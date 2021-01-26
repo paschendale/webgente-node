@@ -1,0 +1,31 @@
+{
+  "name": "webgente-node",
+  "version": "2.0.0",
+  "description": "WebGENTE - Um WebGIS para Cadastro",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paschendale/webgente-node.git"
+  },
+  "keywords": [
+    "webgente",
+    "cadastro",
+    "territorial",
+    "multifinalitario"
+  ],
+  "author": "Victor Marotta et al.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paschendale/webgente-node/issues"
+  },
+  "homepage": "https://github.com/paschendale/webgente-node#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "sequelize": "^6.4.0"
+  }
+}

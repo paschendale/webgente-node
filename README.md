@@ -1,12 +1,12 @@
 ### WebGENTE - Um WebGIS para Cadastro
 
-O WebGENTE é um projeto de cartografia na Web desenvolvido pelo Grupo de Engenharia para Gestão Territorial da Universidade Federal de Viçosa, tem como objetivo criar um framework para a disponibilização de dados cadastrais e criação de ferramentas para a administração pública.
+O WebGENTE é um projeto de cartografia cadastral na Web desenvolvido pelo Grupo de Engenharia para Gestão Territorial da Universidade Federal de Viçosa, tem como objetivo criar um framework para a disponibilização de dados cadastrais e criação de ferramentas para a administração pública.
 
-O sistema, lançado em 2020, teve sua primeira versão desenvolvida como um framework Javascript de navegador voltado para hospedagem em servidores HTTP como o Apache, Nginx e etc. Em 2021 a equipe de desenvolvimento optou por lançar uma segunda versão baseada no interpretador Javascript Node.js, implementando tanto a lógica de programação voltada ao navegador do WebGENTE 1.0 quanto diversas funções de segurança, processamento do lado do servidor e rearquitetando o sistema ainda mais conforme as diretrizes de Arquitetura Orientada a Serviços.
+O sistema, lançado em 2020, teve sua primeira versão desenvolvida como um framework Javascript de navegador voltado para hospedagem em servidores HTTP como o Apache, Nginx e etc. Em 2021 a equipe de desenvolvimento optou por lançar uma segunda versão baseada no interpretador Javascript Node.js, implementando além da lógica de programação voltada ao navegador do WebGENTE 1.0 diversas funções de segurança, processamento do lado do servidor e rearquitetando o sistema ainda mais conforme as diretrizes de Arquitetura Orientada a Serviços.
 
-O WebGENTE 2.0 é o resultado desta nova versão! Seja bem vindo!
+De forma a evitar eventuais problemas de compatibilidade entre as duas versões e possibilitar a manutenção de ambas nos usuários que empregam o WebGENTE 1.0 nós optamos por iniciar um novo repositório, dessa forma, o desenvolvimento do WebGENTE 1.0 no Apache HTTP Server e o WebGENTE 2.0 no Node.js pode ocorrer concomitantemente. Caso você tenha interesse na aplicação para o Apache confira o [Repositório do WebGENTE 1.0](https://github.com/paschendale/webgente).
 
-A equipe de desenvolvimento é composta por:
+A equipe de desenvolvimento do WebGENTE é composta por:
 
 ## Coordenação
 **Victor Marotta - @paschendale**
@@ -31,6 +31,8 @@ Estudante de Engenharia de Agrimensura e Cartográfica na UFV
 Estudante de Engenharia de Agrimensura e Cartográfica na UFV
 
 ## Referências
+
+[Repositório do WebGENTE 1.0](https://github.com/paschendale/webgente)
 
 [Documentação oficial do WebGENTE](https://www.genteufv.com.br/webgente)
 
