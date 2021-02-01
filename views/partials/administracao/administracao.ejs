@@ -1,0 +1,14 @@
+<%- include('../header.ejs') %> 
+
+<body>
+	<script>
+		$(document).ready(function(){
+		    $('#sidebarCollapse').on('click', function () {
+		        $('#sidebar').toggleClass('active');
+		    });
+		});
+	</script>
+    <%- include('menu.ejs') %> 
+</body>
+
+<%- include('../footer.ejs') %> 

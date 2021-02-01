@@ -1,9 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebGENTE</title>
     <link rel="icon" href="/public/img/favicon.ico">
+
+    <!--Alterar o JQuery aqui para a chamada do NodeJS-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.js" ></script>
+    
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/administracao.css">
+
+    <script>
+    	function camadas(){
+		    var $result = $('#conteudo').load('/camadas');
+		}
+        function usuarios(){
+            var $result = $('#conteudo').load('/usuarios');
+        }
+        function contato(){
+            var $result = $('#conteudo').load('/contato');
+        }
+        function sobre(){
+            var $result = $('#conteudo').load('/sobre');
+        }
+</script>
+
 </head>
 

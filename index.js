@@ -39,3 +39,24 @@ app.listen(porta,() => {
 app.get('/',(req,res) => {
     res.render("index")
 })
+
+//Interface de administração 
+app.get('/administracao', (req, res) => {
+	res.render("partials/administracao/administracao")
+})
+
+app.get('/camadas', (req, res) => {
+	res.render("partials/administracao/camadas")
+})
+
+app.get('/usuarios', (req, res) => {
+	res.render("partials/administracao/usuarios")
+})
+
+app.get('/contato', (req, res) => {
+	res.render("partials/administracao/contato")
+})
+
+app.get('/sobre', (req, res) => {
+	res.render("partials/administracao/sobre")
+})
