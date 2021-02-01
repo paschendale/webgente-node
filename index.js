@@ -32,7 +32,7 @@ app.use(bodyParser.json());
 /* Inicializando o servidor HTTP */
 porta = 3000; // Porta de inicialização do servidor
 app.listen(porta,() => {
-    console.log('WebGENTE iniciado no endereço http://localhost:'+porta)
+    console.log('WebGENTE started at http://localhost:'+porta)
 });
 
 /* Criando rota da página inicial */
@@ -41,22 +41,22 @@ app.get('/',(req,res) => {
 })
 
 //Interface de administração 
-app.get('/administracao', (req, res) => {
-	res.render("partials/administracao/administracao")
+app.get('/admin', (req, res) => {
+	res.render("admin")
 })
 
 app.get('/camadas', (req, res) => {
-	res.render("partials/administracao/camadas")
+	res.render("partials/admin/camadas")
 })
 
 app.get('/usuarios', (req, res) => {
-	res.render("partials/administracao/usuarios")
+	res.render("partials/admin/usuarios")
 })
 
 app.get('/contato', (req, res) => {
-	res.render("partials/administracao/contato")
+	res.render("partials/admin/contato")
 })
 
 app.get('/sobre', (req, res) => {
-	res.render("partials/administracao/sobre")
+	res.render("partials/admin/sobre")
 })
