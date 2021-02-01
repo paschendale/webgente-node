@@ -1,10 +1,10 @@
-var viewInicial = {
+var initView = {
     lat: -20.754645,
     lng: -42.873973110001806,
     zoom: 17
 }
 
-var map = L.map('map').setView([viewInicial.lat, viewInicial.lng], viewInicial.zoom);
+var map = L.map('map').setView([initView.lat, initView.lng], initView.zoom);
 
 var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'

@@ -30,9 +30,9 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 /* Inicializando o servidor HTTP */
-porta = 3000; // Porta de inicialização do servidor
+port = 3000; // Porta de inicialização do servidor
 app.listen(porta,() => {
-    console.log('WebGENTE started at http://localhost:'+porta)
+    console.log('WebGENTE started at http://localhost:'+port)
 });
 
 /* Criando rota da página inicial */
