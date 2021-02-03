@@ -55,6 +55,7 @@ var dummyData = [{
     layerName: 'Ortofoto',
     group: 'Camadas Base',
     layer: 'gianetti:ortofoto_gianetti',
+    host: 'https://geoserver.genteufv.com.br/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -62,6 +63,7 @@ var dummyData = [{
     layerName: 'Lotes',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Lote',
+    host: 'https://geoserver.genteufv.com.br/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -69,6 +71,7 @@ var dummyData = [{
     layerName: 'Edificações',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Edificacao',
+    host: 'https://geoserver.genteufv.com.br/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()
 }];
