@@ -18,6 +18,10 @@ const Layers = connection.define('Layers', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    host: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
     restrictedFields: { // Nome dos campos a serem restringidos, separados por vírgula
         type: Sequelize.STRING
     },

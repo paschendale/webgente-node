@@ -8,7 +8,8 @@ const { User } = require("./database/models/User.js")
 
 /* Estrutura de pastas do WebGENTE:
 
-database > Contém bases de dados e modelos utilizados pelo Sequelize. Para cada modelo deve-se criar um novo arquivo .js com o a primeira letra Maiuscula, indicando o nome da tabela criada.
+database > Contém bases de dados e modelos utilizados pelo Sequelize. Para cada tabela deve-se criar um novo arquivo .js 
+dentro de 'models' com o a primeira letra Maiuscula, indicando o nome da tabela criada.
 
 node_modules > Contém as dependências do WebGENTE
 
