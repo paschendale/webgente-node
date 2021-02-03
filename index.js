@@ -2,6 +2,9 @@ const express = require('express');
 const app = new express(); // Inicializando objeto do express para execução do servidor HTTP
 const bodyParser = require("body-parser");
 const { Op } = require("sequelize"); 
+const conn = require("./database/connection.js")
+const { Layers } = require("./database/models/Layers.js")
+const { User } = require("./database/models/User.js")
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -31,7 +34,7 @@ app.use(bodyParser.json());
 
 /* Inicializando o servidor HTTP */
 port = 3000; // Porta de inicialização do servidor
-app.listen(porta,() => {
+app.listen(port,() => {
     console.log('WebGENTE started at http://localhost:'+port)
 });
 
