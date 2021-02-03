@@ -44,13 +44,23 @@ app.get('/',(req,res) => {
     res.render("index")
 })
 
-//Interface de administração 
+/* Rotas da Interface de administração */
 app.get('/admin', (req, res) => {
 	res.render("admin")
 })
 
 app.get('/camadas', (req, res) => {
 	res.render("partials/admin/camadas")
+})
+
+// Rota para obtenção da lista de camadas
+app.get('/listlayers', (req,res) => {
+	Layers.findAll({raw: true})
+	.then(
+		result => {
+			res.send(result)
+		}
+	)
 })
 
 app.get('/usuarios', (req, res) => {
@@ -61,6 +71,7 @@ app.get('/contato', (req, res) => {
 	res.render("partials/admin/contato")
 })
 
+// Rota para obtenção da lista de camadas
 app.get('/listlayers', (req,res) => {
 	Layers.findAll({raw: true})
 	.then(
