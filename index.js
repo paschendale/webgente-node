@@ -3,8 +3,8 @@ const app = new express(); // Inicializando objeto do express para execução do
 const bodyParser = require("body-parser");
 const { Op } = require("sequelize"); 
 const conn = require("./database/connection.js")
-const { Layers } = require("./database/models/Layers.js")
-const { User } = require("./database/models/User.js")
+const Layers = require("./database/models/Layers.js")
+const Users = require("./database/models/User.js")
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -59,6 +59,15 @@ app.get('/usuarios', (req, res) => {
 
 app.get('/contato', (req, res) => {
 	res.render("partials/admin/contato")
+})
+
+app.get('/listlayers', (req,res) => {
+	Layers.findAll({raw: true})
+	.then(
+		result => {
+			res.send(result)
+		}
+	)
 })
 
 app.get('/sobre', (req, res) => {
