@@ -39,7 +39,7 @@ app.listen(port,() => {
     console.log('WebGENTE started at http://localhost:'+port)
 });
 
-/* Criando rota da página inicial */
+/* Rota da página inicial */
 app.get('/',(req,res) => {
     res.render("index")
 })
@@ -71,16 +71,7 @@ app.get('/contato', (req, res) => {
 	res.render("partials/admin/contato")
 })
 
-// Rota para obtenção da lista de camadas
-app.get('/listlayers', (req,res) => {
-	Layers.findAll({raw: true})
-	.then(
-		result => {
-			res.send(result)
-		}
-	)
-})
-
 app.get('/sobre', (req, res) => {
 	res.render("partials/admin/sobre")
 })
+

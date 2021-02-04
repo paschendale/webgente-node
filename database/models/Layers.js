@@ -18,6 +18,13 @@ const Layers = connection.define('Layers', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    attribution: {
+        type: Sequelize.STRING,
+        defaultValue: '<a href="https://www.github.com/paschendale/webgente" target="_blank">WebGENTE</a>'
+    },
+    defaultBaseLayer: {
+        type: Sequelize.BOOLEAN
+    },
     host: {
         type: Sequelize.STRING,
         allowNull: false
@@ -30,22 +37,6 @@ const Layers = connection.define('Layers', {
     },
     fieldAlias: { // Apelidos para a exibição dos nomes no placeholder do formulário de pesquisa, deve ser definido na mesma ordem de queryFields, separados por vírgula
         type: Sequelize.STRING
-    },
-    maxZoom: { // Zoom máximo da camada, por padrão definido como 22
-        type: Sequelize.INTEGER,
-        defaultValue: 22
-    },
-    format: { // Formato de resposta da requisição WMS, por padrão 'image/png'. Pode ser definido como 'image/jpeg' caso a camada seja tipo 1.
-        type: Sequelize.STRING,
-        defaultValue: 'image/png'
-    },
-    transparent: { // Especificação do formato de resposta, definido como padrão para 'true' para compatibilizar camadas overlay. Pode ser definido como 'false' somente em camadas base.
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
-    },
-    tiled: { // EEspecifica ou não o uso da camada como Tile Map Service. Por padrão definido como 'true'.
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
     }
 })
 
@@ -54,6 +45,7 @@ var dummyData = [{
     type: 1 ,
     layerName: 'Ortofoto',
     group: 'Camadas Base',
+    defaultBaseLayer: true,
     layer: 'gianetti:ortofoto_gianetti',
     host: 'https://geoserver.genteufv.com.br/geoserver/gianetti/wms?',
     createdAt: new Date(),
@@ -63,7 +55,7 @@ var dummyData = [{
     layerName: 'Lotes',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Lote',
-    host: 'https://geoserver.genteufv.com.br/geoserver/gianetti/wms?',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -71,7 +63,7 @@ var dummyData = [{
     layerName: 'Edificações',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Edificacao',
-    host: 'https://geoserver.genteufv.com.br/geoserver/gianetti/wms?',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()
 }];
