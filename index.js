@@ -5,6 +5,8 @@ const { Op } = require("sequelize");
 const conn = require("./database/connection.js")
 const Layers = require("./database/models/Layers.js")
 const Users = require("./database/models/User.js")
+const fetch = require('node-fetch');
+const { query } = require('./database/connection.js');
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -38,6 +40,13 @@ port = 3000; // Porta de inicialização do servidor
 app.listen(port,() => {
     console.log('WebGENTE started at http://localhost:'+port)
 });
+
+/* Habilitando CORS headers para todos os recursos */
+app.use(function(req,res,next) {
+	res.header("Access-Control-Allow-Origin","*");
+	res.header("Access-Control-Allow-Headers","Origin, X-Requested-With, Content-Type, Accept");
+	next();
+})
 
 /* Rota da página inicial */
 app.get('/',(req,res) => {
@@ -78,9 +87,36 @@ app.get('/sobre', (req, res) => {
 
 /* GetFeatureInfo e filtragem de informações */
 
-app.get('/gfi/:query',(req,res) => {
-	var query = req.params.query;
+app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigth/:x/:y/:layers/:query_layers',(req,res) => {
 
-	res.send('looking for this? ' + query)
+	params = { // https://docs.geoserver.org/stable/en/user/services/wms/reference.html
+		service: 'WMS',
+		version: '1.1.1',
+		request: 'GetFeatureInfo',		
+		layers: req.params.layers,
+		srs: req.params.srs,
+		bbox: req.params.bbox,
+		width: req.params.width,
+		height: req.params.heigth,
+		query_layers: req.params.layers,
+		info_format: 'text/html', // Formato de resposta do GetFeatureInfo
+		feature_count: '50', // Puxar até 50 feições
+		x: req.params.x,
+		y: req.params.y
+	};
+
+	let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
+
+	var url = 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?'
+
+	console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
+
+	fetch(url+urlParameters)
+    .then(res => res.text())
+    .then(data => {
+        res.send(data);
+    })
+    .catch(err => {
+        res.send(err);
+    });
 })
-
