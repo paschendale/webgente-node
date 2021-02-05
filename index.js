@@ -8,6 +8,16 @@ const Users = require("./database/models/User.js")
 const fetch = require('node-fetch');
 const { query } = require('./database/connection.js');
 
+/* Cabeçalho de autenticação do usuário com o Geoserver 
+
+A chave de autenticação após 'Basic' é uma codificação Base64 no formato usuario:senha
+
+Sendo um usuário do Geoserver configurado adequadamente para acesso aos serviços */
+
+var headers = {
+	authorization: 'Basic Z2Vvc2VydmVyOkB6aCVJcUxRRnBjeg=='
+};
+
 /* Estrutura de pastas do WebGENTE:
 
 database > Contém bases de dados e modelos utilizados pelo Sequelize. Para cada tabela deve-se criar um novo arquivo .js 
@@ -41,7 +51,7 @@ app.listen(port,() => {
     console.log('WebGENTE started at http://localhost:'+port)
 });
 
-/* Habilitando CORS headers para todos os recursos */
+/* Habilitando CORS headers para todas as respostas dadas pelo backend */
 app.use(function(req,res,next) {
 	res.header("Access-Control-Allow-Origin","*");
 	res.header("Access-Control-Allow-Headers","Origin, X-Requested-With, Content-Type, Accept");
@@ -110,8 +120,8 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	var url = 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?'
 
 	console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
-
-	fetch(url+urlParameters)
+	console.log(url+urlParameters)
+	fetch(url+urlParameters, {method : 'GET', headers: headers})
     .then(res => res.text())
     .then(data => {
         res.send(data);
