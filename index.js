@@ -55,7 +55,8 @@ app.get('/camadas', (req, res) => {
 
 // Rota para obtenção da lista de camadas
 app.get('/listlayers', (req,res) => {
-	Layers.findAll({raw: true})
+	Layers.findAll({raw: true,
+	attributes: ['type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias']})
 	.then(
 		result => {
 			res.send(result)
@@ -73,5 +74,13 @@ app.get('/contato', (req, res) => {
 
 app.get('/sobre', (req, res) => {
 	res.render("partials/admin/sobre")
+})
+
+/* GetFeatureInfo e filtragem de informações */
+
+app.get('/gfi/:query',(req,res) => {
+	var query = req.params.query;
+
+	res.send('looking for this? ' + query)
 })
 

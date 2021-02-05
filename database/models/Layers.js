@@ -47,7 +47,7 @@ var dummyData = [{
     group: 'Camadas Base',
     defaultBaseLayer: true,
     layer: 'gianetti:ortofoto_gianetti',
-    host: 'https://geoserver.genteufv.com.br/geoserver/gianetti/wms?',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -63,6 +63,22 @@ var dummyData = [{
     layerName: 'Edificações',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Edificacao',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    createdAt: new Date(),
+    updatedAt: new Date()
+},{
+    type: 2 ,
+    layerName: 'Geocodificações',
+    group: 'Cadastro',
+    layer: 'gianetti:CAD_Geocodificacao',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    createdAt: new Date(),
+    updatedAt: new Date()
+},{
+    type: 2 ,
+    layerName: 'Seções de Logradouro',
+    group: 'Cadastro',
+    layer: 'gianetti:CAD_Secao_Logradouro',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()

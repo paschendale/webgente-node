@@ -14,4 +14,18 @@
 <!-- Código fonte do WebGENTE -->
 <script src="/js/webgente.js"></script>
 
+<!-- Redimensiona a div do mapa para o espaço vertical disponivel em tela -->
+<script type="application/javascript">
+    var resizeMap = function () {
+        var map = document.getElementById('map');
+        var newHeight = document.documentElement.clientHeight -
+        document.getElementById('navbar').clientHeight;
+        map.style.height = newHeight + "px";
+        map.style.minHeight = newHeight + "px";
+    }
+    
+    $(document).ready(resizeMap);
+    window.onresize = resizeMap;
+    </script>
+
 </html>
