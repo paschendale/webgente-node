@@ -68,7 +68,7 @@ app.get('/admin', (req, res) => {
 	res.render("admin")
 })
 
-app.get('/camadas', (req, res) => {
+app.get('/layers', (req, res) => {
 	res.render("partials/admin/camadas")
 })
 
@@ -83,15 +83,25 @@ app.get('/listlayers', (req,res) => {
 	)
 })
 
-app.get('/usuarios', (req, res) => {
+// Rota para obtenção da lista de usuario
+app.get('/listusers', (req,res) => {
+	Users.findAll({raw: true})
+	.then(
+		result => {
+			res.send(result)
+		}
+	)
+})
+
+app.get('/users', (req, res) => {
 	res.render("partials/admin/usuarios")
 })
 
-app.get('/contato', (req, res) => {
+app.get('/contact', (req, res) => {
 	res.render("partials/admin/contato")
 })
 
-app.get('/sobre', (req, res) => {
+app.get('/about', (req, res) => {
 	res.render("partials/admin/sobre")
 })
 

@@ -6,26 +6,39 @@
     <title>WebGENTE</title>
     <link rel="icon" href="/public/img/favicon.ico">
 
-    <!--Alterar o JQuery aqui para a chamada do NodeJS-->
+    <!--Versão do JQuery que permite usar a função load()-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    
     <script src="/js/bootstrap/bootstrap.js" ></script>
     
     <link rel="stylesheet" type="text/css" href="/css/bootstrap/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/css/administracao.css">
 
+    <script src="/js/bootstrap-table/bootstrap-table.js" ></script>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-table/bootstrap-table.css">
+
+
     <script>
-    	function camadas(){
-		    var $result = $('#conteudo').load('/camadas');
+        //Funções adicionadas somente para teste
+        function remove(){
+            alert("REMOVE");
+        }
+        function add(){
+            alert("ADD");
+        }
+
+    	function layers(){
+		    var $result = $('#conteudo').load('/layers');
 		}
-        function usuarios(){
-            var $result = $('#conteudo').load('/usuarios');
+        function users(){
+            var $result = $('#conteudo').load('/users');
         }
-        function contato(){
-            var $result = $('#conteudo').load('/contato');
+        function contact(){
+            var $result = $('#conteudo').load('/contact');
         }
-        function sobre(){
-            var $result = $('#conteudo').load('/sobre');
+        function about(){
+            var $result = $('#conteudo').load('/about');
         }
 </script>
 
