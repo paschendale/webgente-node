@@ -54,9 +54,10 @@ function getFeatureInfo(e) {
         gfiAjax = $.ajax({
             url: '/gfi/'+ Object.values(params).join('/'),
             success: function (data, status, xhr) {
+                data = JSON.parse(data)
                 popup
                     .setLatLng(e.latlng)
-                    .setContent(data);
+                    .setContent(JSONcontentParser(data));
                 map.openPopup(popup);
             },
             error: function (xhr, status, error) {
@@ -65,3 +66,49 @@ function getFeatureInfo(e) {
         });
     };    
 };
+
+/* Formatação do conteudo JSON exibido no GetFeatureInfo para uma tabela */
+
+function JSONcontentParser (data) {
+
+    /* Esta função recebe um JSON resultante do GetFeatureInfo e o formata para exibição em um formato adequado aos dados cadastrais */
+
+    var content = [];
+
+    for (i = 0; i < data.features.length; i++) {
+        
+        const element = data.features[i];
+
+        /* Definindo o ID que aparece para identificar a feição na lista de tabelas disponíveis no Popup */
+
+        function featureCadasterId (element) {
+
+            var properties = element.properties;
+
+            var keys = Object.keys(properties);
+            var values = Object.values(properties);
+
+            if (keys.find(a =>a.includes("insc")) !== undefined) { // Retorna o primeiro atributo cujo nome contem a substring 'insc'
+                index = keys.indexOf(keys.find(a =>a.includes("insc"))) // Procura o indice do atributo contendo 'insc'
+                return values[index]; // Retorna o valor do atributo contendo 'insc'
+            } else {
+                return element.id.split('.')[1] // Caso não encontrado nenhum atributo que se encaixe nas instancias superiores retorna a chave primária da feição
+            }            
+        }
+
+        content.push('<div class="popup-inner-div"><p><a class="link-table-collapse" style="color:black;" data-toggle="collapse" href="#row-'+i+'">'+element.id.split('.')[0]+': '+featureCadasterId(element)+'</a></p></div><div id="row-'+i+'" class="panel-collapse collapse"><div class="panel-body">');
+        var table = ['<table><tr><th>Atributo</th><th>Valor</th></tr>'];
+        for (j = 0; j < Object.keys(element.properties).length; j++) {            
+            var table_row = '<tr><td>'+Object.keys(element.properties)[j]+'</td><td>'+Object.values(element.properties)[j]+'</td></tr>';
+            table.push(table_row);           
+        };
+        table.push('</table></div></div>')
+        content.push(table.join(''));
+    };
+    
+    content = content.join('');
+
+    return content;
+}
+
+

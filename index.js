@@ -127,7 +127,7 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		width: req.params.width,
 		height: req.params.heigth,
 		query_layers: req.params.layers,
-		info_format: 'text/html', // Formato de resposta do GetFeatureInfo
+		info_format: 'application/json', // Formato de resposta do GetFeatureInfo
 		feature_count: '50', // Puxar até 50 feições
 		x: req.params.x,
 		y: req.params.y
@@ -142,7 +142,7 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	fetch(url+urlParameters, {method : 'GET', headers: headers})
     .then(res => res.text())
     .then(data => {
-        res.send(data);
+        res.send(data); // O data deve ser tratado de acordo com a permissão do usuário, aplicando as restrições de dados caso necessárias antes do res.send()
     })
     .catch(err => {
         res.send(err);
