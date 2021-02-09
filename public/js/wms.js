@@ -71,6 +71,8 @@ function getFeatureInfo(e) {
 
 function JSONcontentParser (data) {
 
+    if (data.features.length == 0) { return 'No features selected'}
+
     /* Esta função recebe um JSON resultante do GetFeatureInfo e o formata para exibição em um formato adequado aos dados cadastrais */
 
     var content = [];
@@ -79,27 +81,12 @@ function JSONcontentParser (data) {
         
         const element = data.features[i];
 
-        /* Definindo o ID que aparece para identificar a feição na lista de tabelas disponíveis no Popup */
-
-        function featureCadasterId (element) {
-
-            var properties = element.properties;
-
-            var keys = Object.keys(properties);
-            var values = Object.values(properties);
-
-            if (keys.find(a =>a.includes("insc")) !== undefined) { // Retorna o primeiro atributo cujo nome contem a substring 'insc'
-                index = keys.indexOf(keys.find(a =>a.includes("insc"))) // Procura o indice do atributo contendo 'insc'
-                return values[index]; // Retorna o valor do atributo contendo 'insc'
-            } else {
-                return element.id.split('.')[1] // Caso não encontrado nenhum atributo que se encaixe nas instancias superiores retorna a chave primária da feição
-            }            
-        }
-
-        content.push('<div class="popup-inner-div"><p><a class="link-table-collapse" style="color:black;" data-toggle="collapse" href="#row-'+i+'">'+element.id.split('.')[0]+': '+featureCadasterId(element)+'</a></p></div><div id="row-'+i+'" class="panel-collapse collapse"><div class="panel-body">');
+        content.push('<div class="popup-inner-div"><p><a class="link-table-collapse" style="color:black;font-weight: bold;" data-toggle="collapse" href="#row-'+i+'">'+element.id.split('.')[0]+': '+featureCadasterId(element)+'</a></p></div><div id="row-'+i+'" class="panel-collapse collapse"><div class="panel-body">');
         var table = ['<table><tr><th>Atributo</th><th>Valor</th></tr>'];
-        for (j = 0; j < Object.keys(element.properties).length; j++) {            
-            var table_row = '<tr><td>'+Object.keys(element.properties)[j]+'</td><td>'+Object.values(element.properties)[j]+'</td></tr>';
+
+        for (j = 0; j < Object.keys(element.properties).length; j++) {    
+
+            var table_row = '<tr><td>'+Object.keys(element.properties)[j]+'</td><td>'+attributeFormatter(Object.values(element.properties)[j],Object.keys(element.properties)[j])+'</td></tr>';
             table.push(table_row);           
         };
         table.push('</table></div></div>')
@@ -111,4 +98,53 @@ function JSONcontentParser (data) {
     return content;
 }
 
+/* Funções auxiliares do JSONcontentParser */
 
+/* Definindo o ID que aparece para identificar a feição na lista de tabelas disponíveis no Popup */
+
+function featureCadasterId (element) {
+
+    var properties = element.properties;
+
+    var keys = Object.keys(properties);
+    var values = Object.values(properties);
+
+    if (keys.find(a =>a.includes("insc")) !== undefined) { // Retorna o primeiro atributo cujo nome contem a substring 'insc'
+        index = keys.indexOf(keys.find(a =>a.includes("insc"))) // Procura o indice do atributo contendo 'insc'
+        return values[index]; // Retorna o valor do atributo contendo 'insc'
+    } else {
+        return element.id.split('.')[1] // Caso não encontrado nenhum atributo que se encaixe nas instancias superiores retorna a chave primária da feição
+    }            
+}
+
+/* Check se o atributo de um element é um link para formata-lo */
+
+function attributeFormatter(element,keys) {
+
+    if (typeof(element) == 'string') { 
+        // Formatação de strings
+        if(keys.indexOf('path_360') > -1) { 
+            // Substitui o HTML do Popup (leaflet-popup-content) por um visualizador 360
+            return '<a href =#  dir="'+element+'"  id = "path_360" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
+        } else if (element.includes('http')){ 
+            // Se um dos valores contiver a substring 'http' formatar como link
+            return '<a target="_blank" href="'+element+'">Link</a>'
+        } else return element // Retorno se string nao for link
+    } else return element // Retorno se nao for string
+}
+
+/* Formata a classe popup-inner-div com um panorama 360 e volta pra tabela de atributos */
+
+function open360Viewer() {
+    
+    element = $('#path_360').attr('dir');
+
+    old_html = $('.leaflet-popup-content').html()
+
+    fullscreen = '<a style="color:black;font-weight: bold;" href="'+element+'" target="_blank">Abrir visualizador 360° em tela cheia</a>';
+
+    html = '<div><iframe src="'+element+'" class="panoramic-visualizer"></iframe><p align="center">'+fullscreen+'</p></div>'
+
+    $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
+
+}

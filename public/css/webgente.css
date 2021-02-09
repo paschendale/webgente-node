@@ -13,17 +13,6 @@ html, body, #map {
     width: 270px;
 }
 
-.popup-collaspsable-body {
-    height: 120px; 
-    overflow-y: auto; 
-    overflow-x: hidden;
-}
-
-.link-table-collapse {
-    font-weight: bold; 
-    color: black;        
-}
-
 table {
     width:250px;
     text-align:left;
@@ -41,6 +30,13 @@ tr:hover {
 }
 th {
     background-color: #f5f5f5;
+}
+
+.panoramic-visualizer {
+    overflow:auto;
+    width: 270px; /* Setar mesma width de .popup-inner-div */
+    height:200px;
+    border:none;
 }
 
 /* Fim dos Elementos do GetFeatureInfo */

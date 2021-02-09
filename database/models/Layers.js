@@ -82,6 +82,14 @@ var dummyData = [{
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()
+},{
+    type: 2 ,
+    layerName: 'Panoramas 360°',
+    group: 'Panoramas 360°',
+    layer: 'gianetti:PTO_Panoramas',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    createdAt: new Date(),
+    updatedAt: new Date()
 }];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
