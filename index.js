@@ -84,17 +84,25 @@ app.get('/listlayers', (req,res) => {
 })
 
 // Rota para obtenção da lista de usuario
-app.get('/listusers', (req,res) => {
+/*app.get('/listusers', (req,res) => {
 	Users.findAll({raw: true})
 	.then(
 		result => {
 			res.send(result)
 		}
 	)
-})
+})*/
 
 app.get('/users', (req, res) => {
-	res.render("partials/admin/usuarios")
+	Users.findAll({raw: true})
+	.then(
+		result => {
+			res.render("partials/admin/usuarios", { 
+				users: result 
+			});
+		}
+	)
+	
 })
 
 app.get('/contact', (req, res) => {
