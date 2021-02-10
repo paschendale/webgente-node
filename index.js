@@ -76,21 +76,23 @@ app.get('/admin', (req, res) => {
 	res.render("home")
 })
 
+/* Rota para página de gerenciamento de camadas */
 app.route('/layers')
 	.get((req, res) => {
 		res.render("layers")
 	})
 
+/* Rota para adição de novas camadas */	
 app.route('/layers/add')
 	.get((req,res) => {
 		res.render("partials/admin/add-layer")
 	})
-	.post((req,res) => { //todo: verificar se dados estão ok antes de dar entrada
+	.post((req,res) => { //todo: verificar se dados estão ok antes de dar entrada no banco
 		console.log('You´ve made a POST request: ',req.body);
 		res.render("layers");
 	})
 
-// Rota para obtenção da lista de camadas
+/* Rota para obtênção de lista de camadas */
 app.get('/listlayers', (req,res) => {
 	Layers.findAll({raw: true,
 	attributes: ['type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias']})
@@ -101,7 +103,7 @@ app.get('/listlayers', (req,res) => {
 	)
 })
 
-// Rota para obtenção da lista de usuario
+/* Rota para página de gerenciamento de usuários */
 app.get('/users', (req, res) => {
 	Users.findAll({raw: true})
 	.then(
@@ -113,11 +115,12 @@ app.get('/users', (req, res) => {
 	)	
 })
 
-
+/* Rota para página 'Sobre' na interface de administração */
 app.get('/about', (req, res) => {
 	res.render("about")
 })
 
+/* Rota para configurações gerais do WebGENTE na interface de administração */
 app.route('/config')
 	.get((req, res) => {
 		Config.findAll({raw:true})
