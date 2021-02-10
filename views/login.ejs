@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGENTE</title>
+    <link rel="icon" href="/public/img/favicon.ico">
+
+    <!--Versão do JQuery que permite usar a função load()-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    
+    <script src="/js/bootstrap/bootstrap.js" ></script>
+    
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/css/administracao.css">
+
+    <script src="/js/bootstrap-table/bootstrap-table.js" ></script>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-table/bootstrap-table.css">
+
+
+    <!--Login com Gmail-->
+    <!--Alterar o content abaixo conforme a credencial do Google Developer API-->
+    <meta name="google-signin-client_id" content='333295678672-v010o5iseq8kos37qh6ld8uua1bs3594.apps.googleusercontent.com'>
+
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+    <script>
+		function onSuccess(googleUser) {
+			const profile = googleUser.getBasicProfile();
+
+			console.log('Logged in as: ' + profile.getName());
+		  	console.log('Name: ' + profile.getName());
+		  	console.log('Image URL: ' + profile.getImageUrl());
+		  	console.log('Email: ' + profile.getEmail()); 
+
+		  	/*$.ajax({
+			 	type: "POST",
+			  	url: 'redirect/redirect-login-gmail.php',
+			  	data: { email: profile.getEmail() },
+			  	success: function(data){
+			  		console.log(data);
+			  		if(data == 'prefeitura'){
+			  			console.log("Prefeitura");
+			  			window.location.href = "../index-logged.php";
+			  		}
+			  		else if(data == 'administrador'){
+			  			window.location.href = "admin.php";
+			  		}
+			  		else{
+			  			alert("Email e/ou senha inválido. Tente novamente");
+			  		}
+			  	},
+			  	error:function(){
+			  		console.log("ERROR");
+			  	}
+			});*/
+		}
+		function onFailure(error) {
+			console.log(error);
+		}
+		function renderButton() {
+			gapi.signin2.render('login-gmail', {
+				'scope': 'profile email',
+				'width': 240,
+				'height': 50,
+				'longtitle': true,
+				'theme': 'dark',
+				'onsuccess': onSuccess,
+				'onfailure': onFailure
+			});
+		}
+	</script>
+
+</head>
+
+<body>
+	<%- include('partials/navbar.ejs') %>
+
+    <div class="container">
+        <form method="POST" action="" style="margin-top: 15%;">
+             <div class = row>
+                <div class="col-xl-4 col-sm-2" id="left">
+                </div>
+                <div id="login" name="login" class="col-xl-4 col-sm-8">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="usuario" name="usuario" aria-describedby="emailHelp" placeholder="CPF">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="senha" name="senha" placeholder="Senha">
+                        <small id="emailHelp" class="form-text text-muted">Mantenha em segurança sua senha</small>
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-lg btn-block" id="botao" name="botao">Enviar</button>
+                    <br>
+                    <center>or<center>
+                    <br>
+
+                    <div id="login-gmail"></div>
+					 
+                    <br>
+                    <button type="button" class="btn btn-light btn-sm" data-toggle="modal" data-target="#exampleModalCenter">Esqueceu sua senha ?</button>
+                    <button type="button" class="btn btn-light btn-sm" onclick="recuperarSenhaLogado()">Trocar senha</button>
+
+                    <!-- Modal -->
+                      <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLongTitle">Esqueci minha senha ?</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <p>Solicite uma nova senha ao Admin do sistema, por favor.</p>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+                <div class="col-xl-4 col-sm-2" id="right">
+                </div>
+             </div>
+        </form>
+    </div>
+</body>
+
+</html>

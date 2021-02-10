@@ -1,29 +1,20 @@
 <div id="usuarios">
   <div class="row">
     <div class="col-12">
-    	<table data-toggle="table" data-search="true" data-pagination="true"> 
+    	<table id="table" 
+      data-toggle="table" 
+      data-url="/listusers" 
+      data-search="true" 
+      data-pagination="true"> 
           <thead>
             <tr>
               <th data-checkbox="true"></th>
-              <th>Nome do usuário</th>
-              <th>Email</th>
-              <th>Data de nascimento</th>
-              <th>Grupo</th>
+              <th data-field="userName">Nome do usuário</th>
+              <th data-field="birthDate">Data de nascimento</th>
+              <th data-field="email">Tipo</th>
+              <th data-field="group">Grupo</th>
               <th data-formatter='TableActions'>Opções</th>
-            </tr>
           </thead>
-          <tbody>
-            <% for(var i = 0; i < users.length; i++) { %>
-            <tr>
-              <td></td>
-              <td> <%= users[i].userName %> </td>
-              <td> <%= users[i].email %> </td>
-              <td> <%= users[i].birthDate %> </td>
-              <td> <%= users[i].group %> </td>
-              <td></td>
-            </tr>
-            <% } %>
-          </tbody>
         </table>
     </div>
   </div>
@@ -35,8 +26,17 @@
 <link rel="stylesheet" type="text/css" href="/css/bootstrap-table/bootstrap-table.css">
 
 <script>
+
+  $( document ).ready(function() {
+    $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="new-user" style="margin-right:5px;" onClick="addNewUser()">Novo Usuário</button>')
+  });
+
   function TableActions(value, row, index) {
-    return ['<button class="btn btn-dark" onclick="remove()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark" onclick="add()"> <i class="fas fa-plus"></i></button>'].join('');
+          return ['<button class="btn btn-dark" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
+  }
+  function addNewUser() {
+    alert('em breve: adicionar user')
+    //todo: desenvolver função para chamar novo user
   }
 </script>
 </div>

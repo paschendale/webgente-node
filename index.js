@@ -61,7 +61,13 @@ app.use(function(req,res,next) {
 
 /* Rota da página inicial */
 app.get('/',(req,res) => {
-    res.render("index")
+    var buttons = true;
+    res.render("index", { buttons })
+})
+
+app.get('/login', (req, res) => {
+	var buttons = false;
+	res.render("login", { buttons: buttons })
 })
 
 /* Rotas da Interface de administração */
@@ -85,16 +91,18 @@ app.get('/listlayers', (req,res) => {
 })
 
 // Rota para obtenção da lista de usuario
-app.get('/users', (req, res) => {
+app.get('/listusers', (req,res) => {
 	Users.findAll({raw: true})
 	.then(
 		result => {
-			res.render("partials/admin/usuarios", { 
-				users: result 
-			});
+			res.send(result)
 		}
 	)
-	
+})
+
+// Rota para obtenção da lista de usuario
+app.get('/users', (req, res) => {
+	res.render("partials/admin/usuarios") 
 })
 
 app.get('/contact', (req, res) => {
