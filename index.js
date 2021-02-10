@@ -61,23 +61,34 @@ app.use(function(req,res,next) {
 
 /* Rota da página inicial */
 app.get('/',(req,res) => {
-    var buttons = true;
-    res.render("index", { buttons })
+	var buttons = true;
+    res.render("index", {buttons: buttons})
 })
 
+/* Rota da tela de Login */
 app.get('/login', (req, res) => {
 	var buttons = false;
 	res.render("login", { buttons: buttons })
-})
+});
 
 /* Rotas da Interface de administração */
 app.get('/admin', (req, res) => {
-	res.render("admin")
+	res.render("home")
 })
 
-app.get('/layers', (req, res) => {
-	res.render("partials/admin/camadas")
-})
+app.route('/layers')
+	.get((req, res) => {
+		res.render("layers")
+	})
+
+app.route('/layers/add')
+	.get((req,res) => {
+		res.render("partials/admin/add-layer")
+	})
+	.post((req,res) => { //todo: verificar se dados estão ok antes de dar entrada
+		console.log('You´ve made a POST request: ',req.body);
+		res.render("layers");
+	})
 
 // Rota para obtenção da lista de camadas
 app.get('/listlayers', (req,res) => {
@@ -91,40 +102,33 @@ app.get('/listlayers', (req,res) => {
 })
 
 // Rota para obtenção da lista de usuario
-app.get('/listusers', (req,res) => {
+app.get('/users', (req, res) => {
 	Users.findAll({raw: true})
 	.then(
 		result => {
-			res.send(result)
+			res.render("users", { 
+				users: result 
+			});
 		}
-	)
+	)	
 })
 
-// Rota para obtenção da lista de usuario
-app.get('/users', (req, res) => {
-	res.render("partials/admin/usuarios") 
-})
-
-app.get('/contact', (req, res) => {
-	res.render("partials/admin/contato")
-})
 
 app.get('/about', (req, res) => {
-	res.render("partials/admin/sobre")
+	res.render("about")
 })
 
 app.route('/config')
 	.get((req, res) => {
 		Config.findAll({raw:true})
 		.then( results => {
-			res.render("partials/admin/config",
+			res.render("config",
 			{config: results})
 		})
 	})
 	.post((req, res) => { 
-		console.log(JSON.stringify(req.body));
-
-		console.log('req.body.name', req.body['name']);})
+		console.log(req.params.mapServerUser);
+	});
 
 /* GetFeatureInfo e filtragem de informações */
 

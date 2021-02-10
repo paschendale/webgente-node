@@ -1,0 +1,50 @@
+<%- include('partials/admin/header.ejs') %> 
+
+
+<div id='config'>
+    <p>Configurações Gerais do WebGENTE</p>
+
+    <form action="/config" method="post">
+        <div class="form-group">
+            <label for="mapServerHost">Endereço do endpoint do Servidor de Mapas</label>
+            <input type="text" class="form-control" id="mapServerHost" placeholder="https://geoserver.genteufv.com.br/ows?">
+        </div>
+        <div class="form-group">
+            <label for="mapServerUser">Usuário no Servidor de Mapas</label>
+            <input type="text" class="form-control" id="mapServerUser" placeholder="webgente">
+        </div>
+        <div class="form-group">
+            <label for="mapServerPassword">Senha do Usuário no Servidor de Mapas</label>
+            <input type="password" class="form-control" id="mapServerPassword" placeholder="webgente@ufv">
+        </div>
+        <button class="btn btn-dark" onClick="updateConfig()">Salvar</button>
+    </form>
+
+    <script>
+
+        function updateConfig() {
+            var mapServerHost = $('#mapServerHost').val()
+            var mapServerUser = $('#mapServerUser').val()
+            var mapServerPassword = $('#mapServerPassword').val()
+
+            console.log(mapServerUser)
+
+            $.ajax({
+                method: "POST",
+                url: "/config",
+                data: { 
+                    mapServerHost: mapServerHost,
+                    mapServerUser: mapServerUser,
+                    mapServerPassword: mapServerPassword    
+                }
+            }).done(result => {
+                alert('deu certo')
+            }).fail((jqXHR, textStatus, result) => {
+                alert('nao deu certo')
+            })
+        }
+        
+    </script>
+</div>
+
+<%- include('partials/admin/footer.ejs') %> 
