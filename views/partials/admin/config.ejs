@@ -1,0 +1,19 @@
+<div id='config'>
+    <p>Configurações Gerais do WebGENTE</p>
+
+    <form action="/config" method="post">
+        <div class="form-group">
+            <label for="mapServerHost">Endereço do endpoint do Servidor de Mapas</label>
+            <input type="text" class="form-control" id="mapServerHost" placeholder="https://geoserver.genteufv.com.br/ows?">
+        </div>
+        <div class="form-group">
+            <label for="mapServerUser">Usuário no Servidor de Mapas</label>
+            <input type="text" class="form-control" id="mapServerUser" placeholder="webgente">
+        </div>
+        <div class="form-group">
+            <label for="mapServerPassword">Senha do Usuário no Servidor de Mapas</label>
+            <input type="password" class="form-control" id="mapServerPassword" placeholder="webgente@ufv">
+        </div>
+        <button type="submit" class="btn btn-dark">Salvar</button>
+    </form>
+</div>

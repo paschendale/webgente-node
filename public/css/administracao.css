@@ -57,6 +57,10 @@ a, a:hover, a:focus {
     transition: all 0.3s;
 }
 
+li {
+    cursor: pointer;
+}
+
 #sidebar {
     /* don't forget to add all the previously mentioned styles here too */
     background: #000000;

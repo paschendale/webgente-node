@@ -5,6 +5,7 @@ const { Op } = require("sequelize");
 const conn = require("./database/connection.js")
 const Layers = require("./database/models/Layers.js")
 const Users = require("./database/models/User.js")
+const Config = require("./database/models/Config.js")
 const fetch = require('node-fetch');
 const { query } = require('./database/connection.js');
 
@@ -15,7 +16,7 @@ A chave de autenticação após 'Basic' é uma codificação Base64 no formato u
 Sendo um usuário do Geoserver configurado adequadamente para acesso aos serviços */
 
 var headers = {
-	authorization: 'Basic Z2Vvc2VydmVyOkB6aCVJcUxRRnBjeg=='
+	authorization: 'Basic Z2Vvc2VydmVyOkB6aCVJcUxRRnBjeg==' 
 };
 
 /* Estrutura de pastas do WebGENTE:
@@ -84,15 +85,6 @@ app.get('/listlayers', (req,res) => {
 })
 
 // Rota para obtenção da lista de usuario
-/*app.get('/listusers', (req,res) => {
-	Users.findAll({raw: true})
-	.then(
-		result => {
-			res.send(result)
-		}
-	)
-})*/
-
 app.get('/users', (req, res) => {
 	Users.findAll({raw: true})
 	.then(
@@ -112,6 +104,19 @@ app.get('/contact', (req, res) => {
 app.get('/about', (req, res) => {
 	res.render("partials/admin/sobre")
 })
+
+app.route('/config')
+	.get((req, res) => {
+		Config.findAll({raw:true})
+		.then( results => {
+			res.render("partials/admin/config",
+			{config: results})
+		})
+	})
+	.post((req, res) => { 
+		console.log(JSON.stringify(req.body));
+
+		console.log('req.body.name', req.body['name']);})
 
 /* GetFeatureInfo e filtragem de informações */
 

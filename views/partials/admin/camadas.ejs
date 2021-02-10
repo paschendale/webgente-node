@@ -1,7 +1,12 @@
 <div id="camadas">
+  
   <div class="row">
     <div class="col-12">
-    	<table data-toggle="table" data-url="/listlayers" data-search="true" data-pagination="true"> 
+    	<table 
+        data-toggle="table" 
+        data-url="/listlayers" 
+        data-search="true"
+        data-pagination="true"> 
           <thead>
             <tr>
               <th data-checkbox="true"></th>
@@ -23,8 +28,30 @@
 <link rel="stylesheet" type="text/css" href="/css/bootstrap-table/bootstrap-table.css">
 
 <script>
+
+  $( document ).ready(function() {
+    console.log('opa')
+    $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" onClick="removeMultipleLayers()">Remover Camadas</button> <button class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" onClick="addNewLayer()">Nova Camada</button>')
+  });
+
   function TableActions(value, row, index) {
-         return ['<button class="btn btn-dark" onclick="remove()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark" onclick="add()"> <i class="fas fa-plus"></i></button>'].join('');
-    }
+          return ['<button class="btn btn-dark" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
+  }
+  function removeMultipleLayers() {
+    alert('em breve: deletar layer')
+    //todo: desenvolver função para deletar layers marcadas
+  }
+  function addNewLayer() {
+    alert('em breve: adicionar layer')
+    //todo: desenvolver função para chamar adição de nova layer
+  }
+  function removeLayer() {
+    alert('em breve: remover esta layer')
+    //todo: desenvolver função para remover layer unica da tabela
+  }
+  function editLayer() {
+    alert('em breve: editar esta layer')
+    //todo: desenvolver função para editar layer
+  }
 </script>
 </div>
