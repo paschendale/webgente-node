@@ -34,7 +34,7 @@ Users.sync({force: false}).then(() => {
             console.log('Inserindo usuário de administração padrão do WebGENTE')
             Users.bulkCreate([{
                 userName: 'admin' ,
-                password: 'webgente',
+                password: '$2b$10$gQRnUm5mIPzDR9iPfqmgTe4QyBE1Ogi7p51FbbzCxX5xls/Sjo4FS', // Hash para 1234, senha padrão do admin
                 email: 'gente@ufv.br',
                 birthDate: new Date(),
                 group: 'admin',

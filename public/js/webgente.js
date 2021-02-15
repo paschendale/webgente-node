@@ -57,8 +57,12 @@ function addLayer (layer){
             attribution: layer.attribution,
             maxZoom: 30
         });
-
-        Lc.addOverlay(l, layer.layerName, layer.group);
+        if (layer.defaultBaseLayer == 1) {
+            Lc.addOverlay(l, layer.layerName, layer.group);
+            l.addTo(map);
+        } else {
+            Lc.addOverlay(l, layer.layerName, layer.group);
+        };
     
     } else { // Adiciona como Base
 
@@ -75,7 +79,6 @@ function addLayer (layer){
         } else {
             Lc.addBaseLayer(l, layer.layerName);
         };
-
     }
 };
 

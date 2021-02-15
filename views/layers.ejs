@@ -11,6 +11,7 @@
           <thead>
             <tr>
               <th data-checkbox="true"></th>
+              <th data-field="id">ID</th>
               <th data-field="layerName">Nome da camada</th>
               <th data-field="layer">Nome da chamada</th>
               <th data-field="type">Tipo</th>
@@ -30,19 +31,28 @@
 
 <script>
   $( document ).ready(function() {
-    $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" onClick="removeMultipleLayers()">Remover Camadas</button> <button class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" onClick="addNewLayer()">Nova Camada</button>')
+    $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" onClick="removeMultipleLayers()">Remover Camadas</button> <a class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" href="/layers/add"">Nova Camada</a>')
   });
 
   function TableActions(value, row, index) {
-    return ['<button class="btn btn-dark" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
+    return ['<button class="btn btn-dark" id="removeLayer" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark" id="editLayer" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
   }
+
+  window.operateEvents = {
+    'click .like': function (e, value, row, index) {
+      alert('You click like action, row: ' + JSON.stringify(row))
+    },
+    'click .remove': function (e, value, row, index) {
+      $table.bootstrapTable('remove', {
+        field: 'id',
+        values: [row.id]
+      })
+    }
+  }
+
   function removeMultipleLayers() {
     alert('em breve: deletar layer')
     //todo: desenvolver função para deletar layers marcadas
-  }
-  function addNewLayer() {
-    $('#content').load('/layers/add');
-    //todo: desenvolver função para chamar adição de nova layer
   }
   function removeLayer() {
     alert('em breve: remover esta layer')

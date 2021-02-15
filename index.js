@@ -9,6 +9,7 @@ const Layers = require("./database/models/Layers.js")
 const Users = require("./database/models/User.js")
 const Config = require("./database/models/Config.js")
 const fetch = require('node-fetch');
+const sanitize = require('sanitize')
 const { query } = require('./database/connection.js');
 
 /* Cabeçalho de autenticação do usuário com o Geoserver 
@@ -81,6 +82,7 @@ app.get('/login', (req, res) => {
 	res.render("login", { buttons: buttons })
 });
 
+/* Autenticação do usuário */
 app.post('/authenticate', (req, res) => {
 	const email = req.body.email;
 	const password = req.body.senha;
@@ -112,12 +114,13 @@ app.post('/authenticate', (req, res) => {
 
 })
 
+/* Rota de logout do usuário */
 app.get('/logout', (req, res) => {
 	req.session.user = undefined;
 	res.redirect('/');
 })
 
-/* Rotas da Interface de administração */
+/* Rotas da Interface de administração - Rota protegida pela sessão*/
 app.get('/admin', (req, res) => {
 	if(req.session.user){
 		res.render("home")
@@ -127,26 +130,50 @@ app.get('/admin', (req, res) => {
 	}
 })
 
-/* Rota para página de gerenciamento de camadas */
+/* Rota para página de gerenciamento de camadas - Rota protegida pela sessão */
 app.route('/layers')
 	.get((req, res) => {
-		res.render("layers")
+		if(req.session.user){
+			res.render("layers")
+		} else {
+			res.redirect('/')
+		}		
 	})
 
-/* Rota para adição de novas camadas */	
+/* Rota para adição de novas camadas - Rotas protegidas pela sessão */	
 app.route('/layers/add')
 	.get((req,res) => {
-		res.render("partials/admin/add-layer")
+		if(req.session.user){
+			res.render("add_layer.ejs")
+		} else {
+			res.redirect('/')
+		}		
 	})
-	.post((req,res) => { //todo: verificar se dados estão ok antes de dar entrada no banco
-		console.log('You´ve made a POST request: ',req.body);
-		res.render("layers");
+	.post((req,res) => { //todo: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
+		if(req.session.user){
+			Layers.create(
+				{
+					type: req.body.type,
+					layerName:  req.body.layerName, 
+					group:  req.body.group,
+					host:  req.body.host,
+					layer:  req.body.layer,
+					defaultBaseLayer:  req.body.defaultBaseLayer,
+					restrictedFields:  req.body.restrictedFields,
+					queryFields:  req.body.queryFields,
+					fieldAlias:  req.body.fieldAlias
+				}
+				).then(console.log('Succesfully inserted data into database!', req.body))
+				.then(res.render("layers"))
+		} else {
+			res.redirect('/')
+		}
 	})
 
 /* Rota para obtênção de lista de camadas */
 app.get('/listlayers', (req,res) => {
 	Layers.findAll({raw: true,
-	attributes: ['type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias']})
+	attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias']})
 	.then(
 		result => {
 			res.send(result)
@@ -154,8 +181,7 @@ app.get('/listlayers', (req,res) => {
 	)
 })
 
-/*Rota para obter a lista dos usuários*/
-/*Rota protegida*/
+/*Rota para obter a lista dos usuários - Rota protegida pela sessão*/
 app.get('/listusers', (req,res) => {
 	if(req.session.user){
 		Users.findAll({raw: true,
@@ -205,6 +231,14 @@ app.route('/config')
 
 app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigth/:x/:y/:layers/:query_layers',(req,res) => {
 
+	/* Todo: verificar se o usuário esta logado!
+	if(req.session.user){ 
+				
+	} else {
+		res.redirect('/')
+	}
+	*/
+
 	params = { // https://docs.geoserver.org/stable/en/user/services/wms/reference.html
 		service: 'WMS',
 		version: '1.1.1',
@@ -223,7 +257,7 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 
 	let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
 
-	var url = 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?'
+	var url = 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?' // Puxar este link da configuração
 
 	console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
 	console.log(url+urlParameters)
@@ -236,3 +270,6 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
         res.send(err);
     });
 })
+
+/* Restringindo atributos */
+
