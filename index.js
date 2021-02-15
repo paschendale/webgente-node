@@ -197,47 +197,59 @@ app.get('/listusers', (req,res) => {
 	}
 })
 
-/* Rota para página de gerenciamento de usuários */
+/* Rota para página de gerenciamento de usuários - Rota protegida pela sessão*/
 app.get('/users', (req, res) => {
-	Users.findAll({raw: true})
-	.then(
-		result => {
-			res.render("users", { 
-				users: result 
-			});
-		}
-	)	
+	if(req.session.user){
+		Users.findAll({raw: true})
+		.then(
+			result => {
+				res.render("users", { 
+					users: result 
+				});
+			}
+		)	
+	}
+	else{
+		res.redirect('/');
+	}	
 })
 
-/* Rota para página 'Sobre' na interface de administração */
+/* Rota para página 'Sobre' na interface de administração - Rota protegida pela sessão */
 app.get('/about', (req, res) => {
-	res.render("about")
+	if(req.session.user){
+		res.render('about')	
+	}
+	else{
+		res.redirect('/');
+	}
 })
 
 /* Rota para configurações gerais do WebGENTE na interface de administração */
 app.route('/config')
 	.get((req, res) => {
-		Config.findAll({raw:true})
-		.then( results => {
-			res.render("config",
-			{config: results})
-		})
+		if(req.session.user){
+			Config.findAll({raw:true})
+			.then( results => {
+				res.render("config",
+				{config: results})
+			})	
+		}
+		else{
+			res.redirect('/');
+		}
 	})
 	.post((req, res) => { 
-		console.log(req.params.mapServerUser);
+		if(req.session.user){
+			console.log(req.params.mapServerUser);	
+		}
+		else{
+			res.redirect('/');
+		}		
 	});
 
 /* GetFeatureInfo e filtragem de informações */
 
 app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigth/:x/:y/:layers/:query_layers',(req,res) => {
-
-	/* Todo: verificar se o usuário esta logado!
-	if(req.session.user){ 
-				
-	} else {
-		res.redirect('/')
-	}
-	*/
 
 	params = { // https://docs.geoserver.org/stable/en/user/services/wms/reference.html
 		service: 'WMS',
@@ -262,13 +274,21 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
 	console.log(url+urlParameters)
 	fetch(url+urlParameters, {method : 'GET', headers: headers})
-    .then(res => res.text())
-    .then(data => {
-        res.send(data); // O data deve ser tratado de acordo com a permissão do usuário, aplicando as restrições de dados caso necessárias antes do res.send()
-    })
-    .catch(err => {
-        res.send(err);
-    });
+	.then(res => res.text())
+	.then(data => {
+		if(req.session.user){  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
+			console.log('Usuário logado, getFeatureInfo enviado!')
+			res.send(data); 
+		} else {
+			// Adicionar restrições de dados aqui!
+			data = {"type":"FeatureCollection","features":[],"totalFeatures":"unknown","numberReturned":0,"timeStamp":"2021-02-15T13:32:47.314Z","crs":null}; // Criando um GFI sem nada pra passar
+			console.log('Usuário requisitou getFeatureInfo sem login')
+			res.send(JSON.stringify(data))
+		}	
+	})
+	.catch(err => {
+		res.send(err);
+	});	
 })
 
 /* Restringindo atributos */

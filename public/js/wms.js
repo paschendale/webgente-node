@@ -71,7 +71,7 @@ function getFeatureInfo(e) {
 
 function JSONcontentParser (data) {
 
-    if (data.features.length == 0) { return 'No features selected'}
+    if (data.features.length == 0) { return 'No features selected or you may not have permission to see this!'}
 
     /* Esta função recebe um JSON resultante do GetFeatureInfo e o formata para exibição em um formato adequado aos dados cadastrais */
 
