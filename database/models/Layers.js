@@ -29,7 +29,7 @@ const Layers = connection.define('Layers', {
         type: Sequelize.STRING,
         allowNull: false
     },
-    restrictedFields: { // Nome dos campos a serem restringidos, separados por vírgula
+    allowedFields: { // Nome dos campos liberados nas interfaces anônimas, separados por vírgula
         type: Sequelize.STRING
     },
     queryFields: { // Nome dos campos pesquisáveis da camada, separados por vírgula

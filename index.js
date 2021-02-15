@@ -159,7 +159,7 @@ app.route('/layers/add')
 					host:  req.body.host,
 					layer:  req.body.layer,
 					defaultBaseLayer:  req.body.defaultBaseLayer,
-					restrictedFields:  req.body.restrictedFields,
+					allowedFields:  req.body.allowedFields,
 					queryFields:  req.body.queryFields,
 					fieldAlias:  req.body.fieldAlias
 				}
