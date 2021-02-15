@@ -77,13 +77,13 @@
 	<%- include('partials/navbar.ejs') %>
 
     <div class="container">
-        <form method="POST" action="" style="margin-top: 15%;">
+        <form method="POST" action="/authenticate" style="margin-top: 15%;">
              <div class = row>
                 <div class="col-xl-4 col-sm-2" id="left">
                 </div>
                 <div id="login" name="login" class="col-xl-4 col-sm-8">
                     <div class="form-group">
-                        <input type="text" class="form-control" id="usuario" name="usuario" aria-describedby="emailHelp" placeholder="CPF">
+                        <input type="text" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Email">
                     </div>
                     <div class="form-group">
                         <input type="password" class="form-control" id="senha" name="senha" placeholder="Senha">

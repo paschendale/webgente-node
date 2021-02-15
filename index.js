@@ -2,6 +2,8 @@ const express = require('express');
 const app = new express(); // Inicializando objeto do express para execução do servidor HTTP
 const bodyParser = require("body-parser");
 const { Op } = require("sequelize"); 
+const session = require("express-session");
+const bcrypt = require("bcrypt");
 const conn = require("./database/connection.js")
 const Layers = require("./database/models/Layers.js")
 const Users = require("./database/models/User.js")
@@ -40,6 +42,14 @@ index.js > Arquivo de inicialização do WebGENTE
 
 /* Setando repositório de vias estáticas do EJS na pasta 'public'. Todas as views .ejs devem ser criadas lá. */
 app.set('view engine','ejs');
+
+app.use(session({
+	secret: "segredo_webgente", 
+	resave: false,
+	saveUninitialized: true,
+	cookie: {maxAge: 1800000 /*30 min*/ }
+}))
+
 app.use(express.static('public'));
 
 /* Habilitando bodyparser para extender a leitura de parametros na URL no req.body */
@@ -71,9 +81,50 @@ app.get('/login', (req, res) => {
 	res.render("login", { buttons: buttons })
 });
 
+app.post('/authenticate', (req, res) => {
+	const email = req.body.email;
+	const password = req.body.senha;
+
+	Users.findOne({ where:{ email: email }}).then((user) => {
+		if(user != undefined){
+			if(bcrypt.compareSync(password, user.password)){
+				req.session.user = {
+					name: user.userName,
+					group: user.group,
+					email: user.email
+				}
+				//Definindo o redirecionamento conforme o grupo do usuário
+				if(req.session.user.group == 'admin'){
+					res.redirect('/admin');
+				}
+				/*else if(req.session.user.group == 'publico'){
+					res.redirect('/');
+				}*/
+			}
+			else{
+				res.redirect('/login');
+			}
+		}
+		else{
+			res.redirect('/login');
+		}
+	})
+
+})
+
+app.get('/logout', (req, res) => {
+	req.session.user = undefined;
+	res.redirect('/');
+})
+
 /* Rotas da Interface de administração */
 app.get('/admin', (req, res) => {
-	res.render("home")
+	if(req.session.user){
+		res.render("home")
+	}
+	else{
+		res.redirect('/');
+	}
 })
 
 /* Rota para página de gerenciamento de camadas */
@@ -101,6 +152,23 @@ app.get('/listlayers', (req,res) => {
 			res.send(result)
 		}
 	)
+})
+
+/*Rota para obter a lista dos usuários*/
+/*Rota protegida*/
+app.get('/listusers', (req,res) => {
+	if(req.session.user){
+		Users.findAll({raw: true,
+		attributes: ['userName', 'birthDate', 'email', 'group']})
+		.then(
+			result => {
+				res.send(result)
+			}
+		)
+	}
+	else{
+		res.redirect('/');
+	}
 })
 
 /* Rota para página de gerenciamento de usuários */
