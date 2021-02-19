@@ -136,15 +136,29 @@ function attributeFormatter(element,keys) {
 /* Formata a classe popup-inner-div com um panorama 360 e volta pra tabela de atributos */
 
 function open360Viewer() {
-    
+ 
     element = $('#path_360').attr('dir');
 
     old_html = $('.leaflet-popup-content').html()
 
     fullscreen = '<a style="color:black;font-weight: bold;" href="'+element+'" target="_blank">Abrir visualizador 360° em tela cheia</a>';
 
-    html = '<div><iframe src="'+element+'" class="panoramic-visualizer"></iframe><p align="center">'+fullscreen+'</p></div>'
+    html = '<div id="container-psv"></div>'
 
     $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
 
+    var div = document.getElementById('container-psv');
+    var PSV = new PhotoSphereViewer({
+            panorama: 'http://localhost:3000/img/panoramas/PANO_20210216_133153_0.jpg',
+            container: div,
+            time_anim: 3000,
+            //caption: 'Legenda toDo',
+            minFox: 5,
+            loading_img: 'img/loading.gif',
+            navbar: ['autorotate', 'zoom'],
+            navbar_style: {
+                backgroundColor: 'rgba(58, 67, 77, 0.7)'
+            },
+        });
 }
+

@@ -8,6 +8,14 @@ html, body, #map {
     z-index: -1;
 }
 
+/* Container do visualizador 360° */
+
+#container-psv {
+    width: 100%;
+    height: 270px;
+}
+
+
 /* Elementos do GetFeatureInfo */ 
 .popup-inner-div {
     width: 270px;

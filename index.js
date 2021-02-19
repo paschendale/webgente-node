@@ -48,10 +48,12 @@ app.use(session({
 	secret: "segredo_webgente", 
 	resave: false,
 	saveUninitialized: true,
-	cookie: {maxAge: 1800000 /*30 min*/ }
+	cookie: {maxAge: 7200000 /*120 min*/ }
 }))
 
 app.use(express.static('public'));
+
+app.use("/img", express.static(__dirname + "public/img"));
 
 /* Habilitando bodyparser para extender a leitura de parametros na URL no req.body */
 app.use(bodyParser.urlencoded({extended: false}));

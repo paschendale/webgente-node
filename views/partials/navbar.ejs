@@ -7,15 +7,13 @@
   <a class="navbar-brand" href="#"><img src="img/webgente-fundo-escuro-120x40.png" alt=""></a>
 
   <% if(buttons == true){ %>
-    <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#exampleModalLong">Ajuda</button>
-
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+      <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
       <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
 
     </ul>
-    <button class="btn btn-secondary btn-sm" type="button" id="enviar" onclick="login()">Login</button>
-    &nbsp
-    <button class="btn btn-secondary btn-sm" type="button" id="recuperarSenha" onclick="recuperarSenhaDeslogado()">Alterar senha</button>
+    <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#exampleModalLong"><span class="far fa-question-circle"></span></button>
+    &nbsp;
+    <button class="btn btn-secondary btn-sm" type="button" id="enviar" onclick="login()"><span class="fas fa-user-lock"></span></button>
   <% } %>
   </div>
 </nav>
