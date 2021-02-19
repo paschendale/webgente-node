@@ -280,12 +280,20 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	.then(data => {
 		if(req.session.user){  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
 			console.log('Usuário logado, getFeatureInfo enviado!')
+			data = JSON.parse(data)
 			res.send(data); 
 		} else {
-			// Adicionar restrições de dados aqui!
-			data = {"type":"FeatureCollection","features":[],"totalFeatures":"unknown","numberReturned":0,"timeStamp":"2021-02-15T13:32:47.314Z","crs":null}; // Criando um GFI sem nada pra passar
 			console.log('Usuário requisitou getFeatureInfo sem login')
-			res.send(JSON.stringify(data))
+			data = JSON.parse(data)
+			//restrição de dados
+			var properties=( restrict_feature(req.params.layers,data.features[0].properties))
+			properties.then(result=>{
+				data.features[0].properties=result
+				res.send(data)
+				
+			})
+			
+				
 		}	
 	})
 	.catch(err => {
@@ -293,5 +301,20 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	});	
 })
 
-/* Restringindo atributos */
-
+/* Restringindo atributos de uma única feição */
+async function restrict_feature (name,properties){
+	var restrict= new Object();
+	var prom =  await  Layers.findAll({ 
+			raw: true,
+			attributes: ['allowedFields'],
+			where: { layer: name }
+		})
+		var fields= JSON.parse(JSON.stringify(prom))
+		fields= fields[0].allowedFields.split(',')
+		for( field of fields){ 
+			//Somente os campos obtidos do banco de dados são adicionados 
+				restrict[field]=properties[field];
+		}
+	
+		return restrict
+}

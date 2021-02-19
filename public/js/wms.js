@@ -54,7 +54,7 @@ function getFeatureInfo(e) {
         gfiAjax = $.ajax({
             url: '/gfi/'+ Object.values(params).join('/'),
             success: function (data, status, xhr) {
-                data = JSON.parse(data)
+
                 popup
                     .setLatLng(e.latlng)
                     .setContent(JSONcontentParser(data));
