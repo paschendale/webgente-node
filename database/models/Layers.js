@@ -56,6 +56,7 @@ var dummyData = [{
     group: 'Cadastro',
     layer: 'gianetti:CAD_Lote',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    allowedFields: 'inscricao_lote',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -64,6 +65,7 @@ var dummyData = [{
     group: 'Cadastro',
     layer: 'gianetti:CAD_Edificacao',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    allowedFields: 'inscricao,id',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -72,6 +74,7 @@ var dummyData = [{
     group: 'Cadastro',
     layer: 'gianetti:CAD_Geocodificacao',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    allowedFields: 'inscricao',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
