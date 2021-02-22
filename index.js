@@ -81,7 +81,8 @@ app.get('/',(req,res) => {
 /* Rota da tela de Login */
 app.get('/login', (req, res) => {
 	var buttons = false;
-	res.render("login", { buttons: buttons })
+	var error = '';
+	res.render("login", { buttons: buttons, error: error })
 });
 
 /* Autenticação do usuário */
@@ -106,14 +107,19 @@ app.post('/authenticate', (req, res) => {
 				}*/
 			}
 			else{
-				res.redirect('/login');
+				//$('#errorMessage').append("Senha errada");
+				var error = "Senha errada";
+				var buttons = false;
+				res.render("login", { buttons, error });
 			}
 		}
 		else{
-			res.redirect('/login');
+			//$('#errorMessage').append("Usuario nao encontrado");
+			var error = "Usuário não encontrado.";
+			var buttons = false;
+			res.render("login", { buttons, error });
 		}
 	})
-
 })
 
 /* Rota de logout do usuário */
