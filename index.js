@@ -292,9 +292,10 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 			console.log('Usuário requisitou getFeatureInfo sem login')
 			data = JSON.parse(data)
 			//restrição de dados
-			var properties=( restrict_feature(req.params.layers,data.features[0].properties))
+		
+			var properties=( restrict_feature(data.features))
 			properties.then(result=>{
-				data.features[0].properties=result
+				data.features=result
 				res.send(data)
 				
 			})
@@ -308,19 +309,33 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 })
 
 /* Restringindo atributos de uma única feição */
-async function restrict_feature (name,properties){
-	var restrict= new Object();
-	var prom =  await  Layers.findAll({ 
-			raw: true,
-			attributes: ['allowedFields'],
-			where: { layer: name }
-		})
-		var fields= JSON.parse(JSON.stringify(prom))
-		fields= fields[0].allowedFields.split(',')
-		for( field of fields){ 
-			//Somente os campos obtidos do banco de dados são adicionados 
-				restrict[field]=properties[field];
+async function restrict_feature (features){
+	var restrict_all= new Array();
+	
+		for (feature of features){
+			const loop = async function(feature){
+			var restrict= new Object();
+			//Requisição ao banco de dados 
+				var prom = await Layers.findOne({ 
+					raw: true,
+					attributes: ['allowedFields'],
+					where: { layer: ("gianetti:"+((feature.id).split('.'))[0]) }
+				})
+			//Manipulação da string para um array
+			var fields= JSON.parse(JSON.stringify(prom))
+			fields= (fields.allowedFields).split(',')
+			//Verificação de cada campo
+				for( field of fields){ 
+				//Somente os campos obtidos do banco de dados são adicionados 
+					restrict[field]=feature.properties[field];
+				}
+			feature.properties=restrict
+			return feature
+			}
+		restrict_all.push( await loop(feature))
+		
 		}
 	
-		return restrict
+	
+		return restrict_all
 }
