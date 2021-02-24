@@ -3,12 +3,14 @@
 <div id="usuarios">
     <div class="row">
       <div class="col-12">
-          <table id="table" 
+          <table 
+          class="table table-striped"        
+          id="table" 
 	        data-toggle="table" 
 	        data-url="/listusers" 
 	        data-search="true" 
 	        data-pagination="true"> 
-            <thead>
+            <thead class="thead-dark">
               <tr>
                 <th data-checkbox="true"></th>
                 <th data-field="userName">Nome do usuário</th>
@@ -34,7 +36,7 @@
     });
   
     function TableActions(value, row, index) {
-            return ['<button class="btn btn-dark" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
+            return ['<button class="btn btn-dark btn-custom" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
     }
     function addNewUser() {
       alert('em breve: adicionar user')

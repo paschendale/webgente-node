@@ -4,11 +4,13 @@
   <div class="row">
     <div class="col-12">
         <table 
+          class="table table-striped" 
+
           data-toggle="table" 
           data-url="/listlayers" 
           data-search="true"
           data-pagination="true"> 
-          <thead>
+          <thead class="thead-dark">
             <tr>
               <th data-checkbox="true"></th>
               <th data-field="id">ID</th>
@@ -34,8 +36,9 @@
     $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" onClick="removeMultipleLayers()">Remover Camadas</button> <a class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" href="/layers/add"">Nova Camada</a>')
   });
 
+  /* Aplicação de raio e margem nos botões de ação*/
   function TableActions(value, row, index) {
-    return ['<button class="btn btn-dark" id="removeLayer" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark" id="editLayer" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
+    return ['<button class="btn btn-dark btn-custom" id="removeLayer" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" id="editLayer" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
   }
 
   window.operateEvents = {
