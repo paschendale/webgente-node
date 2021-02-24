@@ -42,7 +42,8 @@ body {
     font-family: 'Poppins', sans-serif;
     width: 100%;
     background-image: linear-gradient(#a3a2a2,#ffffff);
-    background-repeat: no-repeat;
+    background-repeat: repeat-x;
+    background-position: center;
 }
 
 p {
