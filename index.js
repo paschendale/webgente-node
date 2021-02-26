@@ -295,8 +295,12 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		
 			var properties=( restrict_feature(data.features))
 			properties.then(result=>{
+				
+				if( result[0]!=undefined){
+					
 				data.features=result
 				res.send(data)
+				}
 				
 			})
 			
@@ -322,7 +326,11 @@ async function restrict_feature (features){
 					where: { layer: ("gianetti:"+((feature.id).split('.'))[0]) }
 				})
 			//Manipulação da string para um array
+			
 			var fields= JSON.parse(JSON.stringify(prom))
+			
+			if(fields.allowedFields!=null){
+			
 			fields= (fields.allowedFields).split(',')
 			//Verificação de cada campo
 				for( field of fields){ 
@@ -330,7 +338,9 @@ async function restrict_feature (features){
 					restrict[field]=feature.properties[field];
 				}
 			feature.properties=restrict
+			
 			return feature
+			}
 			}
 		restrict_all.push( await loop(feature))
 		
