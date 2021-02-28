@@ -108,14 +108,14 @@ app.post('/authenticate', (req, res) => {
 			}
 			else{
 				//$('#errorMessage').append("Senha errada");
-				var error = "Senha errada";
+				var error = "Wrong username or password";
 				var buttons = false;
 				res.render("login", { buttons, error });
 			}
 		}
 		else{
 			//$('#errorMessage').append("Usuario nao encontrado");
-			var error = "Usuário não encontrado.";
+			var error = "Wrong username or password";
 			var buttons = false;
 			res.render("login", { buttons, error });
 		}
@@ -312,6 +312,8 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 /* Restringindo atributos de uma única feição */
 async function restrictAttributes (features){
 
+	console.log(features)
+
 	var restrictedData = new Array(); 
 	
 	for (feature of features){ // Itera em cada camada
@@ -353,4 +355,5 @@ async function restrictAttributes (features){
 
 	return restrictedData
 }
+
 
