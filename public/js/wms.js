@@ -123,9 +123,9 @@ function attributeFormatter(element,keys) {
 
     if (typeof(element) == 'string') { 
         // Formatação de strings
-        if(keys.indexOf('path_360') > -1) { 
+        if(keys.indexOf('path_360_min') > -1) { 
             // Substitui o HTML do Popup (leaflet-popup-content) por um visualizador 360
-            return '<a href =#  dir="'+element+'"  id = "path_360" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
+            return '<a href =#  dir="'+element+'"  id = "path_360_min" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
         } else if (element.includes('http')){ 
             // Se um dos valores contiver a substring 'http' formatar como link
             return '<a target="_blank" href="'+element+'">Link</a>'
@@ -137,11 +137,9 @@ function attributeFormatter(element,keys) {
 
 function open360Viewer() {
  
-    element = $('#path_360').attr('dir');
+    element = $('#path_360_min').attr('dir');
 
     old_html = $('.leaflet-popup-content').html()
-
-    fullscreen = '<a style="color:black;font-weight: bold;" href="'+element+'" target="_blank">Abrir visualizador 360° em tela cheia</a>';
 
     html = '<div id="container-psv"></div>'
 
@@ -149,11 +147,11 @@ function open360Viewer() {
 
     var div = document.getElementById('container-psv');
     var PSV = new PhotoSphereViewer({
-            panorama: 'http://localhost:3000/img/panoramas/PANO_20210216_133153_0.jpg',
+            panorama: window.location.origin + element,
             container: div,
             time_anim: 3000,
             //caption: 'Legenda toDo',
-            minFox: 5,
+            minFov: 5,
             loading_img: 'img/loading.gif',
             navbar: ['autorotate', 'zoom'],
             navbar_style: {

@@ -94,7 +94,7 @@ var dummyData = [{
     layerName: 'Panoramas 360°',
     group: 'Panoramas 360°',
     layer: 'gianetti:PTO_Panoramas',
-    allowedFields: 'path_360',
+    allowedFields: 'path_360_min',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
     createdAt: new Date(),
     updatedAt: new Date()
