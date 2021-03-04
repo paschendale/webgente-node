@@ -152,7 +152,7 @@ app.route('/layers')
 app.route('/layers/add')
 	.get((req,res) => {
 		if(req.session.user){
-			res.render("add_layer.ejs")
+			res.render("layer_details.ejs",{edit: false})
 		} else {
 			res.redirect('/')
 		}		
@@ -167,12 +167,76 @@ app.route('/layers/add')
 					host:  req.body.host,
 					layer:  req.body.layer,
 					defaultBaseLayer:  req.body.defaultBaseLayer,
+					fields: req.body.fields,
 					allowedFields:  req.body.allowedFields,
 					queryFields:  req.body.queryFields,
-					fieldAlias:  req.body.fieldAlias
+					fieldAlias:  req.body.fieldAlias,
+					fieldType: req.body.fieldType
 				}
 				).then(console.log('Succesfully inserted data into database!', req.body))
 				.then(res.render("layers"))
+				.catch((error) => {console.log('Failed to insert data into database. '+error)})
+		} else {
+			res.redirect('/')
+		}
+	})
+
+app.route('/layers/edit/:id')
+	.get((req,res) => {	
+		if(req.session.user){
+			Layers.findOne({
+				raw:true,
+				where: {
+					id: req.params.id
+				}
+			})
+			.then(layerData => {
+				console.log('Dados enviados da layer '+layerData.layer+' com id: '+layerData.id)
+				res.render('layer_details.ejs',{
+					edit: true,
+					id: layerData.id,
+					layerName: layerData.layerName,
+					group: layerData.group,
+					layer: layerData.layer,
+					type: layerData.type,
+					host: layerData.host,
+					defaultBaseLayer: layerData.defaultBaseLayer,
+					allowedFields: layerData.allowedFields,
+					fieldAlias: layerData.fieldAlias,
+					queryFields: layerData.queryFields
+				})
+			})
+			.catch(() => {
+				res.redirect('/layers')
+			})			
+		} else {
+			res.redirect('/')
+		}
+	})
+	.post((req,res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
+		if(req.session.user){
+			Layers.update(
+				{
+					type: req.body.type,
+					layerName:  req.body.layerName, 
+					group:  req.body.group,
+					host:  req.body.host,
+					layer:  req.body.layer,
+					defaultBaseLayer:  req.body.defaultBaseLayer,
+					fields: req.body.fields,
+					allowedFields:  req.body.allowedFields,
+					queryFields:  req.body.queryFields,
+					fieldAlias:  req.body.fieldAlias,
+					fieldType: req.body.fieldType
+				},
+				{
+					where: {
+						id: req.params.id
+					}
+				}
+				).then(console.log('Succesfully inserted data into database!', req.body))
+				.then(res.render("layers"))
+				.catch((error) => {console.log('Failed to update database. '+error)})
 		} else {
 			res.redirect('/')
 		}
@@ -425,8 +489,6 @@ function isURL(string) {
 
 /* Rota para requisição WFS describeFeatureType */
 app.get('/describeLayer/:layer/:host',(req,res) => {
-
-
 
 	if(req.session.user){
 		params = {
