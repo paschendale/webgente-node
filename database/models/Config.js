@@ -2,35 +2,48 @@ const Sequelize = require('sequelize');
 const connection = require('../connection');
 
 const Config = connection.define('config', {
-    key: {
+    profile: {
         type: Sequelize.STRING,
         allowNull: false
     },
-    value: {
+    serverUser: {
         type: Sequelize.STRING,
+        allowNull: false
+    },
+    serverPassword : {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    serverHost : {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    startupLat : {
+        type: Sequelize.DOUBLE,
+        allowNull: false
+    },
+    startupLong : {
+        type: Sequelize.DOUBLE,
+        allowNull: false
+    },
+    startupZoom : {
+        type: Sequelize.DOUBLE,
         allowNull: false
     }
 })
 
 /* Dados padrão para serem inseridos na inicialização limpa do WebGENTE */
 var dummyData = [{
-    key: 'mapServerHost',
-    value: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    profile: 'webgente-default',
+    serverUser: 'geoserver',
+    serverPassword: '@zh%IqLQFpcz',
+    serverHost: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    startupLat: -20.754649,
+    startupLong: -42.873321,
+    startupZoom: 20,
     createdAt: new Date(),
     updatedAt: new Date()
-},{
-    key: 'mapServerUser',
-    value: 'webgente',
-    createdAt: new Date(),
-    updatedAt: new Date()
-},{
-    key: 'mapServerPassword',
-    value: 'webgente@ufv',
-    createdAt: new Date(),
-    updatedAt: new Date()
-},
-
-];
+}];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
 Config.sync({force: false}).then(() => {

@@ -10,7 +10,7 @@ const Users = require("./database/models/User.js")
 const Config = require("./database/models/Config.js")
 const fetch = require('node-fetch');
 const sanitize = require('sanitize')
-const { query } = require('./database/connection.js');
+const { query, config } = require('./database/connection.js');
 
 /* Cabeçalho de autenticação do usuário com o Geoserver 
 
@@ -18,9 +18,15 @@ A chave de autenticação após 'Basic' é uma codificação Base64 no formato u
 
 Sendo um usuário do Geoserver configurado adequadamente para acesso aos serviços */
 
-var headers = {
-	authorization: 'Basic Z2Vvc2VydmVyOkB6aCVJcUxRRnBjeg==' 
-};
+var headers = {};
+
+Config.findOne({
+	raw:true,
+	attributes: ['serverUser','serverPassword']
+}).then(results => {
+	headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
+	console.log(headers.authorization)
+})
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -75,7 +81,17 @@ app.use(function(req,res,next) {
 /* Rota da página inicial */
 app.get('/',(req,res) => {
 	var buttons = true;
-    res.render("index", {buttons: buttons})
+	Config.findOne({raw: true})
+	.then(results => {
+		console.log(results)
+		res.render("index", {
+			buttons: buttons,
+			startupLat: results.startupLat,
+			startupLong: results.startupLong,
+			startupZoom: results.startupZoom
+		})
+	})
+    
 })
 
 /* Rota da tela de Login */
@@ -253,10 +269,6 @@ app.get('/listlayers', (req,res) => {
 	)
 })
 
-/* TODO: Popular o campo Layer.fields com a lista de campos através da rota describeFeatureType na inicialização do sistema */
-
-
-
 /*Rota para obter a lista dos usuários - Rota protegida pela sessão*/
 app.get('/listusers', (req,res) => {
 	if(req.session.user){
@@ -304,10 +316,17 @@ app.get('/about', (req, res) => {
 app.route('/config')
 	.get((req, res) => {
 		if(req.session.user){
-			Config.findAll({raw:true})
+			Config.findOne({raw:true})
 			.then( results => {
 				res.render("config",
-				{config: results})
+				{
+					serverUser: results.serverUser,
+					serverPassword: results.serverPassword,
+					serverHost: results.serverHost,
+					startupLat: results.startupLat,
+					startupLong: results.startupLong,
+					startupZoom: results.startupZoom
+				})
 			})	
 		}
 		else{
@@ -315,8 +334,29 @@ app.route('/config')
 		}
 	})
 	.post((req, res) => { 
+		console.log(req.body)
 		if(req.session.user){
-			console.log(req.params.mapServerUser);	
+			Config.update(
+				{
+					serverUser: req.body.serverUser,
+					serverPassword: req.body.serverPassword,
+					serverHost: req.body.serverHost,
+					startupLat: req.body.startupLat,
+					startupLong: req.body.startupLong,
+					startupZoom: req.body.startupZoom
+				},
+				{
+					where: {
+						profile: 'webgente-default'
+					}
+				}
+			).then(() => {
+				console.log('Dados de configuração atualizados com sucesso')
+				res.redirect('/config')
+			}).catch((error) => {
+				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
+				res.send('Ocorreu algum erro')
+			})
 		}
 		else{
 			res.redirect('/');
@@ -344,36 +384,41 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	};
 
 	let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
-	var url = 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?' // TODO: Puxar este link da configuração
-
-	console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
-	console.log(url+urlParameters)
-	fetch(url+urlParameters, {method : 'GET', headers: headers})
-	.then(res => res.text())
-	.then(data => {
-		if(req.session.user){  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
-			console.log('Usuário logado, getFeatureInfo enviado!')
-			data = JSON.parse(data)
-			res.send(data); 
-		} else {
-			console.log('Usuário requisitou getFeatureInfo sem login')
-			data = JSON.parse(data)
-			//restrição de dados		
-			restrictAttributes(data.features,'id','properties')
-			.then(result => {
-				if( result[0]!=undefined){
-					data.features=result
-					res.send(data)
-				} else { // Envia um array vazio caso a resposta do GFI seja nula
-					data.features = [];
-					res.send(data)
-				}
-			})		
-		}	
+	
+	Config.findOne({
+		raw:true,
+		attributes: ['serverHost']
 	})
-	.catch(err => {
-		res.send(err);
-	});	
+	.then(results => {
+		console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
+		console.log(results.serverHost+urlParameters)
+		fetch(results.serverHost+urlParameters, {method : 'GET', headers: headers})
+		.then(res => res.text())
+		.then(data => {
+			if(req.session.user){  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
+				console.log('Usuário logado, getFeatureInfo enviado!')
+				data = JSON.parse(data)
+				res.send(data); 
+			} else {
+				console.log('Usuário requisitou getFeatureInfo sem login')
+				data = JSON.parse(data)
+				//restrição de dados		
+				restrictAttributes(data.features,'id','properties')
+				.then(result => {
+					if( result[0]!=undefined){
+						data.features=result
+						res.send(data)
+					} else { // Envia um array vazio caso a resposta do GFI seja nula
+						data.features = [];
+						res.send(data)
+					}
+				})		
+			}	
+		})
+		.catch(err => {
+			res.send(err);
+		});
+	})	
 })
 
 //Recolher campos pesquisáveis no banco de dados 

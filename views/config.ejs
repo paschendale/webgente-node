@@ -6,44 +6,34 @@
 
     <form action="/config" method="post">
         <div class="form-group">
-            <label for="mapServerHost">Endereço do endpoint do Servidor de Mapas</label>
-            <input type="text" class="form-control" id="mapServerHost" placeholder="https://geoserver.genteufv.com.br/ows?">
+            <label for="serverHost">Endereço do endpoint do Servidor de Mapas</label>
+            <input type="text" class="form-control" id="serverHost" name="serverHost" value='<%=serverHost%>'>
         </div>
         <div class="form-group">
-            <label for="mapServerUser">Usuário no Servidor de Mapas</label>
-            <input type="text" class="form-control" id="mapServerUser" placeholder="webgente">
+            <label for="serverUser">Usuário no Servidor de Mapas (alteração neste parâmetro exige um restart do sistema)</label>
+            <input type="text" class="form-control" id="serverUser" name="serverUser" value='<%=serverUser%>'>
         </div>
         <div class="form-group">
-            <label for="mapServerPassword">Senha do Usuário no Servidor de Mapas</label>
-            <input type="password" class="form-control" id="mapServerPassword" placeholder="webgente@ufv">
+            <label for="serverPassword">Senha do Usuário no Servidor de Mapas (alteração neste parâmetro exigem um restart do sistema)</label>
+            <input type="password" class="form-control" id="serverPassword" name="serverPassword" value='<%=serverPassword%>'>
         </div>
-        <button class="btn btn-dark" onClick="updateConfig()">Salvar</button>
+        <div class="form-group">
+            <label for="startupLat">Latitude de Inicialização</label>
+            <input type="number" class="form-control" id="startupLat" name="startupLat" value='<%=startupLat%>'>
+        </div>
+        <div class="form-group">
+            <label for="startupLong">Longitude de Inicialização</label>
+            <input type="number" class="form-control" id="startupLong" name="startupLong" value='<%=startupLong%>'>
+        </div>
+        <div class="form-group">
+            <label for="startupZoom">Zoom de Inicialização</label>
+            <input type="number" class="form-control" id="startupZoom" name="startupZoom" value='<%=startupZoom%>'>
+        </div>
+        <button class="btn btn-dark" type='submit'>Salvar</button>
     </form>
 
     <script>
-
-        function updateConfig() {
-            var mapServerHost = $('#mapServerHost').val()
-            var mapServerUser = $('#mapServerUser').val()
-            var mapServerPassword = $('#mapServerPassword').val()
-
-            console.log(mapServerUser)
-
-            $.ajax({
-                method: "POST",
-                url: "/config",
-                data: { 
-                    mapServerHost: mapServerHost,
-                    mapServerUser: mapServerUser,
-                    mapServerPassword: mapServerPassword    
-                }
-            }).done(result => {
-                alert('deu certo')
-            }).fail((jqXHR, textStatus, result) => {
-                alert('nao deu certo')
-            })
-        }
-        
+        //TODO: Verificar se o usuario e senha do geoserver servem antes do submit!
     </script>
 </div>
 
