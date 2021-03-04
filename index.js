@@ -276,7 +276,6 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	};
 
 	let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
-
 	var url = 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?' // TODO: Puxar este link da configuração
 
 	console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
@@ -292,7 +291,7 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 			console.log('Usuário requisitou getFeatureInfo sem login')
 			data = JSON.parse(data)
 			//restrição de dados		
-			restrictAttributes(data.features)
+			restrictAttributes(data.features,'id','properties')
 			.then(result => {
 				if( result[0]!=undefined){
 					data.features=result
@@ -309,8 +308,53 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	});	
 })
 
+//Recolher campos pesquisáveis no banco de dados 
+app.get('/listqueryable',(req,res)=>{
+	Layers.findAll({ 
+		raw: true,
+		attributes: ['layerName','layer','queryFields','fieldAlias', 'fieldType'],
+		where: { type: '2',
+		[Op.not]:{queryFields: null}
+	}
+
+	}).then(results => {
+	
+	//Função para adaptar retorno do banco de dados	
+	for(var n=0;n<results.length;n++){
+		var results_order= new Array()
+		var querys= (results[n].queryFields).split(',')
+		var alias= (results[n].fieldAlias).split(',')
+		var type= (results[n].fieldType).split(',')
+		for(var n2=0;n2<querys.length;n2++){
+			var inter= new Object()
+			inter[querys[n2]]= {
+				'fieldAlias': alias[n2],
+				'fieldType':type[n2]
+			}
+			results_order.push(inter)
+		
+		}
+		results[n]= {
+			'layerName': results[n].layerName,
+			'layer': results[n].layer,
+			'queryFields': results_order
+		}
+	
+	}
+
+	if(req.session.user){
+		res.send(results)
+	}else{
+		//results=restrictAttributes(results,'layer','queryFields')
+		res.send(results)
+	}
+	
+	})
+})
+
+
 /* Restringindo atributos de uma única feição */
-async function restrictAttributes (features){
+async function restrictAttributes (features,layerKey, fieldKey){
 
 	console.log(features)
 
@@ -328,7 +372,10 @@ async function restrictAttributes (features){
 				raw: true,
 				attributes: ['allowedFields'],
 				// TODO: Remover o nome do workspace e recupera-lo de algum parametro dinamico
-				where: { layer: ("gianetti:"+((feature.id).split('.'))[0]) }
+				where: { 
+				layer:{
+					[Op.like]: '%'+(((feature[layerKey]).split('.'))[0])+'%'} 
+				}
 			}).then(results => {
 				fields = results // Passando resultados para uma variavel fields por conveniencia e legibilidade
 			})
@@ -339,12 +386,12 @@ async function restrictAttributes (features){
 				//Verificação de cada campo
 					for( field of fields){ 
 					//Somente os campos obtidos do banco de dados são adicionados 
-						restrict[field]=feature.properties[field];
+						restrict[field]=feature[fieldKey][field];
 					}
-				feature.properties=restrict
+				feature[fieldKey]=restrict
 				return feature
 			} else {
-				feature.properties = [];
+				feature[fieldKey] = [];
 				return feature
 			}
 		}

@@ -37,6 +37,9 @@ const Layers = connection.define('Layers', {
     },
     fieldAlias: { // Apelidos para a exibição dos nomes no placeholder do formulário de pesquisa, deve ser definido na mesma ordem de queryFields, separados por vírgula
         type: Sequelize.STRING
+    },
+    fieldType: { // Tipo do campo para designar o tipo do formulário de pesquisa, deve ser definido na mesma ordem de queryFields, separados por vírgula
+        type: Sequelize.STRING
     }
 })
 
@@ -59,6 +62,7 @@ var dummyData = [{
     allowedFields: 'inscricao_lote',
     queryFields: 'inscricao_lote',
     fieldAlias: 'Inscrição Cadastral do Lote',
+    fieldType:'String',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -79,6 +83,7 @@ var dummyData = [{
     allowedFields: 'inscricao',
     queryFields: 'inscricao',
     fieldAlias: 'Inscrição Cadastral',
+    fieldType:'String',
     createdAt: new Date(),
     updatedAt: new Date()
 },{

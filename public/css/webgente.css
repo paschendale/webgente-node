@@ -48,3 +48,39 @@ th {
 }
 
 /* Fim dos Elementos do GetFeatureInfo */
+
+#search{
+    background-color: #FFFFFF;
+	opacity: 0.9; 
+	position: absolute; 
+	margin-left: 8%; 
+	margin-top: 1%; 
+	/*width: auto;*/
+	max-width: 470px;
+	min-width: 20px;
+
+	height: auto;
+	max-height: 400px;
+	padding: 5px 5px 5px 5px;
+	z-index: 20000;
+}
+
+#search_bar{
+    background-color: #FFFFFF;
+	opacity: 0.9; 
+	position: absolute; 
+	margin-left: 8%; 
+	margin-top: 1%; 
+	/*width: auto;*/
+	max-width: 470px;
+	min-width: 20px;
+
+	height: auto;
+	max-height: 400px;
+	padding: 5px 5px 5px 5px;
+	z-index: 20000;
+	border: solid lightgrey 2px;
+	border-radius: 0px;
+	overflow: auto;
+	resize: both;
+}

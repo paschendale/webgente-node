@@ -83,6 +83,7 @@ function addLayer (layer){
 };
 
 $.get('/listlayers',function(data){
+    console.log("1");
     for (let index = 0; index < data.length; index++) {
         const element = data[index];
         addLayer(element)
@@ -123,7 +124,7 @@ var info = L.easyButton({
 
 // Adiciona botao para ativar a ferramenta de pesquisas
 var pesquisas = L.easyButton('<img src="img/lupa.png">', function(){
-
+    queryLayers();
 },'Habilitar ferramenta de pesquisa por atributo nas camadas').addTo(map);
 
 // 
