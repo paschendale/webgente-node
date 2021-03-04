@@ -1,0 +1,32 @@
+<%- include('partials/admin/header.ejs') %> 
+<div>
+	<div class="container">
+		<form action="/user/add" method="POST">
+            <div class="row">
+    			<div class="form-group">
+                	<input type="text" class="form-control" id="userName" name="userName" placeholder="Nome de usuário" required>
+            	</div>
+            </div>
+            <div class="row">
+            	<div class="form-group">
+                    <label for="layerName">Data de Nascimento</label>
+                	<input type="date" class="form-control" id="birthDate" name="birthDate" placeholder="Data de Nascimento" required>
+            	</div>
+            </div>
+            <div class="row">
+            	<div class="form-group">
+                	<input type="email" class="form-control" id="email" name="email" placeholder="Email do usuário" required>
+            	</div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Senha" required>
+                </div>
+            </div>
+            	<button type="submit" class="btn btn-dark">Salvar</button>
+            </div>
+		</form>
+	</div>
+</div>
+
+<%- include('partials/admin/footer.ejs') %> 

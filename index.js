@@ -197,6 +197,34 @@ app.route('/layers/add')
 		}
 	})
 
+/* Rota para adicionar novo usuário - Rotas protegidas pela sessão */
+app.route('/user/add')
+.get((req,res) => {
+		if(req.session.user){
+			res.render("add_user.ejs")
+		} else {
+			res.redirect('/')
+		}		
+	})
+.post((req,res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
+	if(req.session.user){
+		/* Hash na senha digitada pelo usuário */
+		const password = bcrypt.hashSync(req.body.password, 10);
+		Users.create(
+			{
+				userName: req.body.userName,
+				password:  password, 
+				birthDate:  req.body.birthDate,
+				email:  req.body.email,
+				group: 'admin'
+			}
+			).then(console.log('Succesfully inserted data into database!', req.body))
+			.then(res.render("users"))
+	} else {
+		res.redirect('/')
+	}
+})
+
 app.route('/layers/edit/:id')
 	.get((req,res) => {	
 		if(req.session.user){

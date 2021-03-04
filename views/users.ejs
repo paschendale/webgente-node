@@ -32,7 +32,7 @@
   <script>
   
     $( document ).ready(function() {
-      $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="new-user" style="margin-right:5px;" onClick="addNewUser()">Novo Usuário</button>')
+      $('.fixed-table-toolbar').prepend('<a class="btn btn-dark layer-toolbar" id="addNewUser" style="margin-right:5px;" href="/user/add">Novo Usuário</a>')
     });
   
     function TableActions(value, row, index) {
