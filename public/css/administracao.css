@@ -37,14 +37,18 @@ a[data-toggle="collapse"] {
         margin-left: 0;
     }
 
-    #tamanhoimg{
+    #imgsize {
+
         width: 0%;
+
     }
-    #tamanhotxt{
+    #txtsize {
+
         font-size: 1.1em;
         text-align: center;
         margin-left: 15%;
         width: 100%;
+
     }
 }
 
@@ -121,7 +125,7 @@ ul ul a {
 
 /*ALTERAÇÕES GUILHERME*/
 
-#margem-container-fluid{
+#margin-container-fluid{
     margin-bottom: 30px;
 }
 
@@ -142,26 +146,22 @@ table{
     background-color: white;
 }
 
-/*td:hover{
-    color:white;
-    background-color: #363636;
-}*/
 
-#alinhamento{
+#align1{
     align-content: center;
     background-color: none;
     margin-left: 15%;
     width: 100%;
 }
 
-#alinhamento2{
+#align2{
     align-content: center;
     background-color: none;
     margin-left: 15%;
     width: 50%;
 }
 
-#titulos {
+#titles1 {
     font-family: 'Poppins', sans-serif;
     font-size: 2em;
     font-weight: 300;
