@@ -189,6 +189,10 @@ app.get('/listlayers', (req,res) => {
 	)
 })
 
+/* TODO: Popular o campo Layer.fields com a lista de campos através da rota describeFeatureType na inicialização do sistema */
+
+
+
 /*Rota para obter a lista dos usuários - Rota protegida pela sessão*/
 app.get('/listusers', (req,res) => {
 	if(req.session.user){
@@ -271,8 +275,8 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		query_layers: req.params.layers,
 		info_format: 'application/json', // Formato de resposta do GetFeatureInfo
 		feature_count: '50', // Puxar até 50 feições
-		x: req.params.x,
-		y: req.params.y
+		x: Math.round(req.params.x),
+		y: Math.round(req.params.y)
 	};
 
 	let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
@@ -354,9 +358,7 @@ app.get('/listqueryable',(req,res)=>{
 
 
 /* Restringindo atributos de uma única feição */
-async function restrictAttributes (features,layerKey, fieldKey){
-
-	console.log(features)
+async function restrictAttributes (features,layerKey,fieldKey){
 
 	var restrictedData = new Array(); 
 	
@@ -370,25 +372,25 @@ async function restrictAttributes (features,layerKey, fieldKey){
 			//Recuperando campos permitidos para a camada do banco de dados
 			await Layers.findOne({ 
 				raw: true,
-				attributes: ['allowedFields'],
-				// TODO: Remover o nome do workspace e recupera-lo de algum parametro dinamico
+				attributes: ['fields','allowedFields'],
 				where: { 
 				layer:{
 					[Op.like]: '%'+(((feature[layerKey]).split('.'))[0])+'%'} 
 				}
 			}).then(results => {
-				fields = results // Passando resultados para uma variavel fields por conveniencia e legibilidade
+				fields = results.fields.split(',')
+				allowedFields = results.allowedFields.split(',')
 			})
+			console.log(feature)
 
-			if(fields.allowedFields!=null){ 
-			/* TODO: Caso a camada não possua nenhum campo permitido ela deve ser excluída  */
-				fields = (fields.allowedFields).split(',')
-				//Verificação de cada campo
-					for( field of fields){ 
-					//Somente os campos obtidos do banco de dados são adicionados 
-						restrict[field]=feature[fieldKey][field];
+			if(allowedFields.indexOf('true') != -1){ 
+				/* TODO: Caso a camada não possua nenhum campo permitido ela deve ser excluída  */
+				for(i = 0; i < fields.length; i++){
+					if(getBool(allowedFields[i])) {
+						restrict[fields[i]] = feature[fieldKey][fields[i]]
 					}
-				feature[fieldKey]=restrict
+				}
+				feature[fieldKey] = restrict
 				return feature
 			} else {
 				feature[fieldKey] = [];
@@ -403,4 +405,51 @@ async function restrictAttributes (features,layerKey, fieldKey){
 	return restrictedData
 }
 
+// Transforma uma string true or false em um elemento boolean
+function getBool(val) {
+    return !!JSON.parse(String(val).toLowerCase());
+}
 
+// Check se a variavel de host é uma URL válida
+function isURL(string) {
+	let url;
+	
+	try {
+		url = new URL(string);
+	} catch (_) {
+		return false;  
+	}
+	
+	return url.protocol === "http:" || url.protocol === "https:";
+}
+
+/* Rota para requisição WFS describeFeatureType */
+app.get('/describeLayer/:layer/:host',(req,res) => {
+
+
+
+	if(req.session.user){
+		params = {
+			service: 'WFS',
+			version: '1.3.0',
+			request: 'describeFeatureType',	
+			typeName: req.params.layer,	
+			outputFormat: 'application/json',
+			exceptions: 'application/json'
+		}
+
+		if (isURL(req.params.host) ==  false) {res.send('Não foi possível completar a requisição')}
+		
+		let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
+	
+		console.log('describeFeatureType requisition sent, querying layers: ' + params.typeName)
+		console.log(req.params.host+urlParameters)
+	
+		fetch(req.params.host+urlParameters, {method : 'GET', headers: headers})
+		.then(res => res.text())
+		.then(data => res.send(data))
+	}
+	else{
+		res.redirect('/');
+	}
+})

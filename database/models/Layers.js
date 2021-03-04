@@ -29,6 +29,9 @@ const Layers = connection.define('Layers', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    fields : {
+        type: Sequelize.STRING
+    },
     allowedFields: { // Nome dos campos liberados nas interfaces anônimas, separados por vírgula
         type: Sequelize.STRING
     },
@@ -38,7 +41,7 @@ const Layers = connection.define('Layers', {
     fieldAlias: { // Apelidos para a exibição dos nomes no placeholder do formulário de pesquisa, deve ser definido na mesma ordem de queryFields, separados por vírgula
         type: Sequelize.STRING
     },
-    fieldType: { // Tipo do campo para designar o tipo do formulário de pesquisa, deve ser definido na mesma ordem de queryFields, separados por vírgula
+    fieldType: { // Tipo do campo para designar o tipo de formulário de pesquisa
         type: Sequelize.STRING
     }
 })
@@ -59,10 +62,11 @@ var dummyData = [{
     group: 'Cadastro',
     layer: 'gianetti:CAD_Lote',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
-    allowedFields: 'inscricao_lote',
-    queryFields: 'inscricao_lote',
-    fieldAlias: 'Inscrição Cadastral do Lote',
-    fieldType:'String',
+    fields: 'id,geom,distrito,setor,quadra,lote,inscricao_lote',
+    allowedFields: 'true,true,false,false,false,false,true',
+    queryFields: 'false,false,false,false,false,false,true',
+    fieldAlias: ',,,,,,Inscrição do Lote',
+    fieldType:'int,Geometry,int,int,int,int,string',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -71,7 +75,11 @@ var dummyData = [{
     group: 'Cadastro',
     layer: 'gianetti:CAD_Edificacao',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
-    allowedFields: 'inscricao',
+    fields: 'id,geom,inscricao',
+    allowedFields: 'false,false,true',
+    queryFields: 'false,false,true',
+    fieldAlias: ',,Inscrição Cadastral',
+    fieldType: 'int,MultiPolygon,string',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -80,10 +88,11 @@ var dummyData = [{
     group: 'Cadastro',
     layer: 'gianetti:CAD_Geocodificacao',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
-    allowedFields: 'inscricao',
-    queryFields: 'inscricao',
-    fieldAlias: 'Inscrição Cadastral',
-    fieldType:'String',
+    fields: 'id,geom,distrito,setor,quadra,lote,unidade,inscricao,inscricao_anterior,proprietario_,cpf,logradouro_correspondencia,numero_correspondencia,complemento_correspondencia,bairro_correspondencia,cep_correspondencia,ocupacao,utilizacao,patrimonio,imune_isento_iptu,imune_isento_tsu,foto',
+    allowedFields: 'false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false',
+    queryFields: 'false,false,false,false,false,false,false,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false',
+    fieldAlias: ',,,,,,,Inscrição Cadastral,Inscrição Anterior,Nome do Proprietário,CPF do Proprietário,,,,,,,,,,,',
+    fieldType:'int,Point,int,int,int,int,int,string,string,string,int,string,int,string,string,int,int,int,int,int,int,string',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -92,6 +101,11 @@ var dummyData = [{
     group: 'Cadastro',
     layer: 'gianetti:CAD_Secao_Logradouro',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    fields: 'id,geom,tipo,nome_logradouro,codigo,secao_e,secao_d',
+    allowedFields: 'false,false,true,true,true,true,true',
+    queryFields: 'false,false,true,true,true,true,true',
+    fieldAlias: ',,Tipo,Nome,Código,Seção Esquerda,Seção Direita',
+    fieldType: 'int,MultiLineString,string,string,int,int,int',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -99,8 +113,12 @@ var dummyData = [{
     layerName: 'Panoramas 360°',
     group: 'Panoramas 360°',
     layer: 'gianetti:PTO_Panoramas',
-    allowedFields: 'path_360_min',
+    allowedFields: 'false,false,false,true',
+    queryFields: 'false,false,false,false',
+    fieldAlias: ',,,',
+    fields: 'id,geom,path_360,path_360_min',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    fieldType: 'int,Point,string,string',
     createdAt: new Date(),
     updatedAt: new Date()
 }];
