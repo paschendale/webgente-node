@@ -316,7 +316,7 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 app.get('/listqueryable',(req,res)=>{
 	Layers.findAll({ 
 		raw: true,
-		attributes: ['layerName','layer','queryFields','fieldAlias', 'fieldType'],
+		attributes: ['layerName','layer','queryFields' ,'fields','fieldAlias', 'fieldType'],
 		where: { type: '2',
 		[Op.not]:{queryFields: null}
 	}
@@ -325,33 +325,46 @@ app.get('/listqueryable',(req,res)=>{
 	
 	//Função para adaptar retorno do banco de dados	
 	for(var n=0;n<results.length;n++){
-		var results_order= new Array()
-		var querys= (results[n].queryFields).split(',')
-		var alias= (results[n].fieldAlias).split(',')
-		var type= (results[n].fieldType).split(',')
-		for(var n2=0;n2<querys.length;n2++){
-			var inter= new Object()
-			inter[querys[n2]]= {
-				'fieldAlias': alias[n2],
-				'fieldType':type[n2]
-			}
-			results_order.push(inter)
+	//Objeto com o retorno ordenadado por propriedade:	
+		var fields= {
+			field:((results[n].fields).split(',')),
+			queryFields: ((results[n].queryFields).split(',')),
+			fieldAlias: ((results[n].fieldAlias).split(',')),
+			fieldType: ((results[n].fieldType).split(','))
+    	}
+		var properties_order= new Object()
+	
+		for(var n2=0;n2<fields.field.length;n2++){
+		//Objeto com retorno ordenado pela chave e campos pesquisáveis definidos 		
+			if(getBool(fields.queryFields[n2])){
+				properties_order[fields.field[n2]]= {
+				'fieldAlias': fields.fieldAlias [n2],
+				'fieldType':fields.fieldType[n2]
+				}
+		}
 		
 		}
 		results[n]= {
 			'layerName': results[n].layerName,
 			'layer': results[n].layer,
-			'queryFields': results_order
+			'queryFields': properties_order
 		}
-	
+		//Restrição de atributos para usuário restrito
+		if(req.session.user==false){
+			restrictAttributes(new Array (results[n]),'layer','queryFields')
+			.then(result => {
+				results[n]=result
+			})	
+			
+		}
+
+		//Remove camadas que possuam queryFields vazio 
+		if( !Object.entries(results[n].queryFields).length){
+			results.splice(n,1)
+		}
 	}
 
-	if(req.session.user){
-		res.send(results)
-	}else{
-		//results=restrictAttributes(results,'layer','queryFields')
-		res.send(results)
-	}
+	res.send(results)
 	
 	})
 })
@@ -361,7 +374,6 @@ app.get('/listqueryable',(req,res)=>{
 async function restrictAttributes (features,layerKey,fieldKey){
 
 	var restrictedData = new Array(); 
-	
 	for (feature of features){ // Itera em cada camada
 
 		// Função para recuperar os campos permitidos de cada camada
@@ -381,7 +393,7 @@ async function restrictAttributes (features,layerKey,fieldKey){
 				fields = results.fields.split(',')
 				allowedFields = results.allowedFields.split(',')
 			})
-			console.log(feature)
+			
 
 			if(allowedFields.indexOf('true') != -1){ 
 				/* TODO: Caso a camada não possua nenhum campo permitido ela deve ser excluída  */
@@ -390,6 +402,7 @@ async function restrictAttributes (features,layerKey,fieldKey){
 						restrict[fields[i]] = feature[fieldKey][fields[i]]
 					}
 				}
+				
 				feature[fieldKey] = restrict
 				return feature
 			} else {
@@ -397,11 +410,11 @@ async function restrictAttributes (features,layerKey,fieldKey){
 				return feature
 			}
 		}
-
+		
 		restrictedData.push(await getAllowedFields(feature))	
 
 	}
-
+	
 	return restrictedData
 }
 
