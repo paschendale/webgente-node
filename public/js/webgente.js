@@ -1,10 +1,4 @@
-/* Inicializando o mapa */
-
-var initView = {
-    lat: -20.754649, // Latitude Inicial
-    lng: -42.873321, // Longitude Inicial
-    zoom: 20 // Zoom Inicial
-};
+/* Inicializando o mapa, initView é inicializado dentro de uma tag script do index.ejs pois recebe dados do backend */
 
 var map = L.map('map').setView([initView.lat, initView.lng], initView.zoom);
 

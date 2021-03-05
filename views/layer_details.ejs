@@ -20,7 +20,11 @@
     -->
 
     <div class="container">
-        <form action="/layers/add" onsubmit="return validateForm()" method="POST">
+        <% if (edit) { %> <!-- Switch entre rotas do modo de edição e criação de camadas -->
+            <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST">
+        <% } else { %>
+            <form action="/layers/add" onsubmit="return validateForm()" method="POST">
+        <% } %>
         <div class="row">
             <div class="col">
                 <label for="layerName">Nome de exibição da camada no menu de camadas</label>
@@ -71,13 +75,13 @@
                 <div class="form-group">
                     <label for="layer-type">Camada Padrão?</label>
                     <div class="form-check" id="default-layer">
-                        <input class="form-check-input" type="radio" name="defaultBaseLayer" id="true" value="true">
+                        <input class="form-check-input" type="radio" name="defaultBaseLayer" id="true" value="1">
                         <label class="form-check-label" for="true">
                             Sim
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="defaultBaseLayer" id="false" value="false" checked>
+                        <input class="form-check-input" type="radio" name="defaultBaseLayer" id="false" value="2" checked>
                         <label class="form-check-label" for="false">
                             Não
                         </label>
@@ -108,32 +112,31 @@
 
         <!-- Campos ocultos para construção do formato de envio à base de dados -->
         <div class="form-group">
-            <input type="text" class="form-control" id="fields" name="fields" placeholder="fields">
+            <input type="hidden" class="form-control" id="fields" name="fields" placeholder="fields">
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" id="allowedFields" name="allowedFields" placeholder="allowedFields">
+            <input type="hidden" class="form-control" id="allowedFields" name="allowedFields" placeholder="allowedFields">
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" id="queryFields" name="queryFields" placeholder="queryFields">
+            <input type="hidden" class="form-control" id="queryFields" name="queryFields" placeholder="queryFields">
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" id="fieldAlias" name="fieldAlias" placeholder="fieldAlias">
+            <input type="hidden" class="form-control" id="fieldAlias" name="fieldAlias" placeholder="fieldAlias">
         </div>
         <div class="form-group">
-            <input type="text" class="form-control" id="fieldType" name="fieldAlias" placeholder="fieldAlias">
+            <input type="hidden" class="form-control" id="fieldType" name="fieldType" placeholder="fieldAlias">
         </div>
-        <button type="button" class="btn btn-dark" onClick="fillHiddenForms()">
-            <span class="fas fa-sync-alt"></span>  Preencher atributos
-        </button>
         <button type="submit" class="btn btn-dark">Salvar</button>
         </form>
     </div>   
 
     <script>
 
-        var loadedAttributes = 0;
+        var loadedAttributes = 0; // Estado da tabela de atributos. 0: nao carregado, 1: carregada
 
-        function loadLayerAttributes(){
+        var edit = false; // Habilita ou nao carregamento de fieldAlias, queryFields e allowedFields ao finalizar carregamento da tabela
+
+        async function loadLayerAttributes(){
 
             loadedAttributes = 1;
 
@@ -143,12 +146,14 @@
             $.get("/describeLayer/" + layer + '/' + encodeURIComponent(host))
             .done(data => {   
                 data = JSON.parse(data);          
-                if (data.featureTypes != undefined) {
-                    console.log(data);
+                if ($('#basemap').is(':checked')) {
+                    $("#attributes-table").html('Camadas base não possuem atributos.')
+                    $("#attributes-div").collapse('show')
+                    return null
+                } else if(data.featureTypes != undefined) {
                     createAttributesTable(data.featureTypes[0].properties);
                 } else {
                     alert('Não existe a camada ' + layer + ' no host ' + host)
-                    console.log(data);
                 }
             })
             .fail(function() {
@@ -157,13 +162,6 @@
         }
 
         function createAttributesTable(properties) {
-
-            if ($('#basemap').is(':checked')) {
-                $("#attributes-table").html('Camadas base não possuem atributos.')
-                $("#attributes-div").collapse('show')
-                return null
-            }
-
             n = 0
             fieldsString = [];
             typeString = [];
@@ -180,6 +178,9 @@
                 typeString.push(property.localType) // Criando o campo Type
                 $("#attributes-table").bootstrapTable('append', data)
                 n++;
+                if (n == properties.length && edit) { // Isso é uma bela gambiarra pra chamar o preenchimento da tabela caso o modo for edição e quando terminar os .append
+                    fillTableForEditing();
+                }
             }
 
             $('#fields').val('').val(fieldsString);
@@ -199,7 +200,8 @@
                 $('#queryFields').val().split(',').length,
                 $('#fieldAlias').val().split(',').length,
                 $('#allowedFields').val().split(',').length,
-                $('#fields').val().split(',').length
+                $('#fields').val().split(',').length,
+                $('#fieldType').val().split(',').length
             ]
 
             if(!fieldLength.every( (val, i, arr) => val === arr[0] )){
@@ -256,5 +258,61 @@
 
         }
     </script>
+
+    <!-- A variável edit é passada como true se o modo for edição -->
+    <% if (edit) { %> 
+
+    <script>
+
+        var edit = true // Habilita o preenchimento dos campos para edição
+
+        $(document).ready(loadLayerDataForEditing())
+
+        function loadLayerDataForEditing(){    
+            $('#layerName').val("<%=layerName%>")
+            $('#group').val("<%=group%>")
+            $('#layer').val("<%=layer%>")
+            $('#host').val("<%=host%>")
+            
+            if("<%=type%>" == 1) {
+                $('input:radio[name=type][value=1]').click();
+            }
+            if("<%=defaultBaseLayer%>" == 1) {
+                $('input:radio[name=defaultBaseLayer][value=1]').click();
+            }  
+
+            loadLayerAttributes() // Carrega a tabela de atributos da Layer
+                       
+        }
+
+        function fillTableForEditing() {
+            allowedFields = "<%=allowedFields%>".split(',')
+            queryFields = "<%=queryFields%>".split(',')
+            fieldAlias = "<%=fieldAlias%>".split(',')
+
+            alias = $('.alias-col')
+            allowed = $('.allowed-col')
+            queryable = $('.queryable-col')
+            
+            for (i = 0; i < allowedFields.length; i++) {
+                if (allowedFields[i] == 'true') {
+                    allowed[i].checked = true
+                }
+            }
+
+            for (i = 0; i < queryable.length; i++) {
+                if (queryFields[i] == 'true') {
+                    queryable[i].checked = true
+                }
+            }
+
+            for (i = 0; i < alias.length; i++) {
+                alias[i].value = fieldAlias[i]
+            }
+        }
+    </script>
+       
+    <% } %>
+
 </div>
 <%- include('partials/admin/footer.ejs') %> 

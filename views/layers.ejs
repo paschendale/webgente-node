@@ -36,32 +36,21 @@
   });
 
   /* Aplicação de raio e margem nos botões de ação*/
-  function TableActions(value, row, index) {
-    return ['<button class="btn btn-dark btn-custom" id="removeLayer" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" id="editLayer" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
-  }
-
-  window.operateEvents = {
-    'click .like': function (e, value, row, index) {
-      alert('You click like action, row: ' + JSON.stringify(row))
-    },
-    'click .remove': function (e, value, row, index) {
-      $table.bootstrapTable('remove', {
-        field: 'id',
-        values: [row.id]
-      })
-    }
+  function TableActions(value, row, index, field) {
+    return ['<button class="btn btn-dark btn-custom" id="removeLayer" onclick="removeLayer('+row.id+')"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" id="editLayer" onclick="editLayer('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
   }
 
   function removeMultipleLayers() {
     alert('em breve: deletar layer')
     //todo: desenvolver função para deletar layers marcadas
   }
-  function removeLayer() {
-    alert('em breve: remover esta layer')
+  function removeLayer(index) {
+    alert('em breve: remover esta layer: ' + index)
     //todo: desenvolver função para remover layer unica da tabela
   }
-  function editLayer() {
-    alert('em breve: editar esta layer')
+  function editLayer(index) {
+    //alert('em breve: editar esta layer: ' + index )
+    window.location.href = '/layers/edit/'+index
     //todo: desenvolver função para editar layer
   }
 </script>
