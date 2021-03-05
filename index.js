@@ -301,7 +301,7 @@ app.get('/listlayers', (req,res) => {
 app.get('/listusers', (req,res) => {
 	if(req.session.user){
 		Users.findAll({raw: true,
-		attributes: ['userName', 'birthDate', 'email', 'group']})
+		attributes: ['id', 'userName', 'birthDate', 'email', 'group']})
 		.then(
 			result => {
 				res.send(result)
@@ -328,6 +328,24 @@ app.get('/users', (req, res) => {
 	else{
 		res.redirect('/');
 	}	
+})
+
+/* Rota para excluir um usuário do sistema - Rota protegida pela sessão */
+app.route('/users/delete/:id')
+	.get((req,res) => {	
+		if(req.session.user){
+			Users.destroy({
+				raw:true,
+				where: {
+					id: req.params.id
+				}
+			})
+			.catch(() => {
+				res.redirect('/users')
+			})			
+		} else {
+			res.redirect('/')
+		}
 })
 
 /* Rota para página 'Sobre' na interface de administração - Rota protegida pela sessão */

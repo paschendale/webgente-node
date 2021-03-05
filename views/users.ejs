@@ -13,6 +13,7 @@
             <thead class="thead-dark">
               <tr>
                 <th data-checkbox="true"></th>
+                <th data-field="id">ID</th>
                 <th data-field="userName">Nome do usuário</th>
                 <th data-field="birthDate">Data de nascimento</th>
                 <th data-field="email">Email</th>
@@ -35,12 +36,15 @@
       $('.fixed-table-toolbar').prepend('<a class="btn btn-dark layer-toolbar" id="addNewUser" style="margin-right:5px;" href="/user/add">Novo Usuário</a>')
     });
   
-    function TableActions(value, row, index) {
-            return ['<button class="btn btn-dark btn-custom" onclick="removeLayer()"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" onclick="editLayer()"> <i class="fas fa-edit"></i></button>'].join('');
+    function TableActions(value, row, index, field) {
+            return ['<button class="btn btn-dark btn-custom" id="removeUser" onclick="removeUser('+row.id+')"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" onclick="editUser()"> <i class="fas fa-edit"></i></button>'].join('');
     }
     function addNewUser() {
       alert('em breve: adicionar user')
       //todo: desenvolver função para chamar novo user
+    }
+    function removeUser(index){
+      window.location.href = '/users/delete/'+index
     }
   </script>
   </div>
