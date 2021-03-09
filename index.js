@@ -289,7 +289,7 @@ app.route('/layers/edit/:id')
 /* Rota para obtênção de lista de camadas */
 app.get('/listlayers', (req,res) => {
 	Layers.findAll({raw: true,
-	attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias']})
+	attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias', 'metadata']})
 	.then(
 		result => {
 			res.send(result)
