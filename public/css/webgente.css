@@ -15,6 +15,31 @@ html, body, #map {
     height: 270px;
 }
 
+/* Container da legenda no mapa */
+
+.webgente-legend-container {
+	width: auto;
+	height: auto;
+	margin-bottom: 25px;
+	margin-right: 10px;
+	background-color: #FFFFFF;
+	border: #333;
+	border-radius: 10px;
+}
+
+.webgente-legend-graphic-container {
+	width: auto;
+	height: auto;
+	padding-bottom: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.webgente-legend-layer-title {
+	font-weight: 700;
+	padding-left: 5px;
+	padding-right: 5px;
+}
 
 /* Elementos do GetFeatureInfo */ 
 .popup-inner-div {

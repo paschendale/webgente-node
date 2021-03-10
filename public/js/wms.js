@@ -8,11 +8,13 @@ só estará habilitado para as camadas inicializadas por L.TileLayer.gfiWMS */
 L.TileLayer.gfiWMS = L.TileLayer.WMS.extend({
     onAdd: function (map) {
       L.TileLayer.WMS.prototype.onAdd.call(this, map);
+      getLegendGraphics(this);
       activeLayers.push(this.options.layers);
     },
     
     onRemove: function (map) {
       L.TileLayer.WMS.prototype.onRemove.call(this, map);
+      removeLegendGraphics(this);
       activeLayers.splice(activeLayers.indexOf(this.options.layers),1)
     }
 });
@@ -160,3 +162,37 @@ function open360Viewer() {
         });
 }
 
+/* Função para obter a legenda do Geoserver */
+
+function getLegendGraphics(layer) {
+
+    params = {
+        request: 'GetLegendGraphic',
+        version: layer.wmsParams.version,
+        format: 'image/png',
+        layer: layer.options.layers
+    }
+    
+    console.log(layer)
+
+    url = layer._url + Object.entries(params).map(e => e.join('=')).join('&');
+
+    $.ajax({
+        url: url,
+        xhrFields: {
+           responseType: 'blob'
+        },
+        success (data) {
+           const url = window.URL || window.webkitURL;
+           const src = url.createObjectURL(data);
+           img = '<div class="webgente-legend-graphic-container" id="legend-'+layer.options.layers+'"><p class="webgente-legend-layer-title">'+layer.options.layers.split(':')[1]+'</p><img id="legend-graphic-'+layer.options.layers+'" src="'+src+'"></img></div>'
+           $('.webgente-legend-container').append(img)
+        }
+    });    
+    return null
+}
+
+function removeLegendGraphics(layer) {
+    document.getElementById('legend-'+layer.options.layers).remove()
+    return null
+}

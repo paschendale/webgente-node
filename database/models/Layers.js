@@ -43,6 +43,9 @@ const Layers = connection.define('Layers', {
     },
     fieldType: { // Tipo do campo para designar o tipo de formulário de pesquisa
         type: Sequelize.STRING
+    },
+    metadata: {// Link para metadados de acordo com perfil MGB
+        type: Sequelize.STRING
     }
 })
 
@@ -54,6 +57,7 @@ var dummyData = [{
     defaultBaseLayer: true,
     layer: 'gianetti:ortofoto_gianetti',
     host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    metadata: '/metadata/Ortofoto.html',
     createdAt: new Date(),
     updatedAt: new Date()
 },{
@@ -61,7 +65,8 @@ var dummyData = [{
     layerName: 'Lotes',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Lote',
-    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',    
+    metadata: '/metadata/CAD_Lote.html',
     fields: 'id,geom,distrito,setor,quadra,lote,inscricao_lote',
     allowedFields: 'true,true,false,false,false,false,true',
     queryFields: 'false,false,false,false,false,false,true',
@@ -74,7 +79,8 @@ var dummyData = [{
     layerName: 'Edificações',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Edificacao',
-    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',    
+    metadata: '/metadata/CAD_Edificacao.html',
     fields: 'id,geom,inscricao',
     allowedFields: 'false,false,true',
     queryFields: 'false,false,true',
@@ -87,7 +93,8 @@ var dummyData = [{
     layerName: 'Geocodificações',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Geocodificacao',
-    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',    
+    metadata: '/metadata/CAD_Geocodificacao.html',
     fields: 'id,geom,distrito,setor,quadra,lote,unidade,inscricao,inscricao_anterior,proprietario_,cpf,logradouro_correspondencia,numero_correspondencia,complemento_correspondencia,bairro_correspondencia,cep_correspondencia,ocupacao,utilizacao,patrimonio,imune_isento_iptu,imune_isento_tsu,foto',
     allowedFields: 'false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false',
     queryFields: 'false,false,false,false,false,false,false,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false',
@@ -100,7 +107,8 @@ var dummyData = [{
     layerName: 'Seções de Logradouro',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Secao_Logradouro',
-    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',    
+    metadata: '/metadata/CAD_Secao_Logradouro.html',
     fields: 'id,geom,tipo,nome_logradouro,codigo,secao_e,secao_d',
     allowedFields: 'false,false,true,true,true,true,true',
     queryFields: 'false,false,true,true,true,true,true',
@@ -117,7 +125,8 @@ var dummyData = [{
     queryFields: 'false,false,false,false',
     fieldAlias: ',,,',
     fields: 'id,geom,path_360,path_360_min',
-    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',
+    host: 'http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?',    
+    metadata: '/metadata/PTO_Panoramas.html',
     fieldType: 'int,Point,string,string',
     createdAt: new Date(),
     updatedAt: new Date()

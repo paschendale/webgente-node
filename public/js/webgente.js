@@ -41,6 +41,8 @@ Lc = L.control.groupedLayers(baseMaps,overlayMaps,optionsControl).addTo(map);
 
 /* Lendo camadas da Base de Dados e adicionando ao controle */
 
+var metadata = '<a href="/metadata/CAD_Lote.txt" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>'
+
 function addLayer (layer){
     if (layer.type == 2) { // Adiciona como Overlay
 
@@ -52,10 +54,10 @@ function addLayer (layer){
             maxZoom: 30
         });
         if (layer.defaultBaseLayer == 1) {
-            Lc.addOverlay(l, layer.layerName, layer.group);
+            Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
             l.addTo(map);
         } else {
-            Lc.addOverlay(l, layer.layerName, layer.group);
+            Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
         };
     
     } else { // Adiciona como Base
@@ -68,10 +70,10 @@ function addLayer (layer){
             maxZoom: 30
         })
         if (layer.defaultBaseLayer == 1) {
-            Lc.addBaseLayer(l, layer.layerName);
+            Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
             l.addTo(map);
         } else {
-            Lc.addBaseLayer(l, layer.layerName);
+            Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
         };
     }
 };
@@ -125,3 +127,27 @@ var pesquisas = L.easyButton('<img src="img/lupa.png">', function(){
 
 // 
 L.DomEvent.disableScrollPropagation(L.DomUtil.get('search'));
+
+// Adiciona botão para habilitar ou desabilitar a legenda
+
+var legend = L.easyButton({
+    states: [{
+                stateName: 'legend_enabled',   
+                icon:      '<img src="img/legend_enabled.png">',               
+                title:     'Desabilita a legenda',
+                onClick: function(btn) {
+                    info.state('legend_disabled');
+                    btn.state('legend_disabled');
+                    document.getElementById('webgente-legend-container').style.visibility = "hidden";
+                }
+            }, {
+                stateName: 'legend_disabled',
+                icon:      '<img src="img/legend_disabled.png">',
+                title:     'Habilita a legenda',   
+                onClick: function(btn) {       
+                    info.state('legend_enabled');
+                    btn.state('legend_enabled');
+                    document.getElementById('webgente-legend-container').style.visibility = "visible";
+                }
+        }]
+    }).addTo(map);
