@@ -619,3 +619,27 @@ app.get('/describeLayer/:layer/:host',(req,res) => {
 		res.redirect('/');
 	}
 })
+
+app.get('/wfs/:layer/:format/:properties/:cql_filter',(req,res)=>{
+
+		params = {
+			service: 'WFS',
+			version: '1.3.0',
+			request: 'GetFeature',	
+			typeName: req.params.layer,
+			outputFormat: 'application/json',
+			exceptions: 'application/json',
+			propertyName: req.params.properties,
+			SrsName : 'EPSG:4326',
+			cql_filter: req.params.cql_filter
+		}
+		
+		
+		let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
+	
+		fetch('http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?'+encodeURI(urlWfs), {method : 'GET', headers: headers})
+		.then(res => res.text())
+		.then(data => res.send(data))
+	
+	
+})

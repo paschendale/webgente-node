@@ -118,7 +118,9 @@ var info = L.easyButton({
 
 // Adiciona botao para ativar a ferramenta de pesquisas
 var pesquisas = L.easyButton('<img src="img/lupa.png">', function(){
-    queryLayers();
+    $.get('/listqueryable',function(data){
+    queryLayers(data);
+},'json');
 },'Habilitar ferramenta de pesquisa por atributo nas camadas').addTo(map);
 
 // 
