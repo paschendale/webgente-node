@@ -457,6 +457,7 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 				//restrição de dados		
 				restrictAttributes(data.features,'id','properties')
 				.then(result => {
+					console.log(result)
 					if( result[0]!=undefined){
 						data.features=result
 						res.send(data)

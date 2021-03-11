@@ -151,3 +151,53 @@ var legend = L.easyButton({
                 }
         }]
     }).addTo(map);
+
+/* Geolocalização */
+
+var legend = L.easyButton({
+    states: [{
+            stateName: 'geolocation_disabled',
+            icon:      'fas fa-map-marker-alt',
+            title:     'Onde estou?',   
+            onClick: function(btn) {       
+                info.state('geolocation_enabled');
+                btn.state('geolocation_enabled');
+                map.locate({setView: true, watch: true, maxZoom: 20});
+            }
+        },
+        {
+            stateName: 'geolocation_enabled',   
+            icon:      'fas fa-map-marker-alt',               
+            title:     'Parar de me seguir',
+            onClick: function(btn) {
+                info.state('geolocation_disabled');
+                btn.state('geolocation_disabled');
+                map.stopLocate()
+            }
+        }]
+    }).addTo(map);
+
+locationIcon = L.divIcon({
+    html: '<i class="fas fa-location-arrow fa-4x"></i>',
+    iconSize: [20, 20],
+    className: 'location'
+    });
+
+var locationMarker = null;
+
+function onLocationFound(e) {
+    if (locationMarker !== null) { // Remove marker anterior
+        map.removeLayer(locationMarker);
+    }
+    L.marker(e.latlng).addTo(map)
+    .bindPopup('Você está aqui: ' + e.latlng)
+    console.log('Geolocalização encontrada')
+}
+
+function onLocationError(e) {
+    alert(e.message);
+    console.log('Geolocalização não encontrada')
+}
+
+map.on('locationfound', onLocationFound);
+map.on('locationerror', onLocationError);

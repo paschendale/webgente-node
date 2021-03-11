@@ -65,7 +65,7 @@ var wfsParams={
     properties:keys,
     format:encodeURIComponent('application/json'),
     cql_filter: encodeURI(filter_all[0] ),
-    host: encodeURIComponent('http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?')
+    host: encodeURIComponent('https://mapas.genteufv.com.br/geoserver/gianetti/wms?')
 }
 
 wfsAjax = $.ajax({
@@ -180,7 +180,7 @@ var wfsParams={
     properties:keys,
     format:encodeURIComponent(format),
     cql_filter: encodeURI(filter_all[ndx] ),
-    host: encodeURIComponent('http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?')
+    host: encodeURIComponent('https://mapas.genteufv.com.br/geoserver/gianetti/wms?')
 }
 
 wfsAjax = $.ajax({
