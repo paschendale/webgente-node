@@ -298,12 +298,16 @@ app.get('/listlayers', (req,res) => {
 })
 
 /*Rota para obter a lista dos usuários - Rota protegida pela sessão*/
+/*Os usuários que a rota retorna são todos os diferentes daquele que estar logado no momento*/
 app.get('/listusers', (req,res) => {
 	if(req.session.user){
+		console.log(req.session.user.name);
 		Users.findAll({raw: true,
+		where: { userName:{ [Op.ne]: req.session.user.name }},
 		attributes: ['id', 'userName', 'birthDate', 'email', 'group']})
 		.then(
 			result => {
+				console.log(result);
 				res.send(result)
 			}
 		)
