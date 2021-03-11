@@ -2,7 +2,9 @@
 //Variavel global para armazenar a consulta realizada em listqueryable
 var layersQuerrys=new Array()
 //Variavel global para armazenar a consulta realizada result_search
-var ressultSearch= new Array()
+var resultSearch= new Array()
+//Variavel global para filtros 
+var filter_all= new Array()
 
  function queryLayers (data){  
 //Função que realiza a consulta e gera a lista de camadas com campos pesquisáveis 
@@ -56,60 +58,142 @@ function search_result(index){
 var keys= Object.keys(layersQuerrys[index].queryFields)
 //Adicionando geometria as propriedades
 keys.unshift('geom')
-
+ filter(index,undefined)
+ 
 var wfsParams={
     layer:layersQuerrys[index].layer,
     properties:keys,
-    cql_filter: encodeURI( filter(layersQuerrys[index],undefined))
+    format:encodeURIComponent('application/json'),
+    cql_filter: encodeURI(filter_all[0] ),
+    host: encodeURIComponent('http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?')
 }
 
 wfsAjax = $.ajax({
     url: '/wfs/'+ Object.values(wfsParams).join('/'),
     success: function (data) {
-        data= JSON.parse(data)
-        console.log(data)
+        resultSearch= JSON.parse(data)
+       
+        if( resultSearch.features.length>0){
+        var column=""
+        var line=""
+        for(var ndx=0; resultSearch.features.length>ndx;ndx++){
+            line+="<tr>"
+        for (query of Object.keys(layersQuerrys[index].queryFields)){
+            if(resultSearch.features.length-1 ==ndx){
+            column+=  `<th>`+layersQuerrys[index].queryFields[query].fieldAlias+`</th>`
+            column+= `\n`
+            }
+        
+            line+= `<td> `+resultSearch.features[ndx].properties[query]+` </td>`
+            line+= `\n`
+         
+        }
+            line+= '<td><img src="img/lupa.png" onclick="zoom('+ndx+');"style_filter('+ndx+')"></td>'; 
+            line+= `<td> <img src="img/donwload.png" onclick="filter(`+ndx+`,`+ndx+`);download(1,`+index+`,'shape-zip');"></td> </tr>`
+            //,`+ filter(undefined, resultSearch.features[ndx])+`
+    }
+    //
+    (document.getElementById('search_fields')).innerHTML=`<div id="result_search">
+    <div id="img_close"><img src="img/left-arrow.png" alt="Voltar ao painel de pesquisas" onclick="searchableFields()"></div>
+    <button type="button" class="btn " onclick="download(0,`+index+`,'shape-zip')" ><strong>SHP</strong></button>
+    <button type="button"  class="btn " onclick="download(0,`+index+`, 'csv' ) "><strong>CSV</strong></button>
+    <button type="button"  class="btn " onclick="download(0,`+index+`,'GML3') "><strong>GML</strong></button>
+    <button type="button"  class="btn " onclick="zoom(-1)"> <img src="img/lupa.png" > </button>
+    
+          <table id="tabela_pesquisa">
+                    <tr>
+                        `+column+`
+                    <th>Ver</th>
+                    <th>Download</th>
+                    </tr>
+                    </div>
+                 `+line+`
+            </table>
+        </div>
+    </div>
+    </div>
+    </div>`
+
+    }else{
+        resultSearch=[]
+        (document.getElementById('search_fields')).innerHTML +=  `<div>
+        <td></td><td> Nenhum resultado encontrado</td><td></td> </div>`
+    }
     },
     error: function ( error) {
-        console.log(error)
+        (document.getElementById('search_fields')).innerHTML +=  `<div>
+        <td></td><td> Erro no servidor! </td><td></td> </div>`
     }
 });
 addLayerByName(layersQuerrys[index].layer)
 
 }
 
-function filter(layer_selected, obj_selected){
+
+function filter(index, index_obj){
 var cql_filter=''
 
-if(obj_selected==undefined){    
-for(query in layer_selected.queryFields){
+if(index_obj==undefined){    
+for(query in layersQuerrys[index].queryFields){
     var value = document.getElementById(query).value
     //Adição da condição E para mais de uma propriedade
     cql_filter+=(value!="" & cql_filter!="")? " and ": ""
     
     //Verficação de tipo do campo
-    if(layer_selected.queryFields[query].fieldType=="string"){
+    if(layersQuerrys[index].queryFields[query].fieldType=="string"){
        // cql_filter+= ("("+query+" LIKE "+ "'%"+value+"%')")
         cql_filter+= ("("+query+" LIKE "+ "'%"+value+"%' or "+query+" LIKE "+ "'%"+(value.toLowerCase())+"%' or "+query+" LIKE "+ "'%"+(value.toUpperCase())+"%') " )
     }else{
         cql_filter+=(value!="")? (isNaN(value))? (query+" = 000"):(query+" = "+ ""+value+" "):"";
     }
 }
+filter_all[0]=cql_filter
 }else{
-    cql_filter+="id="+ obj_selected['id']
+    cql_filter+="id="+ resultSearch.features[index_obj]['id']
+    filter_all[1]= cql_filter
 }
-return cql_filter
 }
 
 //Adiciona wms estilizado e com filtro
-function style_filter(){
-
+function style_filter(index){
+    console.log(resultSearch.features[index])
 }
+
+
 //Zoom na área filtrada
-function zoom(){
-
+function zoom(index){
+console.log(resultSearch.features[index])
 }
+
+
 //Parametros wfs para download
-function download(){
+function download(ndx,index,format){
+//Propriedades que podem ser acessadas    
+var keys= Object.keys(layersQuerrys[index].queryFields)
+//Adicionando geometria as propriedades
+keys.unshift('geom')
+
+filter(ndx,index,undefined)
+ 
+var wfsParams={
+    layer:layersQuerrys[index].layer,
+    properties:keys,
+    format:encodeURIComponent(format),
+    cql_filter: encodeURI(filter_all[ndx] ),
+    host: encodeURIComponent('http://nuvem.genteufv.com.br:8080/geoserver/gianetti/wms?')
+}
+
+wfsAjax = $.ajax({
+    url: '/wfs/'+ Object.values(wfsParams).join('/'),
+    success: function (data) {
+        data=JSON.stringify(data)
+       console.log(data)
+    },
+    error: function ( error) {
+        console.log(error)
+    }
+});
+    
 
 }
 

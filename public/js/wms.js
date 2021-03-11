@@ -173,7 +173,7 @@ function getLegendGraphics(layer) {
         layer: layer.options.layers
     }
     
-    console.log(layer)
+    
 
     url = layer._url + Object.entries(params).map(e => e.join('=')).join('&');
 
