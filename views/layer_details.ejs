@@ -88,7 +88,15 @@
                     </div>
                 </div>
            </div>
-       </div>        
+       </div>   
+       <div class="row">
+            <div class="col">
+                <label for="host">Link para Metadados</label>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="metadata" name="metadata" placeholder="/metadata/CAD_Lote.html">
+                </div>
+            </div>
+        </div>       
         <button type="button" id="load-layer-attributes" class="btn btn-dark" onClick="loadLayerAttributes()">
             <span class="fas fa-sync-alt"></span>  Carregar atributos da camada
         </button>
@@ -273,6 +281,7 @@
             $('#group').val("<%=group%>")
             $('#layer').val("<%=layer%>")
             $('#host').val("<%=host%>")
+            $('#metadata').val("<%=metadata%>")
             
             if("<%=type%>" == 1) {
                 $('input:radio[name=type][value=1]').click();

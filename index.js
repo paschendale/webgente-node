@@ -247,7 +247,8 @@ app.route('/layers/edit/:id')
 					defaultBaseLayer: layerData.defaultBaseLayer,
 					allowedFields: layerData.allowedFields,
 					fieldAlias: layerData.fieldAlias,
-					queryFields: layerData.queryFields
+					queryFields: layerData.queryFields,
+					metadata: layerData.metadata
 				})
 			})
 			.catch(() => {
@@ -271,7 +272,8 @@ app.route('/layers/edit/:id')
 					allowedFields:  req.body.allowedFields,
 					queryFields:  req.body.queryFields,
 					fieldAlias:  req.body.fieldAlias,
-					fieldType: req.body.fieldType
+					fieldType: req.body.fieldType,
+					metadata: req.body.metadata
 				},
 				{
 					where: {
@@ -471,7 +473,7 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	})	
 })
 
-//Recolher campos pesquisáveis no banco de dados 
+/* Recolher campos pesquisáveis no banco de dados */
 app.get('/listqueryable',(req,res)=>{
 	Layers.findAll({ 
 		raw: true,
@@ -577,6 +579,34 @@ async function restrictAttributes (features,layerKey,fieldKey){
 	return restrictedData
 }
 
+/* Requisições WFS */
+app.get('/wfs/:layer/:properties/:format/:cql_filter/:host',(req,res)=>{
+
+	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
+
+		params = {
+			service: 'WFS',
+			version: '1.3.0',
+			request: 'GetFeature',	
+			typeName: req.params.layer,
+			outputFormat: req.params.format,
+			exceptions: 'application/json',
+			propertyName: req.params.properties,
+			SrsName : 'EPSG:4326',
+			cql_filter: req.params.cql_filter
+		}
+		
+		var urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
+		
+		fetch(req.params.host+encodeURI(urlWfs), {method : 'GET', headers: headers})
+		.then(res => res.text())
+		.then(data => {
+			console.log('WFS requisition sent, querying layers: ' + req.params.layer)
+			console.log(req.params.host+encodeURI(urlWfs))
+			res.send(data)
+		})
+})
+
 // Transforma uma string true or false em um elemento boolean
 function getBool(val) {
     return !!JSON.parse(String(val).toLowerCase());
@@ -622,28 +652,4 @@ app.get('/describeLayer/:layer/:host',(req,res) => {
 	else{
 		res.redirect('/');
 	}
-})
-
-app.get('/wfs/:layer/:properties/:format/:cql_filter/:host',(req,res)=>{
-
-		params = {
-			service: 'WFS',
-			version: '1.3.0',
-			request: 'GetFeature',	
-			typeName: req.params.layer,
-			outputFormat: req.params.format,
-			exceptions: 'application/json',
-			propertyName: req.params.properties,
-			SrsName : 'EPSG:4326',
-			cql_filter: req.params.cql_filter
-		}
-		
-		
-		var urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
-		
-		fetch(req.params.host+encodeURI(urlWfs), {method : 'GET', headers: headers})
-		.then(res => res.text())
-		.then(data => res.send(data))
-	
-	
 })

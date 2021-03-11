@@ -8,6 +8,28 @@ html, body, #map {
     z-index: -1;
 }
 
+@media print {
+	#map {
+		height: 210mm;
+		width: 297mm;
+		border: 1px solid black;
+	}
+	.leaflet-control-container {
+		visibility: hidden;
+	}
+	#navbar {
+		visibility: hidden;
+	}
+	.webgente-legend-container {
+		margin-bottom: 10px;
+		margin-right: 10px;
+		border: 1px solid #333;
+	}
+	.leaflet-control-scale-line {
+		visibility: visible;
+	}
+}
+
 /* Container do visualizador 360° */
 
 #container-psv {
