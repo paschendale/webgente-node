@@ -6,6 +6,8 @@ O sistema, lançado em 2020, teve sua primeira versão desenvolvida como um fram
 
 De forma a evitar eventuais problemas de compatibilidade entre as duas versões e possibilitar a manutenção de ambas nos usuários que empregam o WebGENTE 1.0 nós optamos por iniciar um novo repositório, dessa forma, o desenvolvimento do WebGENTE 1.0 no Apache HTTP Server e o WebGENTE 2.0 no Node.js pode ocorrer concomitantemente. Caso você tenha interesse na aplicação para o Apache confira o [Repositório do WebGENTE 1.0](https://github.com/paschendale/webgente).
 
+[Demonstração do sistema](https://webgente.genteufv.com.br/)
+
 A equipe de desenvolvimento do WebGENTE é composta por:
 
 ## Coordenação
