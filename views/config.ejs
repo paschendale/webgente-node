@@ -2,31 +2,33 @@
 
 
 <div id='config'>
-    <p>Configurações Gerais do WebGENTE</p>
+    <div class="container shadow-sm" id="container-form-layerdetails">
+    <h3>Configurações Gerais do WebGENTE</h3>
+    <hr>
 
     <form action="/config" method="post">
         <div class="form-group">
-            <label for="serverHost">Endereço do endpoint do Servidor de Mapas</label>
+            <label for="serverHost"><strong>Endereço do endpoint do Servidor de Mapas:</strong></label>
             <input type="text" class="form-control" id="serverHost" name="serverHost" value='<%=serverHost%>'>
         </div>
         <div class="form-group">
-            <label for="serverUser">Usuário no Servidor de Mapas (alteração neste parâmetro exige um restart do sistema)</label>
+            <label for="serverUser"><strong>Usuário no Servidor de Mapas (alteração neste parâmetro exige um restart do sistema):</strong></label>
             <input type="text" class="form-control" id="serverUser" name="serverUser" value='<%=serverUser%>'>
         </div>
         <div class="form-group">
-            <label for="serverPassword">Senha do Usuário no Servidor de Mapas (alteração neste parâmetro exigem um restart do sistema)</label>
+            <label for="serverPassword"><strong>Senha do Usuário no Servidor de Mapas (alteração neste parâmetro exigem um restart do sistema):</strong></label>
             <input type="password" class="form-control" id="serverPassword" name="serverPassword" value='<%=serverPassword%>'>
         </div>
         <div class="form-group">
-            <label for="startupLat">Latitude de Inicialização</label>
+            <label for="startupLat"><strong>Latitude de Inicialização:</strong></label>
             <input type="number" class="form-control" id="startupLat" name="startupLat" value='<%=startupLat%>'>
         </div>
         <div class="form-group">
-            <label for="startupLong">Longitude de Inicialização</label>
+            <label for="startupLong"><strong>Longitude de Inicialização:</strong></label>
             <input type="number" class="form-control" id="startupLong" name="startupLong" value='<%=startupLong%>'>
         </div>
         <div class="form-group">
-            <label for="startupZoom">Zoom de Inicialização</label>
+            <label for="startupZoom"><strong>Zoom de Inicialização:</strong></label>
             <input type="number" class="form-control" id="startupZoom" name="startupZoom" value='<%=startupZoom%>'>
         </div>
         <button class="btn btn-dark" type='submit'>Salvar</button>
@@ -35,6 +37,7 @@
     <script>
         //TODO: Verificar se o usuario e senha do geoserver servem antes do submit!
     </script>
+    </div>
 </div>
 
 <%- include('partials/admin/footer.ejs') %> 

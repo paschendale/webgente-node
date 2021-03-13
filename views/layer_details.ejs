@@ -20,86 +20,92 @@
     -->
 
     <div class="container">
-        <% if (edit) { %> <!-- Switch entre rotas do modo de edição e criação de camadas -->
-            <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST">
-        <% } else { %>
-            <form action="/layers/add" onsubmit="return validateForm()" method="POST">
-        <% } %>
-        <div class="row">
-            <div class="col">
-                <label for="layerName">Nome de exibição da camada no menu de camadas</label>
-                <div class="form-group">
-                    <input type="text" class="form-control" id="layerName" name="layerName" placeholder="Nome de Exibição da Camada">
+        <!--Início do fomrulário-->
+        <div class="container shadow-sm" id="container-form-layerdetails">
+                <% if (edit) { %> <!-- Switch entre rotas do modo de edição e criação de camadas -->
+                    <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST">
+                <% } else { %>
+                    <form action="/layers/add" onsubmit="return validateForm()" method="POST">
+                <% } %>
+                <h3>Adicionando camadas:</h3>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <label for="layerName"><strong>Nome de exibição da camada no menu de camadas:</strong></label>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="layerName" name="layerName" placeholder="Nome de Exibição da Camada">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label for="group"><strong>Grupo da camada no menu de camadas:</strong></label>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="group" name="group" placeholder="Grupo da Camada">
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col">
-                <label for="group">Grupo da camada no menu de camadas</label>
-                <div class="form-group">
-                    <input type="text" class="form-control" id="group" name="group" placeholder="Grupo da Camada">
+                <div class="row">
+                    <div class="col">
+                        <label for="layer"><strong>Nome da camada no servidor de mapas:</strong></label>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="layer" name="layer" placeholder="workspace:camada">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="layer-type"><strong>Tipo de Camada:</strong></label>
+                            <div class="form-check" id="layer-type">
+                                <input class="form-check-input" type="radio" name="type" id="basemap" value="1">
+                                <label class="form-check-label" for="basemap">
+                                    Camada Base
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="type" id="overlay" value="2" checked>
+                                <label class="form-check-label" for="overlay">
+                                    Camada de Sobreposição
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            <div class="row">
+                <div class="col">
+                        <label for="host"><strong>Endereço do servidor de mapas:</strong></label>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?">
+                        </div>
+                </div>
+                <div class="col">
+                        <div class="form-group">
+                            <label for="layer-type"><strong>Camada Padrão?</strong></label>
+                            <div class="form-check" id="default-layer">
+                                <input class="form-check-input" type="radio" name="defaultBaseLayer" id="true" value="1">
+                                <label class="form-check-label" for="true">
+                                    Sim
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="defaultBaseLayer" id="false" value="2" checked>
+                                <label class="form-check-label" for="false">
+                                    Não
+                                </label>
+                            </div>
+                        </div>
+                </div>
+            </div>   
+            <div class="row">
+                    <div class="col">
+                        <label for="host"><strong>Link para Metadados:</strong></label>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="metadata" name="metadata" placeholder="/metadata/CAD_Lote.html">
+                        </div>
+                    </div>
+                </div>       
+                <button type="button" id="load-layer-attributes" class="btn btn-dark" onClick="loadLayerAttributes()">
+                    <span class="fas fa-sync-alt"></span>  Carregar atributos da camada
+                </button>
         </div>
-        <div class="row">
-            <div class="col">
-                <label for="layer">Nome da camada no servidor de mapas</label>
-                <div class="form-group">
-                    <input type="text" class="form-control" id="layer" name="layer" placeholder="workspace:camada">
-                </div>
-            </div>
-            <div class="col">
-                <div class="form-group">
-                    <label for="layer-type">Tipo de Camada</label>
-                    <div class="form-check" id="layer-type">
-                        <input class="form-check-input" type="radio" name="type" id="basemap" value="1">
-                        <label class="form-check-label" for="basemap">
-                            Camada Base
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="type" id="overlay" value="2" checked>
-                        <label class="form-check-label" for="overlay">
-                            Camada de Sobreposição
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-       <div class="row">
-           <div class="col">
-                <label for="host">Endereço do servidor de mapas</label>
-                <div class="form-group">
-                    <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?">
-                </div>
-           </div>
-           <div class="col">
-                <div class="form-group">
-                    <label for="layer-type">Camada Padrão?</label>
-                    <div class="form-check" id="default-layer">
-                        <input class="form-check-input" type="radio" name="defaultBaseLayer" id="true" value="1">
-                        <label class="form-check-label" for="true">
-                            Sim
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="defaultBaseLayer" id="false" value="2" checked>
-                        <label class="form-check-label" for="false">
-                            Não
-                        </label>
-                    </div>
-                </div>
-           </div>
-       </div>   
-       <div class="row">
-            <div class="col">
-                <label for="host">Link para Metadados</label>
-                <div class="form-group">
-                    <input type="text" class="form-control" id="metadata" name="metadata" placeholder="/metadata/CAD_Lote.html">
-                </div>
-            </div>
-        </div>       
-        <button type="button" id="load-layer-attributes" class="btn btn-dark" onClick="loadLayerAttributes()">
-            <span class="fas fa-sync-alt"></span>  Carregar atributos da camada
-        </button>
+        <!--Fim do formulário-->
         <hr>
         <div id="attributes-div" class="collapse">
             <table 
@@ -134,7 +140,9 @@
         <div class="form-group">
             <input type="hidden" class="form-control" id="fieldType" name="fieldType" placeholder="fieldAlias">
         </div>
+        <div id="align5">
         <button type="submit" class="btn btn-dark">Salvar</button>
+        </div>
         </form>
     </div>   
 
@@ -177,9 +185,9 @@
             for (property of properties) {
                 data = {
                     name: property.name,
-                    allowed: '<div class="form-group"><input class="form-check-input allowed-col" type="checkbox" value="true" id="allowed-field-'+n+'"></div>',
-                    queryable: '<div class="form-group"><input class="form-check-input queryable-col" type="checkbox" value="true" id="queryable-field-'+n+'"></div>',
-                    alias: '<div class="form-group"><input type="text" class="form-control alias-col" value="" id="alias-'+n+'"></div>',
+                    allowed: '<div class="form-group" id="align3"><input class="form-check-input allowed-col" type="checkbox" value="true" id="allowed-field-'+n+'"></div>',
+                    queryable: '<div class="form-group" id="align4"><input class="form-check-input queryable-col" type="checkbox" value="true" id="queryable-field-'+n+'"></div>',
+                    alias: '<div class="form-group" id="align5"><input type="text" class="form-control alias-col" value="" id="alias-'+n+'"></div>',
                     type: property.localType
                 }
                 fieldsString.push(property.name) // Criando o campo Fields

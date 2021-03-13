@@ -75,10 +75,11 @@
 
 <body>
 	<%- include('partials/navbar.ejs') %>
-
+  
     <div class="container">
-        <form method="POST" action="/authenticate" style="margin-top: 15%;">
+        <form method="POST" action="/authenticate" style="margin-top: 2%;">
             <center><div id="errorMessage"><%= error %></div></center>
+            <center><img src="/img/decor-dois.png" width="20%" style="margin-bottom: 30px;" id="imgsize"></center>
              <div class = row>
                 <div class="col-xl-4 col-sm-2" id="left">
                 </div>
@@ -88,18 +89,21 @@
                     </div>
                     <div class="form-group">
                         <input type="password" class="form-control" id="senha" name="senha" placeholder="Senha">
-                        <small id="emailHelp" class="form-text text-muted">Mantenha em segurança sua senha</small>
+                        <center><small id="emailHelp" class="form-text text-muted">Mantenha sua senha em segurança</small></center>
                     </div>
                     <button type="submit" class="btn btn-secondary btn-lg btn-block" id="botao" name="botao">Enviar</button>
-                    <br>
-                    <center>or<center>
-                    <br>
 
-                    <div id="login-gmail"></div>
+                    <hr>
+                    <center><p>ou</p></center>
+
+                    <center><div id="login-gmail"></div></center>
 					 
                     <br>
-                    <button type="button" class="btn btn-light btn-sm" data-toggle="modal" data-target="#exampleModalCenter">Esqueceu sua senha ?</button>
-                    <button type="button" class="btn btn-light btn-sm" onclick="recuperarSenhaLogado()">Trocar senha</button>
+
+                    <center><div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#exampleModalCenter">Esqueceu sua senha ?</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm" onclick="recuperarSenhaLogado()">Trocar senha</button>
+                    </div></center>
 
                     <!-- Modal -->
                       <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
