@@ -201,7 +201,12 @@ app.route('/layers/add')
 app.route('/user/add')
 .get((req,res) => {
 		if(req.session.user){
-			res.render("add_user.ejs")
+			res.render("user_details.ejs", {
+				edit: false,
+				userName: null,
+				email: null,
+				birthDate: null
+			})
 		} else {
 			res.redirect('/')
 		}		
@@ -303,7 +308,6 @@ app.get('/listlayers', (req,res) => {
 /*Os usuários que a rota retorna são todos os diferentes daquele que estar logado no momento*/
 app.get('/listusers', (req,res) => {
 	if(req.session.user){
-		console.log(req.session.user.name);
 		Users.findAll({raw: true,
 		where: { userName:{ [Op.ne]: req.session.user.name }},
 		attributes: ['id', 'userName', 'birthDate', 'email', 'group']})
@@ -336,6 +340,55 @@ app.get('/users', (req, res) => {
 	}	
 })
 
+/**/
+app.route('/users/edit/:id')
+.get((req,res) => {	
+	if(req.session.user){
+		Users.findOne({
+			raw:true,
+			where: {
+				id: req.params.id
+			}
+		})
+		.then(UserData => {
+			const dateFormat = UserData.birthDate.replace(/(\d*)-(\d*)-(\d*).*/, '$1-$2-$3');
+			res.render('user_details.ejs',{	
+				edit: true,
+				id: UserData.id,
+				userName: UserData.userName,
+				email: UserData.email,
+				birthDate: dateFormat
+			})
+		})
+		.catch(() => {
+			res.redirect('/users')
+		})			
+	} else {
+		res.redirect('/')
+	}
+})
+.post((req,res) => { 
+	if(req.session.user){
+		Users.update(
+			{
+				userName: req.body.userName,
+				email: req.body.email,
+				birthDate: req.body.birthDate
+			},
+			{
+				where: {
+					id: req.params.id
+				}
+			}
+			).then(console.log('Succesfully inserted data into database!', req.body))
+			.then(res.render("users"))
+			.catch((error) => {console.log('Failed to update database. '+error)})
+	} 
+	else {
+		res.redirect('/')
+	}
+})
+
 /* Rota para excluir um usuário do sistema - Rota protegida pela sessão */
 app.route('/users/delete/:id')
 	.get((req,res) => {	
@@ -346,7 +399,7 @@ app.route('/users/delete/:id')
 					id: req.params.id
 				}
 			})
-			.catch(() => {
+			.then(() => {
 				res.redirect('/users')
 			})			
 		} else {

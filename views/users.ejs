@@ -37,10 +37,10 @@
     });
   
     function TableActions(value, row, index, field) {
-            return ['<button class="btn btn-dark btn-custom" id="removeUser" onclick="removeUser('+row.id+')"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" onclick="editUser()"> <i class="fas fa-edit"></i></button>'].join('');
+            return ['<button class="btn btn-dark btn-custom" id="removeUser" onclick="removeUser('+row.id+')"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" onclick="editUser('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
     }
-    function addNewUser() {
-      alert('em breve: adicionar user')
+    function editUser(index) {
+      window.location.href = '/users/edit/'+index
       //todo: desenvolver função para chamar novo user
     }
     function removeUser(index){
