@@ -4,6 +4,7 @@
 <!-- Plugins do Leaflet -->
 <script src="/js/leaflet/plugins/Leaflet.GroupedLayerControl/leaflet.groupedlayercontrol.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
 <!-- Bootstrap e dependências -->
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
@@ -14,12 +15,13 @@
 <script src="/js/webgente.js"></script>
 <script src="/js/wms.js"></script>
 <script src="/js/search.js"></script>
+<script src="/js/draw.js"></script>
 
 <!-- Código fonte de PhotoSphereViewer-->
 <script src="js/psv/photo-sphere-viewer.min.js"></script>
 <script src="js/psv/three.min.js"></script>
 
-<!-- Redimensiona a div do mapa para o espaço vertical disponivel em tela -->
+<!-- Redimensiona a div do mapa para o espaço vertical disponivel em tela e habilita/desabilita botão da legenda com base no tamanho da tela-->
 <script type="application/javascript">
     function resizeMap () {
         var map = document.getElementById('map');
@@ -31,17 +33,15 @@
 
     function disableLegendContainer () {
         if ($(window).width() < 1000) {
-            document.getElementById('webgente-legend-container').style.visibility = "hidden";
-        } else {
-            document.getElementById('webgente-legend-container').style.visibility = "visible";
-        }
+            document.getElementById('legend-button').click();
+        } 
     }
 
     $(document).ready(disableLegendContainer);
-    window.onresize = disableLegendContainer;
+    $(window).resize(disableLegendContainer);
     
     $(document).ready(resizeMap);
-    window.onresize = resizeMap;    
+    $(window).resize(resizeMap);    
     </script>
 
 </html>

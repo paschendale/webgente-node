@@ -20,7 +20,7 @@ const Layers = connection.define('Layers', {
     },
     attribution: {
         type: Sequelize.STRING,
-        defaultValue: '<a href="https://www.github.com/paschendale/webgente" target="_blank">WebGENTE</a>'
+        defaultValue: '<a href="https://www.github.com/paschendale/webgente-node" target="_blank">WebGENTE</a>'
     },
     defaultBaseLayer: {
         type: Sequelize.BOOLEAN

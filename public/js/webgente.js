@@ -131,6 +131,7 @@ L.DomEvent.disableScrollPropagation(L.DomUtil.get('search'));
 // Adiciona botão para habilitar ou desabilitar a legenda
 
 var legend = L.easyButton({
+    id: 'legend-button',
     states: [{
                 stateName: 'legend_enabled',   
                 icon:      '<img src="img/legend_enabled.png">',               
@@ -201,3 +202,27 @@ function onLocationError(e) {
 
 map.on('locationfound', onLocationFound);
 map.on('locationerror', onLocationError);
+
+// Adiciona botão para habilitar ou desabilitar ferramentas de medição
+
+var legend = L.easyButton({
+    states: [{
+                stateName: 'measurement_enabled',   
+                icon:      'fas fa-ruler',               
+                title:     'Habilita as Ferramentas de Medição',
+                onClick: function(btn) {
+                    info.state('measurement_disabled');
+                    btn.state('measurement_disabled');
+                    document.getElementsByClassName('leaflet-draw-toolbar')[0].style.visibility = 'visible'
+                }
+            }, {
+                stateName: 'measurement_disabled',
+                icon:      'fas fa-ruler',
+                title:     'Desabilita as Ferramentas de Medição',   
+                onClick: function(btn) {       
+                    info.state('measurement_enabled');
+                    btn.state('measurement_enabled');
+                    document.getElementsByClassName('leaflet-draw-toolbar')[0].style.visibility = 'hidden'
+                }
+        }]
+    }).addTo(map);
