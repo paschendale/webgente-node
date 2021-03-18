@@ -31,7 +31,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
     if (type === 'polygon') {
         area = L.GeometryUtil.geodesicArea(e.layer.getLatLngs()[0]);
         layer.bindPopup('Area: ' + area.toFixed(4) + 'm²');
-        Lc.addOverlay(layer,drawCounter + ': Polígono ' + downloadShp(layer.toGeoJSON()),'Desenhos do Usuário')
+        Lc.addOverlay(layer,drawCounter + ': Polígono ' + downloadShp(layer.toGeoJSON(),'webgente-user-feature-'+drawCounter),'Desenhos do Usuário')
     } else if (type === 'polyline') {
         tempLatLng = null;
         totalDistance = 0.00000;
@@ -45,7 +45,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
         });
 
         layer.bindPopup('Distância: ' +(totalDistance).toFixed(2) + ' metros');
-        Lc.addOverlay(layer,drawCounter + ': Linha '+ downloadShp(layer.toGeoJSON()),'Desenhos do Usuário')
+        Lc.addOverlay(layer,drawCounter + ': Linha '+ downloadShp(layer.toGeoJSON(),'webgente-user-feature-'+drawCounter),'Desenhos do Usuário')
     }
 
     drawCounter++;
@@ -66,13 +66,13 @@ map.on(L.Draw.Event.EDITED, function (e) {
 document.getElementsByClassName('leaflet-draw-toolbar')[0].style.visibility = 'hidden' 
 
 /* Cria botão de download de um shape desenhado no menu de controle de camadas */
-function downloadShp (geojson) {
+function downloadShp (geojson,placeholder) {
 
     /* Este método esta retornando um erro, alguns users sugeriram alterações no código fonte de shp-write aqui: https://github.com/mapbox/shp-write/issues/48
     return '<a onClick="shpwrite.download(\'' + geojson + '\')" target="_blank" style="outline: none;"><i class="fas fa-cloud-download-alt"></i></a>'
     Deixei implementado um método para download do GeoJSON, enquanto nao resolver o problema
     */
     geojson = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geojson));
-    return '<a href="data:' + geojson + '" download="webgente-user-feature-'+drawCounter+'.geojson" target="_blank" style="outline: none;"><i class="fas fa-cloud-download-alt"></i></a>'
+    return '<a href="data:' + geojson + '" download="'+placeholder+'.geojson" target="_blank" style="outline: none;"><i class="fas fa-cloud-download-alt"></i></a>'
 
 }

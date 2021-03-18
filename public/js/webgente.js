@@ -94,15 +94,41 @@ var home = L.easyButton('<img src="img/home.png">', function(btn, map){
     map.setView(initial,initView.zoom);
 },'Voltar o mapa à vista inicial').addTo(map);
 
+// Adiciona o botao de seleção de feições
+var select= false; // Variável que habilita o GetFeatureInfo
+var selectButton = L.easyButton({
+    states: [{
+                stateName: 'select_disabled',
+                icon:      'fas fa-hand-pointer',
+                title:     'Habilita a ferramenta de seleção de feições das camadas ligadas',   
+                onClick: function(btn) {       
+                    selectButton.state('select_enabled');
+                    btn.state('select_enabled');  
+                    select=true;              
+                    Lc.addOverlay(selectedLayers,'<a id="selected-download-link" href="" download="webgente-selected-data.geojson" target="_blank" style="outline: none;">Download <i class="fas fa-cloud-download-alt"></i></a>','Dados selecionados')
+                }
+            }, {
+                stateName: 'select_enabled',   
+                icon:      'far fa-hand-pointer',               
+                title:     'Desabilita a ferramenta de seleção de feições das camadas ligadas',
+                onClick: function(btn) {
+                    selectButton.state('select_disabled');
+                    btn.state('select_disabled'); 
+                    select=false;   
+                    Lc.removeLayer(selectedLayers)
+                }
+        }]
+    }).addTo(map);
+
 // Adiciona o botao de visualizar informacoes com dois estados
 var gfi = false; // Variável que habilita o GetFeatureInfo
-var info = L.easyButton({
+var infoButton = L.easyButton({
     states: [{
                 stateName: 'info_disabled',
                 icon:      '<img src="img/info_enabled.png">',
                 title:     'Habilita a ferramenta de visualização de informações das camadas',   
                 onClick: function(btn) {       
-                    info.state('info_enabled');
+                    infoButton.state('info_enabled');
                     btn.state('info_enabled');  
                     gfi=true;  
                 }
@@ -111,7 +137,7 @@ var info = L.easyButton({
                 icon:      '<img src="img/info_disabled.png">',               
                 title:     'Desabilita a ferramenta de visualização de informações das camadas',
                 onClick: function(btn) {
-                    info.state('info_disabled');
+                    infoButton.state('info_disabled');
                     btn.state('info_disabled'); 
                     gfi=false;   
                 }
@@ -130,14 +156,14 @@ L.DomEvent.disableScrollPropagation(L.DomUtil.get('search'));
 
 // Adiciona botão para habilitar ou desabilitar a legenda
 
-var legend = L.easyButton({
+var legendButton = L.easyButton({
     id: 'legend-button',
     states: [{
                 stateName: 'legend_enabled',   
                 icon:      '<img src="img/legend_enabled.png">',               
                 title:     'Desabilita a legenda',
                 onClick: function(btn) {
-                    info.state('legend_disabled');
+                    legendButton.state('legend_disabled');
                     btn.state('legend_disabled');
                     document.getElementById('webgente-legend-container').style.visibility = "hidden";
                 }
@@ -146,7 +172,7 @@ var legend = L.easyButton({
                 icon:      '<img src="img/legend_disabled.png">',
                 title:     'Habilita a legenda',   
                 onClick: function(btn) {       
-                    info.state('legend_enabled');
+                    legendButton.state('legend_enabled');
                     btn.state('legend_enabled');
                     document.getElementById('webgente-legend-container').style.visibility = "visible";
                 }
@@ -155,13 +181,13 @@ var legend = L.easyButton({
 
 /* Geolocalização */
 
-var legend = L.easyButton({
+var geolocationButton = L.easyButton({
     states: [{
             stateName: 'geolocation_disabled',
             icon:      'fas fa-map-marker-alt',
             title:     'Onde estou?',   
             onClick: function(btn) {       
-                info.state('geolocation_enabled');
+                geolocationButton.state('geolocation_enabled');
                 btn.state('geolocation_enabled');
                 map.locate({setView: true, watch: true, maxZoom: 20});
             }
@@ -171,18 +197,12 @@ var legend = L.easyButton({
             icon:      'fas fa-map-marker-alt',               
             title:     'Parar de me seguir',
             onClick: function(btn) {
-                info.state('geolocation_disabled');
+                geolocationButton.state('geolocation_disabled');
                 btn.state('geolocation_disabled');
                 map.stopLocate()
             }
         }]
     }).addTo(map);
-
-locationIcon = L.divIcon({
-    html: '<i class="fas fa-location-arrow fa-4x"></i>',
-    iconSize: [20, 20],
-    className: 'location'
-    });
 
 var locationMarker = null;
 
@@ -205,13 +225,13 @@ map.on('locationerror', onLocationError);
 
 // Adiciona botão para habilitar ou desabilitar ferramentas de medição
 
-var legend = L.easyButton({
+var measurementButton = L.easyButton({
     states: [{
                 stateName: 'measurement_enabled',   
                 icon:      'fas fa-ruler',               
                 title:     'Habilita as Ferramentas de Medição',
                 onClick: function(btn) {
-                    info.state('measurement_disabled');
+                    measurementButton.state('measurement_disabled');
                     btn.state('measurement_disabled');
                     document.getElementsByClassName('leaflet-draw-toolbar')[0].style.visibility = 'visible'
                 }
@@ -220,7 +240,7 @@ var legend = L.easyButton({
                 icon:      'fas fa-ruler',
                 title:     'Desabilita as Ferramentas de Medição',   
                 onClick: function(btn) {       
-                    info.state('measurement_enabled');
+                    measurementButton.state('measurement_enabled');
                     btn.state('measurement_enabled');
                     document.getElementsByClassName('leaflet-draw-toolbar')[0].style.visibility = 'hidden'
                 }

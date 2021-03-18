@@ -527,6 +527,41 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 	})	
 })
 
+/* Seleção de feições */
+app.get('/select/:layer/:lat1/:lng1/:lat2/:lng2/:srs',(req,res) => {
+
+	params = {	
+		service: 'WFS',
+		version: '2.0.0',
+		request: 'GetFeature',
+		typeNames: req.params.layer,         
+		outputformat: 'application/json',
+		srsName:'EPSG:4326',
+		bbox: req.params.lat1+','+req.params.lng1+','+req.params.lat2+','+req.params.lng2+','+req.params.srs,
+		count: 1
+	}
+
+	url = 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?' + Object.entries(params).map(e => e.join('=')).join('&');
+
+	fetch(url, {method : 'GET', headers: headers})
+	.then(res => res.text())
+	.then(data => {
+		console.log('WFS requisition sent: ' + url)
+		data = removeProperties(data)
+		res.send(data)
+	})
+	.catch(error => res.send(error))
+
+	function removeProperties(data) {
+		data = JSON.parse(data)
+		for (i = 0; i < data.features.length; i++) {
+			data.features[i].properties = []
+		}
+		data = JSON.stringify(data)
+		return data
+	}
+})
+
 /* Recolher campos pesquisáveis no banco de dados */
 app.get('/listqueryable',(req,res)=>{
 	Layers.findAll({ 

@@ -56,7 +56,6 @@ function getFeatureInfo(e) {
         gfiAjax = $.ajax({
             url: '/gfi/'+ Object.values(params).join('/'),
             success: function (data, status, xhr) {
-
                 popup
                     .setLatLng(e.latlng)
                     .setContent(JSONcontentParser(data));
@@ -171,9 +170,7 @@ function getLegendGraphics(layer) {
         version: layer.wmsParams.version,
         format: 'image/png',
         layer: layer.options.layers
-    }
-    
-    
+    } 
 
     url = layer._url + Object.entries(params).map(e => e.join('=')).join('&');
 
