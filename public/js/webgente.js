@@ -15,7 +15,7 @@ L.control.scale(optionsScale).addTo(map);
 
 var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-});
+}).addTo(map);
 
 var google = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
     maxZoom: 20,
@@ -105,7 +105,7 @@ var selectButton = L.easyButton({
                     selectButton.state('select_enabled');
                     btn.state('select_enabled');  
                     select=true;              
-                    Lc.addOverlay(selectedLayers,'<a id="selected-download-link" href="" download="webgente-selected-data.geojson" target="_blank" style="outline: none;">Download <i class="fas fa-cloud-download-alt"></i></a>','Dados selecionados')
+                    Lc.addOverlay(selectedLayers,'<a id="selected-download-link" href="" download="webgente-selected-data-'+new Date().getTime()+'.geojson" target="_blank" style="outline: none;">Download <i class="fas fa-cloud-download-alt"></i></a>','Dados selecionados')
                 }
             }, {
                 stateName: 'select_enabled',   

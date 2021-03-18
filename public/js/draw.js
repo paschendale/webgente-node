@@ -31,7 +31,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
     if (type === 'polygon') {
         area = L.GeometryUtil.geodesicArea(e.layer.getLatLngs()[0]);
         layer.bindPopup('Area: ' + area.toFixed(4) + 'm²');
-        Lc.addOverlay(layer,drawCounter + ': Polígono ' + downloadShp(layer.toGeoJSON(),'webgente-user-feature-'+drawCounter),'Desenhos do Usuário')
+        Lc.addOverlay(layer,drawCounter + ': Polígono ' + downloadShp(layer.toGeoJSON(),'webgente-user-feature-'+drawCounter+'-'+new Date().getTime()),'Desenhos do Usuário')
     } else if (type === 'polyline') {
         tempLatLng = null;
         totalDistance = 0.00000;
@@ -45,7 +45,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
         });
 
         layer.bindPopup('Distância: ' +(totalDistance).toFixed(2) + ' metros');
-        Lc.addOverlay(layer,drawCounter + ': Linha '+ downloadShp(layer.toGeoJSON(),'webgente-user-feature-'+drawCounter),'Desenhos do Usuário')
+        Lc.addOverlay(layer,drawCounter + ': Linha '+ downloadShp(layer.toGeoJSON(),'webgente-user-feature-'+drawCounter+'-'+new Date().getTime()),'Desenhos do Usuário')
     }
 
     drawCounter++;

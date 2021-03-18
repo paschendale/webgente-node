@@ -3,6 +3,10 @@ map.addEventListener('click',getFeature);
 
 selectedLayers = L.geoJSON().addTo(map);
 
+selectedLayers.on('click', function(e){
+    map.fitBounds(selectedLayers.getBounds())
+});
+
 function getFeature(e) {
 
     if (select) {
@@ -22,7 +26,6 @@ function getFeature(e) {
                 srs: 'urn:ogc:def:crs:EPSG:4326'
             }
             url = '/select/' + Object.values(params).join('/');
-            console.log(params)
             $.ajax({
                 url: url,
                 success: function (data, status, xhr) {
@@ -40,6 +43,10 @@ function loadFeatureAsLayer (data) {
     data = JSON.parse(data)
     selectedLayers.addData(data)
     updateSelectedDownloadLink() // Atualiza o link de download após a exibição das feições selecionadas
+
+    if(data.features.length != 0){  
+        map.fitBounds(selectedLayers.getBounds())
+    }
 }
 
 function updateSelectedDownloadLink () {
@@ -54,5 +61,6 @@ function updateSelectedDownloadLink () {
     geojson = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geojson));
 
     $('#selected-download-link').attr('href','data:' + geojson)
+    $('#selected-download-link').attr('download','webgente-selected-data-'+new Date().getTime()+'.geojson')
 
 }

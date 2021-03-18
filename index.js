@@ -253,7 +253,8 @@ app.route('/layers/edit/:id')
 					allowedFields: layerData.allowedFields,
 					fieldAlias: layerData.fieldAlias,
 					queryFields: layerData.queryFields,
-					metadata: layerData.metadata
+					metadata: layerData.metadata,
+					publicLayer: layerData.publicLayer
 				})
 			})
 			.catch(() => {
@@ -278,7 +279,8 @@ app.route('/layers/edit/:id')
 					queryFields:  req.body.queryFields,
 					fieldAlias:  req.body.fieldAlias,
 					fieldType: req.body.fieldType,
-					metadata: req.body.metadata
+					metadata: req.body.metadata,
+					publicLayer: req.body.publicLayer
 				},
 				{
 					where: {
@@ -295,13 +297,25 @@ app.route('/layers/edit/:id')
 
 /* Rota para obtênção de lista de camadas */
 app.get('/listlayers', (req,res) => {
-	Layers.findAll({raw: true,
-	attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias', 'metadata']})
-	.then(
-		result => {
-			res.send(result)
-		}
-	)
+	if(req.session.user){
+		Layers.findAll({raw: true,
+		attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias', 'metadata']})
+		.then(
+			result => {
+				res.send(result)
+			}
+		)
+	}
+	else{
+		Layers.findAll({raw: true,
+		where: { publicLayer: 1 },
+		attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias', 'metadata']})
+		.then(
+			result => {
+				res.send(result)
+			}
+		)
+	}
 })
 
 /*Rota para obter a lista dos usuários - Rota protegida pela sessão*/

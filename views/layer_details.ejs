@@ -37,9 +37,47 @@
                         </div>
                     </div>
                     <div class="col">
+                        <div class="form-group">
+                            <label for="public-layer"><strong>Camada Pública:</strong></label>
+                            <br>
+                            <div class="form-check" id="public-layer">
+                                <input class="form-check-input" type="radio" name="publicLayer" value="1" checked>
+                                <label class="form-check-label" for="true">
+                                    Sim
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="publicLayer" value="0">
+                                <label class="form-check-label" for="false">
+                                    Não
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
                         <label for="group"><strong>Grupo da camada no menu de camadas:</strong></label>
                         <div class="form-group">
                             <input type="text" class="form-control" id="group" name="group" placeholder="Grupo da Camada">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="layer-type"><strong>Tipo de Camada:</strong></label>
+                            <br>
+                            <div class="form-check" id="layer-type">
+                                <input class="form-check-input" type="radio" name="type" id="basemap" value="1">
+                                <label class="form-check-label" for="basemap">
+                                    Camada Base
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="type" id="overlay" value="0" checked>
+                                <label class="form-check-label" for="overlay">
+                                    Camada de Sobreposição
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -52,45 +90,29 @@
                     </div>
                     <div class="col">
                         <div class="form-group">
-                            <label for="layer-type"><strong>Tipo de Camada:</strong></label>
-                            <div class="form-check" id="layer-type">
-                                <input class="form-check-input" type="radio" name="type" id="basemap" value="1">
-                                <label class="form-check-label" for="basemap">
-                                    Camada Base
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="type" id="overlay" value="2" checked>
-                                <label class="form-check-label" for="overlay">
-                                    Camada de Sobreposição
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <div class="row">
-                <div class="col">
-                        <label for="host"><strong>Endereço do servidor de mapas:</strong></label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?">
-                        </div>
-                </div>
-                <div class="col">
-                        <div class="form-group">
-                            <label for="layer-type"><strong>Camada Padrão?</strong></label>
+                            <label for="default-layer"><strong>Camada Padrão:</strong></label>
+                            <br>
                             <div class="form-check" id="default-layer">
-                                <input class="form-check-input" type="radio" name="defaultBaseLayer" id="true" value="1">
+                                <input class="form-check-input" type="radio" name="defaultBaseLayer" value="1">
                                 <label class="form-check-label" for="true">
                                     Sim
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="defaultBaseLayer" id="false" value="2" checked>
+                                <input class="form-check-input" type="radio" name="defaultBaseLayer" value="0" checked>
                                 <label class="form-check-label" for="false">
                                     Não
                                 </label>
                             </div>
                         </div>
+                    </div>  
+                </div>
+            <div class="row">
+                <div class="col">
+                    <label for="host"><strong>Endereço do servidor de mapas:</strong></label>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?">
+                    </div>
                 </div>
             </div>   
             <div class="row">
@@ -297,6 +319,9 @@
             if("<%=defaultBaseLayer%>" == 1) {
                 $('input:radio[name=defaultBaseLayer][value=1]').click();
             }  
+            if("<%=publicLayer%>" == 0) {
+                $('input:radio[name=publicLayer][value=0]').click();
+            }
 
             loadLayerAttributes() // Carrega a tabela de atributos da Layer
                        

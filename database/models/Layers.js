@@ -29,6 +29,9 @@ const Layers = connection.define('Layers', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    publicLayer: {
+        type: Sequelize.BOOLEAN
+    },
     fields : {
         type: Sequelize.STRING
     },
@@ -55,6 +58,7 @@ var dummyData = [{
     layerName: 'Ortofoto',
     group: 'Camadas Base',
     defaultBaseLayer: true,
+    publicLayer: true,
     layer: 'gianetti:ortofoto_gianetti',
     host: 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?',
     metadata: '/metadata/Ortofoto.html',
@@ -65,6 +69,7 @@ var dummyData = [{
     layerName: 'Lotes',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Lote',
+    publicLayer: true,
     host: 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?',    
     metadata: '/metadata/CAD_Lote.html',
     fields: 'id,geom,distrito,setor,quadra,lote,inscricao_lote',
@@ -79,6 +84,7 @@ var dummyData = [{
     layerName: 'Edificações',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Edificacao',
+    publicLayer: true,
     host: 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?',    
     metadata: '/metadata/CAD_Edificacao.html',
     fields: 'id,geom,inscricao',
@@ -93,6 +99,7 @@ var dummyData = [{
     layerName: 'Geocodificações',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Geocodificacao',
+    publicLayer: false,
     host: 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?',    
     metadata: '/metadata/CAD_Geocodificacao.html',
     fields: 'id,geom,distrito,setor,quadra,lote,unidade,inscricao,inscricao_anterior,proprietario_,cpf,logradouro_correspondencia,numero_correspondencia,complemento_correspondencia,bairro_correspondencia,cep_correspondencia,ocupacao,utilizacao,patrimonio,imune_isento_iptu,imune_isento_tsu,foto',
@@ -107,6 +114,7 @@ var dummyData = [{
     layerName: 'Seções de Logradouro',
     group: 'Cadastro',
     layer: 'gianetti:CAD_Secao_Logradouro',
+    publicLayer: true,
     host: 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?',    
     metadata: '/metadata/CAD_Secao_Logradouro.html',
     fields: 'id,geom,tipo,nome_logradouro,codigo,secao_e,secao_d',
@@ -120,6 +128,7 @@ var dummyData = [{
     type: 2 ,
     layerName: 'Panoramas 360°',
     group: 'Panoramas 360°',
+    publicLayer: true,
     layer: 'gianetti:PTO_Panoramas',
     allowedFields: 'false,false,false,true',
     queryFields: 'false,false,false,false',
