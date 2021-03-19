@@ -24,10 +24,11 @@
         <div class="container shadow-sm" id="container-form-layerdetails">
                 <% if (edit) { %> <!-- Switch entre rotas do modo de edição e criação de camadas -->
                     <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST">
+                    <h3>Edição de Camada</h3>
                 <% } else { %>
                     <form action="/layers/add" onsubmit="return validateForm()" method="POST">
+                    <h3>Adição de Camada</h3>
                 <% } %>
-                <h3>Adicionando camadas:</h3>
                 <hr>
                 <div class="row">
                     <div class="col">
@@ -73,7 +74,7 @@
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="type" id="overlay" value="0" checked>
+                                <input class="form-check-input" type="radio" name="type" id="overlay" value="2" checked>
                                 <label class="form-check-label" for="overlay">
                                     Camada de Sobreposição
                                 </label>
@@ -99,7 +100,7 @@
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="defaultBaseLayer" value="0" checked>
+                                <input class="form-check-input" type="radio" name="defaultBaseLayer" value="2" checked>
                                 <label class="form-check-label" for="false">
                                     Não
                                 </label>

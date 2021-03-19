@@ -14,13 +14,13 @@ L.control.scale(optionsScale).addTo(map);
 /* Camadas base do OpenStreetMaps e Google */
 
 var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' 
+});
 
 var google = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
     maxZoom: 20,
     subdomains:['mt0','mt1','mt2','mt3']
-});
+}).addTo(map);
 
 /* Inicializa o Controle de Camadas com as Camadas Base Estáticas */
 
@@ -145,11 +145,31 @@ var infoButton = L.easyButton({
     }).addTo(map);
 
 // Adiciona botao para ativar a ferramenta de pesquisas
-var pesquisas = L.easyButton('<img src="img/lupa.png">', function(){
-    $.get('/listqueryable',function(data){
-    queryLayers(data);
-},'json');
-},'Habilitar ferramenta de pesquisa por atributo nas camadas').addTo(map);
+var searchButton = L.easyButton({
+    id: 'search-button',
+    states: [{
+                stateName: 'search_enabled',   
+                icon:      '<img src="img/search_enabled.png">', // Adicionar icone da pesquisa ativada           
+                title:     'Habilita ferramenta de pesquisa por atributos das camadas',
+                onClick: function(btn) {
+                    searchButton.state('search_disabled');
+                    btn.state('search_disabled');
+                    $.get('/listqueryable',function(data){
+                        queryLayers(data);
+                    },'json');
+                    // TODO: .show na div de pesquisa
+                }
+            }, {
+                stateName: 'search_disabled',
+                icon:      '<img src="img/search_disabled.png">', // Adicionar icone da pesquisa desativada
+                title:     'Desabilita ferramenta de pesquisa por atributos das camadas',   
+                onClick: function(btn) {       
+                    searchButton.state('search_enabled');
+                    btn.state('search_enabled');
+                    // TODO: .hide na div de pesquisa
+                }
+        }]
+    }).addTo(map);
 
 // 
 L.DomEvent.disableScrollPropagation(L.DomUtil.get('search'));
