@@ -149,7 +149,7 @@ var searchButton = L.easyButton({
     id: 'search-button',
     states: [{
                 stateName: 'search_enabled',   
-                icon:      '<img src="img/search_enabled.png">', // Adicionar icone da pesquisa ativada           
+                icon:      '<img src="/img/search_enabled.png">', // Adicionar icone da pesquisa ativada           
                 title:     'Habilita ferramenta de pesquisa por atributos das camadas',
                 onClick: function(btn) {
                     searchButton.state('search_disabled');
@@ -161,7 +161,7 @@ var searchButton = L.easyButton({
                 }
             }, {
                 stateName: 'search_disabled',
-                icon:      '<img src="img/search_disabled.png">', // Adicionar icone da pesquisa desativada
+                icon:      '<img src="/img/search_disabled.png">', // Adicionar icone da pesquisa desativada
                 title:     'Desabilita ferramenta de pesquisa por atributos das camadas',   
                 onClick: function(btn) {       
                     searchButton.state('search_enabled');

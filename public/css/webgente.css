@@ -45,9 +45,11 @@ html, body, #map {
 	margin-bottom: 25px;
 	margin-right: 10px;
 	background-color: #FFFFFF;
-	border: #333;
+	border-color: rgba(73, 73, 73, 0.377);
+	border-style: solid;
 	border-radius: 10px;
 }
+
 
 .webgente-legend-graphic-container {
 	width: auto;
