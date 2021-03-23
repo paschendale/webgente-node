@@ -8,6 +8,10 @@
 
     <form action="/config" method="post" novalidate>
         <div class="form-group">
+            <label for="cityName"><strong>Nome do Município (Título do WebGENTE):</strong></label>
+            <input type="text" class="form-control" id="cityName" name="cityName" value='<%=cityName%>'>
+        </div>
+        <div class="form-group">
             <label for="serverHost"><strong>Endereço do endpoint do Servidor de Mapas:</strong></label>
             <input type="text" class="form-control" id="serverHost" name="serverHost" value='<%=serverHost%>'>
         </div>

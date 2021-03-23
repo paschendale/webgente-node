@@ -29,6 +29,9 @@ const Config = connection.define('config', {
     startupZoom : {
         type: Sequelize.DOUBLE,
         allowNull: false
+    },
+    cityName: {
+        type: Sequelize.STRING
     }
 })
 

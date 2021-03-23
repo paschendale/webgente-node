@@ -5,7 +5,14 @@
   </button>
 
   <a class="navbar-brand" href="/"><img src="img/webgente-fundo-escuro-120x40.png" alt=""></a>
+  
+  <% if (cityName != undefined) { %>
 
+    <span class="navbar-text">
+      <%=cityName%>
+    </span>
+
+  <%} %> 
   <% if(buttons == true){ %>
       <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
       <ul class="navbar-nav mr-auto mt-2 mt-lg-0">

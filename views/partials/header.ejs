@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
-    <title>WebGENTE</title>
+   
+    <% if (cityName != undefined) { %>
+
+        <title>
+          WebGENTE - <%=cityName%>
+        </title>
+    
+    <%} else { %>
+
+        <title>WebGENTE</title>
+
+    <% } %>     
     <link rel="icon" href="img/favicon.ico">    
 
     <!--Icones-->

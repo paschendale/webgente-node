@@ -20,13 +20,15 @@ A chave de autenticação após 'Basic' é uma codificação Base64 no formato u
 Sendo um usuário do Geoserver configurado adequadamente para acesso aos serviços */
 
 var headers = {};
+var cityName;
 
 Config.findOne({
 	raw:true,
-	attributes: ['serverUser','serverPassword']
+	attributes: ['serverUser','serverPassword','cityName']
 }).then(results => {
 	headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
 	console.log(headers.authorization)
+	cityName = results.cityName;
 })
 
 /* Estrutura de pastas do WebGENTE:
@@ -69,7 +71,7 @@ app.use(bodyParser.json());
 /* Inicializando o servidor HTTP */
 port = 3000; // Porta de inicialização do servidor
 app.listen(port,() => {
-    console.log('WebGENTE started at http://localhost:'+port)
+    console.log('WebGENTE de '+cityName+' started at http://localhost:'+port)
 });
 
 /* Habilitando CORS headers para todas as respostas dadas pelo backend */
@@ -89,7 +91,8 @@ app.get('/',(req,res) => {
 			buttons: buttons,
 			startupLat: results.startupLat,
 			startupLong: results.startupLong,
-			startupZoom: results.startupZoom
+			startupZoom: results.startupZoom,
+			cityName: results.cityName
 		})
 	})
     
@@ -99,7 +102,7 @@ app.get('/',(req,res) => {
 app.get('/login', (req, res) => {
 	var buttons = false;
 	var error = '';
-	res.render("login", { buttons: buttons, error: error })
+	res.render("login", { buttons: buttons, error: error, cityName: cityName })
 });
 
 /* Autenticação do usuário */
@@ -148,7 +151,9 @@ app.get('/logout', (req, res) => {
 /* Rotas da Interface de administração - Rota protegida pela sessão*/
 app.get('/admin', (req, res) => {
 	if(req.session.user){
-		res.render("home")
+		res.render("home",{
+			cityName: cityName
+		})
 	}
 	else{
 		res.redirect('/');
@@ -446,7 +451,8 @@ app.route('/config')
 					serverHost: results.serverHost,
 					startupLat: results.startupLat,
 					startupLong: results.startupLong,
-					startupZoom: results.startupZoom
+					startupZoom: results.startupZoom,
+					cityName: results.cityName
 				})
 			})	
 		}
@@ -464,7 +470,8 @@ app.route('/config')
 					serverHost: req.body.serverHost,
 					startupLat: req.body.startupLat,
 					startupLong: req.body.startupLong,
-					startupZoom: req.body.startupZoom
+					startupZoom: req.body.startupZoom,
+					cityName: req.body.cityName
 				},
 				{
 					where: {
