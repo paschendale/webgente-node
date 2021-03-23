@@ -12,6 +12,7 @@ const fetch = require('node-fetch');
 const sanitize = require('sanitize')
 const { query, config } = require('./database/connection.js');
 
+
 /* Cabeçalho de autenticação do usuário com o Geoserver 
 
 A chave de autenticação após 'Basic' é uma codificação Base64 no formato usuario:senha
@@ -312,6 +313,7 @@ app.get('/listlayers', (req,res) => {
 		attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias', 'metadata']})
 		.then(
 			result => {
+				
 				res.send(result)
 			}
 		)
@@ -683,7 +685,7 @@ async function restrictAttributes (features,layerKey,fieldKey){
 }
 
 /* Requisições WFS */
-app.get('/wfs/:layer/:properties/:format/:cql_filter/:host',(req,res)=>{
+app.get('/wfs/:layer/:format/:cql_filter',(req,res)=>{
 
 	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 
@@ -694,22 +696,29 @@ app.get('/wfs/:layer/:properties/:format/:cql_filter/:host',(req,res)=>{
 			typeName: req.params.layer,
 			outputFormat: req.params.format,
 			exceptions: 'application/json',
-			propertyName: req.params.properties,
+			propertyName: propertyName(req.params.layer),
 			SrsName : 'EPSG:4326',
 			cql_filter: req.params.cql_filter
 		}
-		
-		var urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
-		
-		fetch(req.params.host+encodeURI(urlWfs), {method : 'GET', headers: headers})
-		.then(res => res.text())
+		console.log(params.propertyName)
+		let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
+		Config.findOne({
+			raw:true,
+			attributes: ['serverHost']
+		})
+		.then(result=> {
+		fetch(result.serverHost+encodeURI(urlWfs), {method : 'GET', headers: headers})
+		.then(res=>res.text())
 		.then(data => {
 			console.log('WFS requisition sent, querying layers: ' + req.params.layer)
-			console.log(req.params.host+encodeURI(urlWfs))
-			res.send(data)
-		})
-})
+			console.log(result.serverHost+encodeURI(urlWfs))
+			data= JSON.parse(data)
 
+		
+				res.send(data)
+		
+		})
+})})
 // Transforma uma string true or false em um elemento boolean
 function getBool(val) {
     return !!JSON.parse(String(val).toLowerCase());
@@ -756,3 +765,61 @@ app.get('/describeLayer/:layer/:host',(req,res) => {
 		res.redirect('/');
 	}
 })
+
+
+function  propertyName(name){
+	var layer_properties;
+	Layers.findAll({ 
+		raw: true,
+		attributes: ['fields'],
+		where: { type: '2',
+		layer:name
+	}
+
+	}).then(results => {
+		
+		 layer_properties={
+			layer: name,
+        field:results[0].fields.split(',')
+	}
+	restrictAttributes(new Array(layer_properties),'layer','field').then(res=>{
+	
+	res.field.unshift('geom')
+	return res
+	})
+	
+	})
+	 
+}
+app.get('/propertyname/:layer',(req,res) => {
+	var layer_properties;
+	Layers.findAll({ 
+		raw: true,
+		attributes: ['fields','fieldAlias'],
+		where: { type: '2',
+		layer:req.params.layer
+	}
+
+	}).then(results => {
+		var field= results[0].fields.split(',')
+		var alias= results[0].fieldAlias.split(',')
+		var properties= new Object()
+		
+		for(var ind=0; ind<field.length;ind++ ){
+			properties[field[ind]]= alias[ind]
+		}
+		console.log(properties)
+		layer_properties={
+			layer:req.params.layer,
+            field:properties
+	}
+	restrictAttributes(new Array(layer_properties),'layer','field').then(result=>{
+	
+	result[0].field.geom= 'geom'
+	res.send(result)
+	})
+	
+	})
+
+})
+

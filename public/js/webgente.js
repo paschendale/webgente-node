@@ -145,11 +145,40 @@ var infoButton = L.easyButton({
     }).addTo(map);
 
 // Adiciona botao para ativar a ferramenta de pesquisas
-var pesquisas = L.easyButton('<img src="img/lupa.png">', function(){
-    $.get('/listqueryable',function(data){
-    queryLayers(data);
-},'json');
-},'Habilitar ferramenta de pesquisa por atributo nas camadas').addTo(map);
+var searchButton = L.easyButton({
+    states: [{
+                stateName: 'search_disabled',
+                icon:      '<img src="img/lupa.png">',
+                title:     'Habilitar ferramenta de pesquisa por atributo nas camadas',   
+                onClick: function(btn) {       
+                    searchButton.state('search_enabled');
+                    btn.state('search_enabled');  
+                    document.getElementById('search').style.visibility = "visible";
+                    $.ajax({
+                        url: '/listqueryable/',
+                        beforeSend: function () {
+                            document.getElementById('search').innerHTML= loading()
+                        },
+                        success: function (response) {
+                            queryLayers(response)
+                            
+                      },
+                       complete:function(){
+                        $('#loader').addClass('hidden')
+                       }  })
+                }
+            }, {
+                stateName: 'search_enabled',   
+                icon:      '<img src="img/info_disabled.png">',               
+                title:     'Desabilitar ferramenta de pesquisa por atributo nas camadas',
+                onClick: function(btn) {
+                    searchButton.state('search_disabled');
+                    btn.state('search_disabled'); 
+                    document.getElementById('search').style.visibility = "hidden";
+                     
+                }
+        }]
+    }).addTo(map);
 
 // 
 L.DomEvent.disableScrollPropagation(L.DomUtil.get('search'));
