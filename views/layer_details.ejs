@@ -42,14 +42,14 @@
                             <label for="public-layer"><strong>Camada Pública:</strong></label>
                             <br>
                             <div class="form-check" id="public-layer">
-                                <input class="form-check-input" type="radio" name="publicLayer" value="1" checked>
-                                <label class="form-check-label" for="true">
+                                <input class="form-check-input" type="radio" name="publicLayer" id="publicLayertrue" value="1" checked>
+                                <label class="form-check-label" for="publicLayertrue">
                                     Sim
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="publicLayer" value="0">
-                                <label class="form-check-label" for="false">
+                                <input class="form-check-input" type="radio" name="publicLayer" id="publicLayerfalse" value="0">
+                                <label class="form-check-label" for="publicLayerfalse">
                                     Não
                                 </label>
                             </div>
@@ -350,7 +350,11 @@
             }
 
             for (i = 0; i < alias.length; i++) {
-                alias[i].value = fieldAlias[i]
+                if (fieldAlias[i] != undefined){
+                    alias[i].value = fieldAlias[i]
+                } else {
+                    alias[i].value = ''
+                }
             }
         }
     </script>

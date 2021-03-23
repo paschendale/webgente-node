@@ -3,7 +3,7 @@ const app = new express(); // Inicializando objeto do express para execução do
 const bodyParser = require("body-parser");
 const { Op } = require("sequelize"); 
 const session = require("express-session");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const conn = require("./database/connection.js")
 const Layers = require("./database/models/Layers.js")
 const Users = require("./database/models/User.js")
@@ -557,16 +557,23 @@ app.get('/select/:layer/:lat1/:lng1/:lat2/:lng2/:srs',(req,res) => {
 		count: 1
 	}
 
-	url = 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?' + Object.entries(params).map(e => e.join('=')).join('&');
-
-	fetch(url, {method : 'GET', headers: headers})
-	.then(res => res.text())
-	.then(data => {
-		console.log('WFS requisition sent: ' + url)
-		data = removeProperties(data)
-		res.send(data)
+	Config.findOne({
+		raw:true,
+		attributes: ['serverHost']
 	})
-	.catch(error => res.send(error))
+	.then(results => {
+
+		url = results.serverHost + Object.entries(params).map(e => e.join('=')).join('&');
+
+		fetch(url, {method : 'GET', headers: headers})
+		.then(res => res.text())
+		.then(data => {
+			console.log('WFS requisition sent: ' + url)
+			data = removeProperties(data)
+			res.send(data)
+		})
+		.catch(error => res.send(error))
+	})
 
 	function removeProperties(data) {
 		data = JSON.parse(data)

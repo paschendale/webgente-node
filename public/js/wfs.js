@@ -11,8 +11,9 @@ function getFeature(e) {
 
     if (select) {
 
-        selectedLayers.clearLayers() // Limpa seleção anterior
-        // TODO: Puxar feicoes sob o clique em formato GeoJSON e exibi-los dentro do mapa /select/:layer/:lat1/:lng1/:lat2/:lng2/:srs
+        if (!e.originalEvent.shiftKey) {
+            selectedLayers.clearLayers() // Limpa seleção anterior
+        }
     
         pixelSize = (40075016.686 * Math.abs(Math.cos(map.getCenter().lat / 180 * Math.PI)) / Math.pow(2, map.getZoom()+8))/111120
     
