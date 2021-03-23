@@ -15,7 +15,7 @@ L.control.scale(optionsScale).addTo(map);
 
 var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+});
 
 var google = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
     maxZoom: 20,
@@ -79,12 +79,20 @@ function addLayer (layer){
 };
 
 $.get('/listlayers',function(data){
-    console.log("1");
     for (let index = 0; index < data.length; index++) {
         const element = data[index];
         addLayer(element)
-    }
+    }    
+    existsBasemap(data)
 },'json');
+
+function existsBasemap(data){
+    if (data.map(e => e.type).indexOf(1) == -1) { // If there's no Basemap enabled on /listlayers WebGENTE will automatically enable OSM
+        osm.addTo(map);
+    } else {
+        return null
+    }
+}
 
 /* Inicializando botões de ferramentas */
 

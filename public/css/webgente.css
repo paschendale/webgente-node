@@ -70,6 +70,16 @@ html, body, #map {
     width: 270px;
 }
 
+.panel-body {
+	overflow-y: auto;
+	max-height: 200px;
+}
+
+.leaflet-popup-content-wrapper {
+	max-height: 400px;
+	overflow-y: auto;
+}
+
 table {
     width:250px;
     text-align:left;
