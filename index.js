@@ -325,6 +325,24 @@ app.get('/listlayers', (req,res) => {
 	}
 })
 
+/* Rota para excluir uma camada do sistema - Rota protegida pela sessão */
+app.route('/layers/delete/:id')
+	.get((req,res) => {	
+		if(req.session.user){
+			Layers.destroy({
+				raw:true,
+				where: {
+					id: req.params.id
+				}
+			})
+			.then(() => {
+				res.redirect('/layers')
+			})			
+		} else {
+			res.redirect('/')
+		}
+	})
+
 /*Rota para obter a lista dos usuários - Rota protegida pela sessão*/
 /*Os usuários que a rota retorna são todos os diferentes daquele que estar logado no momento*/
 app.get('/listusers', (req,res) => {

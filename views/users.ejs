@@ -1,6 +1,7 @@
 <%- include('partials/admin/header.ejs') %> 
 
-<div id="usuarios">
+<div id="users">
+  <div id="modalHere"></div>
     <div class="row">
       <div class="col-12" style="margin-left: 5%;">
           <table 
@@ -37,11 +38,32 @@
     });
   
     function TableActions(value, row, index, field) {
-            return ['<button class="btn btn-dark btn-custom" id="removeUser" onclick="removeUser('+row.id+')"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" onclick="editUser('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
+      return [`<button class="btn btn-dark btn-custom" id="removeUser" data-toggle="modal" data-target="#modalUser" onclick='modalUser("`+row.userName+`",`+row.id+`)'> <i class="fas fa-trash"></i></button>`, ' ', '<button class="btn btn-dark btn-custom2" onclick="editUser('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
     }
     function editUser(index) {
       window.location.href = '/users/edit/'+index
       //todo: desenvolver função para chamar novo user
+    }
+     function modalUser(userName, id){
+      $('#modalHere').html(`
+        <div class="modal fade" id="modalUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-body">
+                <p>Você está excluindo o usuário `+userName+`</p>
+                <p>Confirmar ação ?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="removeUser(`+id+`)">Sim</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+    function deleteAll(){
+      alert("Em breve");
     }
     function removeUser(index){
       window.location.href = '/users/delete/'+index
