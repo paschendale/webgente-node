@@ -131,22 +131,11 @@ function filter(index, index_obj){
     }
     }
 
-//Adiciona layer pelo controle de camadas
-function addLayerByName(nameString) {
-	Lc._layers.find(x => x.layer.options.layers === nameString).layer.addTo(map)
-	return null
-}
-//Remove layer pelo controle de camadas
-function removeLayerByName(nameString) {
-	Lc._layers.find(x => x.layer.options.layers === nameString).layer.remove()
-	return null
-}
 function loading(){
     return `<div class="spinner-border" role="status">
             <span class="sr-only">Loading...</span>
             </div>`
 }
-
 
 function zoom_style(index){
    
