@@ -1,5 +1,5 @@
 #content{
-	margin-left: 15%;
+	margin:100px 50px 50px 50px;
 	width: 100%;
     
 }
@@ -7,20 +7,10 @@
 .wrapper {
     display: flex;
     width: 100%;
-    align-items: stretch;
+    align-items: center;
 }
 
-#sidebar {
-    min-width: 250px;
-    max-width: 250px;
-    min-height: 100vh;
-}
 
-#sidebar.active {
-    margin-left: -250px;
-}
-a[data-toggle="collapse"] {
-    position: relative;
 }
 .dropdown-toggle::after {
     display: block;
@@ -29,17 +19,12 @@ a[data-toggle="collapse"] {
     right: 20px;
     transform: translateY(-50%);
 }
-@media (max-width: 768px) {
-    #sidebar {
-        margin-left: -250px;
-    }
 
-    #sidebar.active {
-        margin-left: 0;
-    }
+@media (max-width: 768px) {
+    
  /*ID's para a responsividade da página home*/
     #imgsize {
-
+        
         width: 0%;
 
     }
@@ -53,15 +38,17 @@ a[data-toggle="collapse"] {
     }
 }
 
+/*IMPORTANDO FONTE MONTSERRAT*/
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,800;1,200;1,300;1,400;1,500;1,800&display=swap');
-/*@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";*/
+
 
 
 body {
-    /*font-family: 'Poppins', sans-serif;*/
     font-family: 'Montserrat', sans-serif;
     width: 100%;
-    background-image: linear-gradient(#a3a2a2,#ffffff);
+    background: url(../img/bg-1.png),
+                url(../img/bg-2.png);
     background-repeat: repeat-x;
     background-position: center;
 }
@@ -75,59 +62,6 @@ p {
     color: black;
 }
 
-a, a:hover, a:focus {
-    color: inherit;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-li {
-    cursor: pointer;
-}
-
-#sidebar {
-    /* don't forget to add all the previously mentioned styles here too */
-    background: #000000;
-    color: #fff;
-    transition: all 0.3s;
-}
-
-#sidebar .sidebar-header {
-    padding: 20px;
-    background: #000000;
-}
-
-#sidebar ul.components {
-    padding: 20px;
-    /*border-bottom: 1px solid #47748b;*/
-}
-
-#sidebar ul p {
-    color: #fff;
-    padding: 10px;
-}
-
-#sidebar ul li a {
-    padding: 10px;
-    font-size: 1.1em;
-    display: block;
-}
-#sidebar ul li a:hover {
-    color: #000000;
-    background: #fff;
-}
-
-#sidebar ul li.active > a, a[aria-expanded="true"] {
-    color: #fff;
-    /*background: #6d7fcc;*/
-}
-ul ul a {
-    font-size: 0.9em !important;
-    padding-left: 30px !important;
-    /*background: #6d7fcc;*/
-}
-
-/*ALTERAÇÕES GUILHERME*/
 
 #margin-container-fluid{
     margin-bottom: 30px;
@@ -136,6 +70,8 @@ ul ul a {
 .margin2 {
     margin-bottom: 10%;
 }
+
+/*ARREDONDAMENTO DE BOTÕES*/
 
 .btn-custom {
     margin: 5px;
@@ -148,12 +84,13 @@ ul ul a {
 	padding: 5px 6px 5px 10px;
 	border-radius: 50px;
 }
-
+/*FIM ARREDONDAMENTO DE BOTÕES*/
 
 table{
     background-color: white;
 }
 
+/*ALINHAMENTOS*/
 
 #align1{
     align-content: center;
@@ -165,7 +102,6 @@ table{
 #align2{
     align-content: center;
     background-color: none;
-    margin-left: 15%;
     width: 50%;
 }
 
@@ -195,6 +131,8 @@ table{
     margin-left: 30%;
 }
 
+/*FIM ALINHAMENTOS*/
+
 #titles1 {
     font-family: 'Montserrat', sans-serif;
     font-size: 2em;
@@ -211,3 +149,37 @@ table{
     margin-bottom: 30px;
     
 }
+
+/*MENU DE NAVEGAÇÃO*/
+
+.navbar-style {
+    padding: 15px 0px;
+    background: #343a40f3;
+}
+
+a {
+    color: white;
+}
+
+a:hover {
+    color: #97bbf0;
+}
+
+.navbar-toggler {
+    padding: 0,25rem 0,75rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-color: white;
+    border-radius: 0.25rem;
+}
+
+.divisor {
+
+width: 1px;
+background: white;
+margin: 12px 15px;
+}
+
+/*FIM DE MENU DE NAVEGAÇÃO*/
