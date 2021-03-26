@@ -10,8 +10,6 @@
     align-items: center;
 }
 
-
-}
 .dropdown-toggle::after {
     display: block;
     position: absolute;
@@ -151,6 +149,10 @@ table{
 }
 
 /*MENU DE NAVEGAÇÃO*/
+
+.nav-item {
+    cursor: pointer;
+}
 
 .navbar-style {
     padding: 15px 0px;

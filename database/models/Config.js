@@ -45,7 +45,8 @@ var dummyData = [{
     startupLong: -42.873321,
     startupZoom: 20,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    cityName: 'Universidade Federal de Viçosa'
 }];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */

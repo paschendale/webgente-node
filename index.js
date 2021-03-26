@@ -22,14 +22,18 @@ Sendo um usuário do Geoserver configurado adequadamente para acesso aos serviç
 var headers = {};
 var cityName;
 
-Config.findOne({
-	raw:true,
-	attributes: ['serverUser','serverPassword','cityName']
-}).then(results => {
-	headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
-	console.log(headers.authorization)
-	cityName = results.cityName;
-})
+function setHeaders() {
+	Config.findOne({
+		raw:true,
+		attributes: ['serverUser','serverPassword','cityName']
+	}).then(results => {
+		headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
+		console.log(headers.authorization)
+		cityName = results.cityName;
+	})
+} 
+
+setHeaders();
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -122,9 +126,9 @@ app.post('/authenticate', (req, res) => {
 				if(req.session.user.group == 'admin'){
 					res.redirect('/admin');
 				}
-				/*else if(req.session.user.group == 'publico'){
+				else {
 					res.redirect('/');
-				}*/
+				}
 			}
 			else{
 				//$('#errorMessage').append("Senha errada");
@@ -210,6 +214,7 @@ app.route('/user/add')
 			res.render("user_details.ejs", {
 				edit: false,
 				userName: null,
+				group: null,
 				email: null,
 				birthDate: null
 			})
@@ -227,13 +232,118 @@ app.route('/user/add')
 				password:  password, 
 				birthDate:  req.body.birthDate,
 				email:  req.body.email,
-				group: 'admin'
+				group: req.body.group
 			}
 			).then(console.log('Succesfully inserted data into database!', req.body))
 			.then(res.render("users"))
 	} else {
 		res.redirect('/')
 	}
+})
+
+/*Rota para obter a lista dos usuários - Rota protegida pela sessão*/
+/*Os usuários que a rota retorna são todos os diferentes daquele que estar logado no momento*/
+app.get('/listusers', (req,res) => {
+	if(req.session.user){
+		Users.findAll({raw: true,
+		where: { userName:{ [Op.ne]: req.session.user.name }},
+		attributes: ['id', 'userName', 'birthDate', 'email', 'group']})
+		.then(
+			result => {
+				console.log(result);
+				res.send(result)
+			}
+		)
+	}
+	else{
+		res.redirect('/');
+	}
+})
+
+/* Rota para página de gerenciamento de usuários - Rota protegida pela sessão*/
+app.get('/users', (req, res) => {
+	if(req.session.user){
+		Users.findAll({raw: true})
+		.then(
+			result => {
+				res.render("users", { 
+					users: result 
+				});
+			}
+		)	
+	}
+	else{
+		res.redirect('/');
+	}	
+})
+
+/**/
+app.route('/users/edit/:id')
+.get((req,res) => {	
+	if(req.session.user){
+		Users.findOne({
+			raw:true,
+			where: {
+				id: req.params.id
+			}
+		})
+		.then(UserData => {
+			const dateFormat = UserData.birthDate.replace(/(\d*)-(\d*)-(\d*).*/, '$1-$2-$3');
+			res.render('user_details.ejs',{	
+				edit: true,
+				id: UserData.id,
+				userName: UserData.userName,
+				group: UserData.group,
+				email: UserData.email,
+				birthDate: dateFormat
+			})
+		})
+		.catch(() => {
+			res.redirect('/users')
+		})			
+	} else {
+		res.redirect('/')
+	}
+})
+.post((req,res) => { 
+	if(req.session.user){
+		Users.update(
+			{
+				userName: req.body.userName,
+				group: req.body.group,
+				email: req.body.email,
+				birthDate: req.body.birthDate
+			},
+			{
+				where: {
+					id: req.params.id
+				}
+			}
+			).then(console.log('Succesfully inserted data into database!', req.body))
+			.then(res.render("users"))
+			.catch((error) => {console.log('Failed to update database. '+error)})
+	} 
+	else {
+		res.redirect('/')
+	}
+})
+
+/* Rota para excluir um usuário do sistema - Rota protegida pela sessão */
+app.route('/users/delete/:id')
+	.get((req,res) => {	
+		if(req.session.user){
+			Users.destroy({
+				raw:true,
+				where: {
+					id: req.params.id
+				}
+			})
+			.then(() => {
+				res.redirect('/users')
+			})			
+		} else {
+			res.redirect('/')
+		}
 })
 
 app.route('/layers/edit/:id')
@@ -342,109 +452,6 @@ app.route('/layers/delete/:id')
 			res.redirect('/')
 		}
 	})
-
-/*Rota para obter a lista dos usuários - Rota protegida pela sessão*/
-/*Os usuários que a rota retorna são todos os diferentes daquele que estar logado no momento*/
-app.get('/listusers', (req,res) => {
-	if(req.session.user){
-		Users.findAll({raw: true,
-		where: { userName:{ [Op.ne]: req.session.user.name }},
-		attributes: ['id', 'userName', 'birthDate', 'email', 'group']})
-		.then(
-			result => {
-				console.log(result);
-				res.send(result)
-			}
-		)
-	}
-	else{
-		res.redirect('/');
-	}
-})
-
-/* Rota para página de gerenciamento de usuários - Rota protegida pela sessão*/
-app.get('/users', (req, res) => {
-	if(req.session.user){
-		Users.findAll({raw: true})
-		.then(
-			result => {
-				res.render("users", { 
-					users: result 
-				});
-			}
-		)	
-	}
-	else{
-		res.redirect('/');
-	}	
-})
-
-/**/
-app.route('/users/edit/:id')
-.get((req,res) => {	
-	if(req.session.user){
-		Users.findOne({
-			raw:true,
-			where: {
-				id: req.params.id
-			}
-		})
-		.then(UserData => {
-			const dateFormat = UserData.birthDate.replace(/(\d*)-(\d*)-(\d*).*/, '$1-$2-$3');
-			res.render('user_details.ejs',{	
-				edit: true,
-				id: UserData.id,
-				userName: UserData.userName,
-				email: UserData.email,
-				birthDate: dateFormat
-			})
-		})
-		.catch(() => {
-			res.redirect('/users')
-		})			
-	} else {
-		res.redirect('/')
-	}
-})
-.post((req,res) => { 
-	if(req.session.user){
-		Users.update(
-			{
-				userName: req.body.userName,
-				email: req.body.email,
-				birthDate: req.body.birthDate
-			},
-			{
-				where: {
-					id: req.params.id
-				}
-			}
-			).then(console.log('Succesfully inserted data into database!', req.body))
-			.then(res.render("users"))
-			.catch((error) => {console.log('Failed to update database. '+error)})
-	} 
-	else {
-		res.redirect('/')
-	}
-})
-
-/* Rota para excluir um usuário do sistema - Rota protegida pela sessão */
-app.route('/users/delete/:id')
-	.get((req,res) => {	
-		if(req.session.user){
-			Users.destroy({
-				raw:true,
-				where: {
-					id: req.params.id
-				}
-			})
-			.then(() => {
-				res.redirect('/users')
-			})			
-		} else {
-			res.redirect('/')
-		}
-})
 
 /* Rota para página 'Sobre' na interface de administração - Rota protegida pela sessão */
 app.get('/about', (req, res) => {
