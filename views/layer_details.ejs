@@ -171,13 +171,9 @@
 
     <script>
 
-        var loadedAttributes = 0; // Estado da tabela de atributos. 0: nao carregado, 1: carregada
-
         var edit = false; // Habilita ou nao carregamento de fieldAlias, queryFields e allowedFields ao finalizar carregamento da tabela
 
         async function loadLayerAttributes(){
-
-            loadedAttributes = 1;
 
             host = $('#host').val()
             layer = $('#layer').val()
@@ -188,14 +184,22 @@
                 if ($('#basemap').is(':checked')) {
                     $("#attributes-table").html('Camadas base não possuem atributos.')
                     $("#attributes-div").collapse('show')
+                    $('#load-layer-attributes').removeClass().addClass('btn btn-success')
+                    $('#load-layer-attributes').attr('state','basemap')
                     return null
                 } else if(data.featureTypes != undefined) {
                     createAttributesTable(data.featureTypes[0].properties);
+                    $('#load-layer-attributes').removeClass().addClass('btn btn-success')
+                    $('#load-layer-attributes').attr('state','success')
                 } else {
                     alert('Não existe a camada ' + layer + ' no host ' + host)
+                    $('#load-layer-attributes').removeClass().addClass('btn btn-danger')                    
+                    $('#load-layer-attributes').attr('state','error')
                 }
             })
             .fail(function() {
+                $('#load-layer-attributes').removeClass().addClass('btn btn-danger')                    
+                $('#load-layer-attributes').attr('state','error')
                 alert('Não foi possível recuperar a lista de atributos da camada');
             });
         }
@@ -250,12 +254,14 @@
 
             // TODO: Deixar bonito essa validação com JS colorindo os campos errados
 
-            if (loadedAttributes == 1 || $('#basemap').is(':checked')) { // Verifica se foram carregados os atributos da camada antes de salva-la ou se a camada é um basemap
-                return true;
-            } else {
-                alert('Carregue os atributos da camada antes de salva-la!')
-                return false;
+            // Verifica se os atributos da camada foram carregados com sucesso
+            if($('#load-layer-attributes').attr('state') == 'error' || $('#load-layer-attributes').attr('state') == undefined) {
+                alert('Verifique os atributos da camada antes de salva-la')
+                return false
             }
+            
+            // Verifica se a camada existe antes de salva-la
+
 
         }
 
