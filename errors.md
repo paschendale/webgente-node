@@ -1,0 +1,1 @@
+100 - Requisição viola restrição da base de dados

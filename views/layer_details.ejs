@@ -112,7 +112,7 @@
                 <div class="col">
                     <label for="host"><strong>Endereço do servidor de mapas:</strong></label>
                     <div class="form-group">
-                        <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?">
+                        <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?" disabled>
                     </div>
                 </div>
             </div>   
@@ -172,6 +172,13 @@
     <script>
 
         var edit = false; // Habilita ou nao carregamento de fieldAlias, queryFields e allowedFields ao finalizar carregamento da tabela
+
+        /* Preenche automaticamente o host no campo desabilitado,
+        para possibilitar atualizações futuras onde o WebGENTE permite
+        o uso de mais de um host essa funcionalidade não foi removida,
+        entretanto, o backend ignorará qualquer entrada de host que diferir
+        daquela em /config */
+        $('#host').val("<%=host%>")
 
         async function loadLayerAttributes(){
 
