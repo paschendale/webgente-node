@@ -1,4 +1,3 @@
-var activeLayers = []; // Variável global com camadas ativas e GetFeatureInfo habilitado
 var gfiAjax; // Criando uma instancia global do AJAX para controle de execução junto ao backend
 
 /* Expandindo a classe nativa do Leaflet L.TileLayer.WMS para adicionar 
@@ -10,12 +9,14 @@ L.TileLayer.gfiWMS = L.TileLayer.WMS.extend({
       L.TileLayer.WMS.prototype.onAdd.call(this, map);
       getLegendGraphics(this);
       activeLayers.push(this.options.layers);
+      setMapStateInURL();
     },
     
     onRemove: function (map) {
       L.TileLayer.WMS.prototype.onRemove.call(this, map);
       removeLegendGraphics(this);
-      activeLayers.splice(activeLayers.indexOf(this.options.layers),1)
+      activeLayers.splice(activeLayers.indexOf(this.options.layers),1);
+      setMapStateInURL();
     }
 });
 

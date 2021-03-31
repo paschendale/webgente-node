@@ -112,7 +112,7 @@
                 <div class="col">
                     <label for="host"><strong>Endereço do servidor de mapas:</strong></label>
                     <div class="form-group">
-                        <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?">
+                        <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?" disabled>
                     </div>
                 </div>
             </div>   
@@ -171,13 +171,16 @@
 
     <script>
 
-        var loadedAttributes = 0; // Estado da tabela de atributos. 0: nao carregado, 1: carregada
-
         var edit = false; // Habilita ou nao carregamento de fieldAlias, queryFields e allowedFields ao finalizar carregamento da tabela
 
-        async function loadLayerAttributes(){
+        /* Preenche automaticamente o host no campo desabilitado,
+        para possibilitar atualizações futuras onde o WebGENTE permite
+        o uso de mais de um host essa funcionalidade não foi removida,
+        entretanto, o backend ignorará qualquer entrada de host que diferir
+        daquela em /config */
+        $('#host').val("<%=host%>")
 
-            loadedAttributes = 1;
+        async function loadLayerAttributes(){
 
             host = $('#host').val()
             layer = $('#layer').val()
@@ -188,14 +191,22 @@
                 if ($('#basemap').is(':checked')) {
                     $("#attributes-table").html('Camadas base não possuem atributos.')
                     $("#attributes-div").collapse('show')
+                    $('#load-layer-attributes').removeClass().addClass('btn btn-success')
+                    $('#load-layer-attributes').attr('state','basemap')
                     return null
                 } else if(data.featureTypes != undefined) {
                     createAttributesTable(data.featureTypes[0].properties);
+                    $('#load-layer-attributes').removeClass().addClass('btn btn-success')
+                    $('#load-layer-attributes').attr('state','success')
                 } else {
                     alert('Não existe a camada ' + layer + ' no host ' + host)
+                    $('#load-layer-attributes').removeClass().addClass('btn btn-danger')                    
+                    $('#load-layer-attributes').attr('state','error')
                 }
             })
             .fail(function() {
+                $('#load-layer-attributes').removeClass().addClass('btn btn-danger')                    
+                $('#load-layer-attributes').attr('state','error')
                 alert('Não foi possível recuperar a lista de atributos da camada');
             });
         }
@@ -250,12 +261,14 @@
 
             // TODO: Deixar bonito essa validação com JS colorindo os campos errados
 
-            if (loadedAttributes == 1 || $('#basemap').is(':checked')) { // Verifica se foram carregados os atributos da camada antes de salva-la ou se a camada é um basemap
-                return true;
-            } else {
-                alert('Carregue os atributos da camada antes de salva-la!')
-                return false;
+            // Verifica se os atributos da camada foram carregados com sucesso
+            if($('#load-layer-attributes').attr('state') == 'error' || $('#load-layer-attributes').attr('state') == undefined) {
+                alert('Verifique os atributos da camada antes de salva-la')
+                return false
             }
+            
+            // Verifica se a camada existe antes de salva-la
+
 
         }
 

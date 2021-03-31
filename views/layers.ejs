@@ -1,14 +1,21 @@
 <%- include('partials/admin/header.ejs') %> 
 
 <div id="camadas">
+
+  <div id="modalHere"></div>
+
   <div class="row">
+
     <div class="col-12">
-        <table 
+
+       <table 
           class="table table-striped" 
           data-toggle="table" 
           data-url="/listlayers" 
           data-search="true"
-          data-pagination="true"> 
+          data-pagination="true">
+           
+
           <thead class="thead-dark">
             <tr>
               <th data-checkbox="true"></th>
@@ -19,9 +26,13 @@
               <th data-field="group">Grupo</th>
               <th data-formatter='TableActions'>Opções</th>
           </thead>
+
         </table>
+
     </div>
+
   </div>
+
 </div>
   
 <!--Icones-->
@@ -37,8 +48,8 @@
   });
 
   /* Aplicação de raio e margem nos botões de ação*/
-  function TableActions(value, row, index, field) {
-    return ['<button class="btn btn-dark btn-custom" id="removeLayer" onclick="removeLayer('+row.id+')"> <i class="fas fa-trash"></i></button>', ' ', '<button class="btn btn-dark btn-custom2" id="editLayer" onclick="editLayer('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
+   function TableActions(value, row, index, field) {
+    return [`<button class="btn btn-dark btn-custom" id="removeLayer" data-toggle="modal" data-target="#modalLayer" onclick='modalLayer("`+row.layerName+`",`+row.id+`)'> <i class="fas fa-trash"></i></button>`, ' ', '<button class="btn btn-dark btn-custom2" id="editLayer" onclick="editLayer('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
   }
 
   function removeMultipleLayers() {
@@ -53,6 +64,27 @@
     //alert('em breve: editar esta layer: ' + index )
     window.location.href = '/layers/edit/'+index
     //todo: desenvolver função para editar layer
+  }
+  function modalLayer(layerName, id){
+    $('#modalHere').html(`
+      <div class="modal fade" id="modalLayer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+              <p>Você está excluindo a camada `+layerName+`</p>
+              <p>Confirmar ação ?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="removeLayer(`+id+`)">Sim</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+  function removeLayer(index){
+    window.location.href = '/layers/delete/'+index
   }
 </script>
 </div>

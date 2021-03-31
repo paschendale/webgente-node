@@ -40,6 +40,15 @@ Users.sync({force: false}).then(() => {
                 group: 'admin',
                 createdAt: new Date(),
                 updatedAt: new Date()
+            },
+            {
+                userName: 'noAdmin' ,
+                password: '$2b$10$gQRnUm5mIPzDR9iPfqmgTe4QyBE1Ogi7p51FbbzCxX5xls/Sjo4FS', // Hash para 1234, senha padrão do admin
+                email: 'ufv@ufv.br',
+                birthDate: new Date(),
+                group: 'users',
+                createdAt: new Date(),
+                updatedAt: new Date()
             }])
         }
     });

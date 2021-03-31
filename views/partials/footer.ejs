@@ -34,10 +34,8 @@
 <script type="application/javascript">
     function resizeMap () {
         var map = document.getElementById('map');
-        var newHeight = document.documentElement.clientHeight -
-        document.getElementById('navbar').clientHeight;
+        var newHeight = window.innerHeight - document.getElementById('navbar').clientHeight;
         map.style.height = newHeight + "px";
-        map.style.minHeight = newHeight + "px";
     }
 
     function disableLegendContainer () {

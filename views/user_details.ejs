@@ -12,6 +12,11 @@
             	</div>
             </div>
             <div class="row">
+    			<div class="form-group">
+                	<input type="text" class="form-control" id="group" name="group" placeholder="Grupo do Usuário" required>
+            	</div>
+            </div>
+            <div class="row">
             	<div class="form-group">
                     <label for="layerName">Data de Nascimento</label>
                 	<input type="date" class="form-control" id="birthDate" name="birthDate" placeholder="Data de Nascimento" required>
@@ -37,6 +42,7 @@
 
 <script>
     $('#userName').val("<%=userName%>");
+    $('#group').val("<%=group%>");
     $('#birthDate').val("<%=birthDate%>");
     $('#email').val("<%=email%>");
 </script>

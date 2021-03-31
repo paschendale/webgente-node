@@ -22,14 +22,18 @@ Sendo um usuário do Geoserver configurado adequadamente para acesso aos serviç
 var headers = {};
 var cityName;
 
-Config.findOne({
-	raw:true,
-	attributes: ['serverUser','serverPassword','cityName']
-}).then(results => {
-	headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
-	console.log(headers.authorization)
-	cityName = results.cityName;
-})
+function setHeaders() {
+	Config.findOne({
+		raw:true,
+		attributes: ['serverUser','serverPassword','cityName']
+	}).then(results => {
+		headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
+		console.log(headers.authorization)
+		cityName = results.cityName;
+	})
+} 
+
+setHeaders();
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -107,10 +111,16 @@ app.get('/login', (req, res) => {
 
 /* Autenticação do usuário */
 app.post('/authenticate', (req, res) => {
-	const email = req.body.email;
-	const password = req.body.senha;
+	const user = req.body.username;
+	const password = req.body.password;
 
-	Users.findOne({ where:{ email: email }}).then((user) => {
+	Users.findOne({ where:{ 
+		[Op.or]: [
+			{email: user},
+			{userName: user}
+		] 
+	}})
+	.then((user) => {
 		if(user != undefined){
 			if(bcrypt.compareSync(password, user.password)){
 				req.session.user = {
@@ -122,19 +132,17 @@ app.post('/authenticate', (req, res) => {
 				if(req.session.user.group == 'admin'){
 					res.redirect('/admin');
 				}
-				/*else if(req.session.user.group == 'publico'){
+				else {
 					res.redirect('/');
-				}*/
+				}
 			}
 			else{
-				//$('#errorMessage').append("Senha errada");
 				var error = "Wrong username or password";
 				var buttons = false;
 				res.render("login", { buttons, error });
 			}
 		}
 		else{
-			//$('#errorMessage').append("Usuario nao encontrado");
 			var error = "Wrong username or password";
 			var buttons = false;
 			res.render("login", { buttons, error });
@@ -160,49 +168,6 @@ app.get('/admin', (req, res) => {
 	}
 })
 
-/* Rota para página de gerenciamento de camadas - Rota protegida pela sessão */
-app.route('/layers')
-	.get((req, res) => {
-		if(req.session.user){
-			res.render("layers")
-		} else {
-			res.redirect('/')
-		}		
-	})
-
-/* Rota para adição de novas camadas - Rotas protegidas pela sessão */	
-app.route('/layers/add')
-	.get((req,res) => {
-		if(req.session.user){
-			res.render("layer_details.ejs",{edit: false})
-		} else {
-			res.redirect('/')
-		}		
-	})
-	.post((req,res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
-		if(req.session.user){
-			Layers.create(
-				{
-					type: req.body.type,
-					layerName:  req.body.layerName, 
-					group:  req.body.group,
-					host:  req.body.host,
-					layer:  req.body.layer,
-					defaultBaseLayer:  req.body.defaultBaseLayer,
-					fields: req.body.fields,
-					allowedFields:  req.body.allowedFields,
-					queryFields:  req.body.queryFields,
-					fieldAlias:  req.body.fieldAlias,
-					fieldType: req.body.fieldType
-				}
-				).then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("layers"))
-				.catch((error) => {console.log('Failed to insert data into database. '+error)})
-		} else {
-			res.redirect('/')
-		}
-	})
-
 /* Rota para adicionar novo usuário - Rotas protegidas pela sessão */
 app.route('/user/add')
 .get((req,res) => {
@@ -210,6 +175,7 @@ app.route('/user/add')
 			res.render("user_details.ejs", {
 				edit: false,
 				userName: null,
+				group: null,
 				email: null,
 				birthDate: null
 			})
@@ -227,7 +193,7 @@ app.route('/user/add')
 				password:  password, 
 				birthDate:  req.body.birthDate,
 				email:  req.body.email,
-				group: 'admin'
+				group: req.body.group
 			}
 			).then(console.log('Succesfully inserted data into database!', req.body))
 			.then(res.render("users"))
@@ -235,6 +201,7 @@ app.route('/user/add')
 		res.redirect('/')
 	}
 })
+
 
 app.route('/layers/edit/:id')
 	.get((req,res) => {	
@@ -325,12 +292,12 @@ app.get('/listlayers', (req,res) => {
 	}
 })
 
+
 /*Rota para obter a lista dos usuários - Rota protegida pela sessão*/
 /*Os usuários que a rota retorna são todos os diferentes daquele que estar logado no momento*/
 app.get('/listusers', (req,res) => {
 	if(req.session.user){
 		Users.findAll({raw: true,
-		where: { userName:{ [Op.ne]: req.session.user.name }},
 		attributes: ['id', 'userName', 'birthDate', 'email', 'group']})
 		.then(
 			result => {
@@ -377,6 +344,7 @@ app.route('/users/edit/:id')
 				edit: true,
 				id: UserData.id,
 				userName: UserData.userName,
+				group: UserData.group,
 				email: UserData.email,
 				birthDate: dateFormat
 			})
@@ -393,6 +361,7 @@ app.route('/users/edit/:id')
 		Users.update(
 			{
 				userName: req.body.userName,
+				group: req.body.group,
 				email: req.body.email,
 				birthDate: req.body.birthDate
 			},
@@ -414,19 +383,222 @@ app.route('/users/edit/:id')
 app.route('/users/delete/:id')
 	.get((req,res) => {	
 		if(req.session.user){
-			Users.destroy({
+			Users.findOne({
+				raw: true,
+				where: {
+					id: req.params.id
+				}
+			})
+			.then(results => {
+				if (results.userName != req.session.user.name) {
+					/* Se o usuario a ser excluido for diferente do usuario logado
+					o sistema procederá com a exclusão normalmente */			
+					Users.destroy({
+						raw:true,
+						where: {
+							id: req.params.id
+						}
+					})
+					.then(() => {
+						res.redirect('/users')
+					})
+				} else {
+					/* Se o usuario a ser excluido for o mesmo usuario logado
+					o sistema procederá com a exclusão e terminará a sessão do
+					usuário, caso o usuário seja o único admin na base o sistema
+					recusará a exclusão */		
+					Users.count({where : {group: 'admin'}})
+					.then(count => {
+						if(count == 1) {
+							res.render('error',{
+								errorCode: 100, 
+								errorMessage: 'Não é possível realizar a exclusão do único usuário administrador da base'
+							})
+						} else {
+							Users.destroy({
+								raw:true,
+								where: {
+									id: req.params.id
+								}
+							})
+							.then(() => {
+								req.session.user = undefined;
+								res.redirect('/')
+							})
+						}
+					})
+				}
+			})			
+		} else {
+			res.redirect('/')
+		}
+})
+
+/* Rota para página de gerenciamento de camadas - Rota protegida pela sessão */
+app.route('/layers')
+	.get((req, res) => {
+		if(req.session.user){
+			res.render("layers")
+		} else {
+			res.redirect('/')
+		}		
+	})
+
+/* Rota para adição de novas camadas - Rotas protegidas pela sessão */	
+app.route('/layers/add')
+	.get((req,res) => {
+		if(req.session.user){
+			Config.findOne({
+				raw: true,
+				attributes: ['serverHost']
+			})
+			.then(results => {
+				res.render("layer_details.ejs",{edit: false, host: results.serverHost})
+			})			
+		} else {
+			res.redirect('/')
+		}		
+	})
+	.post((req,res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
+		if(req.session.user){
+			Config.findOne({
+				raw: true,
+				attributes: ['serverHost']
+			})
+			.then(results => {
+				Layers.create({
+						type: req.body.type,
+						layerName:  req.body.layerName, 
+						group:  req.body.group,
+						host:  results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+						layer:  req.body.layer,
+						defaultBaseLayer:  req.body.defaultBaseLayer,
+						fields: req.body.fields,
+						allowedFields:  req.body.allowedFields,
+						queryFields:  req.body.queryFields,
+						fieldAlias:  req.body.fieldAlias,
+						fieldType: req.body.fieldType
+				})
+			})
+			.then(console.log('Succesfully inserted data into database!', req.body))
+			.then(res.render("layers"))
+			.catch((error) => {console.log('Failed to insert data into database. '+error)})
+		} else {
+			res.redirect('/')
+		}
+	})
+
+app.route('/layers/edit/:id')
+	.get((req,res) => {	
+		if(req.session.user){
+			Layers.findOne({
+				raw:true,
+				where: {
+					id: req.params.id
+				}
+			})
+			.then(layerData => {
+				console.log('Dados enviados da layer '+layerData.layer+' com id: '+layerData.id)
+				res.render('layer_details.ejs',{
+					edit: true,
+					id: layerData.id,
+					layerName: layerData.layerName,
+					group: layerData.group,
+					layer: layerData.layer,
+					type: layerData.type,
+					host: layerData.host,
+					defaultBaseLayer: layerData.defaultBaseLayer,
+					allowedFields: layerData.allowedFields,
+					fieldAlias: layerData.fieldAlias,
+					queryFields: layerData.queryFields,
+					metadata: layerData.metadata,
+					publicLayer: layerData.publicLayer
+				})
+			})
+			.catch(() => {
+				res.redirect('/layers')
+			})			
+		} else {
+			res.redirect('/')
+		}
+	})
+	.post((req,res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
+		if(req.session.user){
+			Config.findOne({
+				raw: true,
+				attributes: ['serverHost']
+			})
+			.then(results => {
+				Layers.update({
+					type: req.body.type,
+					layerName:  req.body.layerName, 
+					group:  req.body.group,
+					host:  results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+					layer:  req.body.layer,
+					defaultBaseLayer:  req.body.defaultBaseLayer,
+					fields: req.body.fields,
+					allowedFields:  req.body.allowedFields,
+					queryFields:  req.body.queryFields,
+					fieldAlias:  req.body.fieldAlias,
+					fieldType: req.body.fieldType,
+					metadata: req.body.metadata,
+					publicLayer: req.body.publicLayer
+				},
+				{
+					where: {
+						id: req.params.id
+					}
+				})
+			})
+			.then(console.log('Succesfully inserted data into database!', req.body))
+			.then(res.render("layers"))
+			.catch((error) => {console.log('Failed to update database. '+error)})
+		} else {
+			res.redirect('/')
+		}
+	})
+
+/* Rota para obtênção de lista de camadas */
+app.get('/listlayers', (req,res) => {
+	if(req.session.user){
+		Layers.findAll({raw: true,
+		attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias', 'metadata']})
+		.then(
+			result => {
+				res.send(result)
+			}
+		)
+	}
+	else{
+		Layers.findAll({raw: true,
+		where: { publicLayer: 1 },
+		attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias', 'metadata']})
+		.then(
+			result => {
+				
+				res.send(result)
+			}
+		)
+	}
+})
+
+/* Rota para excluir uma camada do sistema - Rota protegida pela sessão */
+app.route('/layers/delete/:id')
+	.get((req,res) => {	
+		if(req.session.user){
+			Layers.destroy({
 				raw:true,
 				where: {
 					id: req.params.id
 				}
 			})
 			.then(() => {
-				res.redirect('/users')
+				res.redirect('/layers')
 			})			
 		} else {
 			res.redirect('/')
 		}
-})
+	})
 
 /* Rota para página 'Sobre' na interface de administração - Rota protegida pela sessão */
 app.get('/about', (req, res) => {
@@ -480,6 +652,7 @@ app.route('/config')
 				}
 			).then(() => {
 				console.log('Dados de configuração atualizados com sucesso')
+				setHeaders();
 				res.redirect('/config')
 			}).catch((error) => {
 				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)

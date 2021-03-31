@@ -1,44 +1,54 @@
-<nav id="sidebar">
+<header> <!--INÍCIO DO CABEÇALHO-->
+<nav class="navbar navbar-expand-md navbar-ligth fixed-top navbar-style">
+    <div class="container">
 
-    <a onclick="location.href='/';"><img src="/img/icon-gente.png" id="align6"></a>
-    
+            <a onclick="location.href='/';">
+                <img src="/img/decor-dez.svg" width="250">
+            </a>
 
-    <ul class="list-unstyled components">
-        
-        <li>
-            <a onclick="location.href='/admin';">Início</a>
-        </li>
-        <li>
-            <a onclick="location.href='/layers';">Camadas</a>
-        </li>
-        <li>
-            <a onclick="location.href='/users';">Usuários</a>
-        </li>
-        <li>
-            <a onclick="location.href='/about';">Sobre</a>
-        </li>
-        <li>
-            <a onclick="location.href='/config';">Configurações</a>
-        </li>
-        <li>
-            <a onclick="location.href='/';">Acessar o WebGENTE</a>
-        </li>
-        <li>
-            <a href="/logout">Sair</a>
-        </li>
-    </ul>
-</nav>
-<div id="content-container">
-    <nav class="navbar navbar-expand-lg navbar-light" id="margin-container-fluid">
-        <div class="container-fluid">
-
-            <button type="button" id="sidebarCollapse" class="btn btn-dark">
-                <i class="fas fa-align-left"></i>
-                <span>Menu</span>
+            <button class="navbar-toggler" data-toggle="collapse" data-target="#nav-admin">
+                <i class="fas fa-bars text-white"></i>
             </button>
 
-        </div>
-    </nav>
+            <div class="collapse navbar-collapse" id="nav-admin">
+
+                <ul class="navbar-nav ml-auto">
+                
+                    <li class="nav-item">
+                        <a onclick="location.href='/admin';" class="nav-link">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a onclick="location.href='/layers';" class="nav-link">Camadas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a onclick="location.href='/users';" class="nav-link">Usuários</a>
+                    </li>
+                    <li class="nav-item"> 
+                        <a onclick="location.href='/about';" class="nav-link">Sobre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a onclick="location.href='/config';" class="nav-link">Configurações</a>
+                    </li>
+
+                    <li class="nav-item divisor"></li>
+                    
+                    <li class="nav-item">
+                        <a onclick="location.href='/';" class="nav-link">Acessar o WebGENTE</a>
+                    </li>
+
+                    <li class="nav-item divisor"></li>
+
+                    <li class="nav-item">
+                        <a href="/logout" class="nav-link">Logout</a>
+                    </li>
+                </ul>
+
+            </div>
+            
+    </div>
+
+</nav>
+</header><!--FINAL DO CABEÇALHO-->
 
     
 

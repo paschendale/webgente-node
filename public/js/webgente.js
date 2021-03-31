@@ -55,7 +55,12 @@ function addLayer (layer){
         });
         if (layer.defaultBaseLayer == 1) {
             Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
-            l.addTo(map);
+            
+            // O comportamento de defaultBaseLayer = true só é ativado se não houver indicação de camadas no hash
+            if(window.location.hash == '') {
+                l.addTo(map);
+            }
+
         } else {
             Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
         };
@@ -83,7 +88,8 @@ $.get('/listlayers',function(data){
         const element = data[index];
         addLayer(element)
     }    
-    existsBasemap(data)
+    existsBasemap(data);
+    getMapStateFromURL();
 },'json');
 
 function existsBasemap(data){
@@ -275,3 +281,52 @@ var measurementButton = L.easyButton({
                 }
         }]
     }).addTo(map);
+
+/* Manutenção de camadas pelo nome de chamada no LayerControl */
+
+function addLayerByName(nameString) {
+	Lc._layers.find(x => x.layer.options.layers === nameString).layer.addTo(map)
+	return null
+};
+
+function removeLayerByName(nameString) {
+	Lc._layers.find(x => x.layer.options.layers === nameString).layer.remove()
+	return null
+};
+
+/* Verificação de camadas e coordenadas no HASH e atualização do mapa com as informações */
+
+var activeLayers = []; // Variável global com camadas ativas e GetFeatureInfo habilitado
+
+function setMapStateInURL() {
+    
+    if(activeLayers.length != 0) {
+        window.location.hash = '/'+ map.getCenter().lat + '/' + map.getCenter().lng + '/' + map.getZoom() + '/' + activeLayers.join(',')
+    } else {
+        window.location.hash = '/'+ map.getCenter().lat + '/' + map.getCenter().lng + '/' + map.getZoom()
+    }   
+};
+
+map.on("moveend", function () {
+    setMapStateInURL()
+});
+
+map.on("zoomend", function () {
+    setMapStateInURL()
+});
+
+function getMapStateFromURL () {
+    if (window.location.hash != '') {
+
+        var url = window.location.hash.split('/')
+        map.setView([url[1],url[2]],url[3])
+    
+        if (url[4] != undefined) { // Se houverem camadas na URL, ativa-las
+           
+            layersFromURL = url[4].split(',')
+            for(i = 0; i < layersFromURL.length; i++) {
+                addLayerByName(layersFromURL[i])
+            }
+        }
+    }
+};
