@@ -162,18 +162,9 @@ var searchButton = L.easyButton({
                     searchButton.state('search_enabled');
                     btn.state('search_enabled');  
                     document.getElementById('search').style.visibility = "visible";
-                    $.ajax({
-                        url: '/listqueryable/',
-                        beforeSend: function () {
-                            document.getElementById('search').innerHTML= loading()
-                        },
-                        success: function (response) {
-                            queryLayers(response)
-                            
-                      },
-                       complete:function(){
-                        $('#loader').addClass('hidden')
-                       }  })
+                    $.get('/search', function( data ) {
+                        $('#search').html(data)
+                            })
                 }
             }, {
                 stateName: 'search_enabled',   
@@ -182,6 +173,7 @@ var searchButton = L.easyButton({
                 onClick: function(btn) {
                     searchButton.state('search_disabled');
                     btn.state('search_disabled'); 
+                    $('#search').html(" ")
                     document.getElementById('search').style.visibility = "hidden";
                      
                 }

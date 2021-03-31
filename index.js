@@ -311,8 +311,8 @@ app.get('/listlayers', (req,res) => {
 				res.send(result)
 			}
 		)
-	}
-	else{
+	
+		}else{
 		Layers.findAll({raw: true,
 		where: { publicLayer: 1 },
 		attributes: ['id','type','layerName','group','layer','attribution','defaultBaseLayer','host','fieldAlias', 'metadata']})
@@ -652,7 +652,6 @@ app.get('/listqueryable',(req,res)=>{
 
 /* Restringindo atributos de uma única feição */
 async function restrictAttributes (features,layerKey,fieldKey){
-
 	var restrictedData = new Array(); 
 	for (feature of features){ // Itera em cada camada
 
@@ -699,10 +698,9 @@ async function restrictAttributes (features,layerKey,fieldKey){
 }
 
 /* Requisições WFS */
-app.get('/wfs/:layer/:format/:cql_filter',(req,res)=>{
-
+app.get('/wfs/:layer/:format/:property_name/:cql_filter',(req,res)=>{
+	
 	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
-
 		params = {
 			service: 'WFS',
 			version: '1.3.0',
@@ -710,11 +708,11 @@ app.get('/wfs/:layer/:format/:cql_filter',(req,res)=>{
 			typeName: req.params.layer,
 			outputFormat: req.params.format,
 			exceptions: 'application/json',
-			propertyName: propertyName(req.params.layer),
+			propertyName: req.params.property_name,
 			SrsName : 'EPSG:4326',
 			cql_filter: req.params.cql_filter
 		}
-		console.log(params.propertyName)
+	
 		let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
 		Config.findOne({
 			raw:true,
@@ -726,9 +724,8 @@ app.get('/wfs/:layer/:format/:cql_filter',(req,res)=>{
 		.then(data => {
 			console.log('WFS requisition sent, querying layers: ' + req.params.layer)
 			console.log(result.serverHost+encodeURI(urlWfs))
-			data= JSON.parse(data)
-
-		
+			//data= JSON.parse(data)
+			
 				res.send(data)
 		
 		})
@@ -781,30 +778,7 @@ app.get('/describeLayer/:layer/:host',(req,res) => {
 })
 
 
-function  propertyName(name){
-	var layer_properties;
-	Layers.findAll({ 
-		raw: true,
-		attributes: ['fields'],
-		where: { type: '2',
-		layer:name
-	}
 
-	}).then(results => {
-		
-		 layer_properties={
-			layer: name,
-        field:results[0].fields.split(',')
-	}
-	restrictAttributes(new Array(layer_properties),'layer','field').then(res=>{
-	
-	res.field.unshift('geom')
-	return res
-	})
-	
-	})
-	 
-}
 app.get('/propertyname/:layer',(req,res) => {
 	var layer_properties;
 	Layers.findAll({ 
@@ -822,7 +796,7 @@ app.get('/propertyname/:layer',(req,res) => {
 		for(var ind=0; ind<field.length;ind++ ){
 			properties[field[ind]]= alias[ind]
 		}
-		console.log(properties)
+		
 		layer_properties={
 			layer:req.params.layer,
             field:properties
@@ -837,3 +811,11 @@ app.get('/propertyname/:layer',(req,res) => {
 
 })
 
+app.route('/search')
+	.get((req, res) => {
+		
+			res.render("search")
+
+		
+			
+	})
