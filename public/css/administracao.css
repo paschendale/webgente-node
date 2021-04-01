@@ -34,6 +34,7 @@
         width: 100%;
 
     }
+
 }
 
 /*IMPORTANDO FONTE MONTSERRAT*/
@@ -47,7 +48,7 @@ body {
     width: 100%;
     background: url(../img/bg-1.png),
                 url(../img/bg-2.png);
-    background-repeat: repeat-x;
+    background-repeat: repeat;
     background-position: center;
 }
 
@@ -129,6 +130,13 @@ table{
     margin-left: 30%;
 }
 
+#align8 {
+
+    margin: 5px;
+	padding: 5px 5px 5px 5px;
+    width: 100%;
+}
+
 /*FIM ALINHAMENTOS*/
 
 #titles1 {
@@ -169,13 +177,15 @@ a:hover {
 }
 
 .navbar-toggler {
-    padding: 0,25rem 0,75rem;
+
     font-size: 1.25rem;
     line-height: 1;
     background-color: transparent;
     border: 1px solid transparent;
     border-color: white;
     border-radius: 0.25rem;
+    margin: 5px;
+	padding: 5px 10px;
 }
 
 .divisor {
@@ -186,3 +196,22 @@ margin: 12px 15px;
 }
 
 /*FIM DE MENU DE NAVEGAÇÃO*/
+
+@media (max-width: 768px) {
+
+    .navbar-style {
+        padding: 0px 5px;
+    }
+
+    #content {
+
+        margin: 150px 50px 50px 50px;
+	    width: 100%;
+
+    }
+
+}
+
+.pointer {
+    cursor: pointer;
+}
