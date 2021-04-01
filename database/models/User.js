@@ -4,7 +4,8 @@ const connection = require('../connection');
 const Users = connection.define('User', {
     userName: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     password: {
         type: Sequelize.STRING,
@@ -12,7 +13,8 @@ const Users = connection.define('User', {
     },
     email:{
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     birthDate: {
         type: Sequelize.DATE,

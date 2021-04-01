@@ -113,13 +113,16 @@ th {
 	width: auto;
 	height: auto;
 	background-color: #FFFFFF;
-	margin-top: 5%;
-	margin-left: 10%;	
-	padding: 3%;
+	margin-top: 12px;
+	margin-left: 60px;	
 	max-height: 70vh; 
+	padding: 3%;
+	max-width: 50vh;
 	overflow-y: auto;
-	
-
+	overflow-x: auto;
+	border-color: rgba(73, 73, 73, 0.377);
+	border-style: solid;
+	border-radius: 10px;
 }
 
 

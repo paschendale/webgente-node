@@ -767,61 +767,61 @@ app.get('/select/:layer/:lat1/:lng1/:lat2/:lng2/:srs',(req,res) => {
 
 /* Recolher campos pesquisáveis no banco de dados */
 app.get('/listqueryable',(req,res)=>{
+
+	if (req.session.user) { // Filtra camadas publicas ou nao
+		whereClausule = { type: '2', [Op.not]: {queryFields: null}}
+	} else {
+		whereClausule = { type: '2', [Op.not]: {queryFields: null}, publicLayer: 1 }
+	}
+	
 	Layers.findAll({ 
-		raw: true,
-		attributes: ['layerName','layer','queryFields' ,'fields','fieldAlias', 'fieldType'],
-		where: { type: '2',
-		[Op.not]:{queryFields: null}
-	}
-
+			raw: true,
+			attributes: ['layerName','layer','queryFields','publicLayer','fields','fieldAlias', 'fieldType'],
+			where: whereClausule
 	}).then(results => {
-	
-	//Função para adaptar retorno do banco de dados	
-	for(var n=0;n<results.length;n++){
-	//Objeto com o retorno ordenadado por propriedade:	
-		var fields= {
-			field:((results[n].fields).split(',')),
-			queryFields: ((results[n].queryFields).split(',')),
-			fieldAlias: ((results[n].fieldAlias).split(',')),
-			fieldType: ((results[n].fieldType).split(','))
-    	}
-		var properties_order= new Object()
-	
-		for(var n2=0;n2<fields.field.length;n2++){
-		//Objeto com retorno ordenado pela chave e campos pesquisáveis definidos 		
-			if(getBool(fields.queryFields[n2])){
-				properties_order[fields.field[n2]]= {
-				'fieldAlias': fields.fieldAlias [n2],
-				'fieldType':fields.fieldType[n2]
-				}
-		}
+		//Função para adaptar retorno do banco de dados	
+		for(var n=0;n<results.length;n++){
+			//Objeto com o retorno ordenadado por propriedade:	
+			var fields= {
+				field:((results[n].fields).split(',')),
+				queryFields: ((results[n].queryFields).split(',')),
+				fieldAlias: ((results[n].fieldAlias).split(',')),
+				fieldType: ((results[n].fieldType).split(','))
+			}
+			var properties_order= new Object()
 		
-		}
-		results[n]= {
-			'layerName': results[n].layerName,
-			'layer': results[n].layer,
-			'queryFields': properties_order
-		}
-		//Restrição de atributos para usuário restrito
-		if(req.session.user==false){
-			restrictAttributes(new Array (results[n]),'layer','queryFields')
-			.then(result => {
-				results[n]=result
-			})	
+			for(var n2=0;n2<fields.field.length;n2++){
+			//Objeto com retorno ordenado pela chave e campos pesquisáveis definidos 		
+				if(getBool(fields.queryFields[n2])){
+					properties_order[fields.field[n2]]= {
+					'fieldAlias': fields.fieldAlias [n2],
+					'fieldType':fields.fieldType[n2]
+					}
+				}
+			}
+
+			results[n]= {
+				'layerName': results[n].layerName,
+				'layer': results[n].layer,
+				'queryFields': properties_order
+			}
 			
-		}
+			//Restrição de atributos para usuário restrito
+			if(req.session.user==false){
+				restrictAttributes(new Array (results[n]),'layer','queryFields')
+				.then(result => {
+					results[n]=result
+				})	
+			}
 
-		//Remove camadas que possuam queryFields vazio 
-		if( !Object.entries(results[n].queryFields).length){
-			results.splice(n,1)
-		}
-	}
-
-	res.send(results)
-	
+			//Remove camadas que possuam queryFields vazio 
+			if(!Object.entries(results[n].queryFields).length){
+				results.splice(n,1)
+			}
+		}		
+		res.send(results)
 	})
 })
-
 
 /* Restringindo atributos de uma única feição */
 async function restrictAttributes (features,layerKey,fieldKey){
@@ -887,22 +887,25 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter',(req,res)=>{
 		}
 	
 		let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
+
 		Config.findOne({
 			raw:true,
 			attributes: ['serverHost']
 		})
 		.then(result=> {
-		fetch(result.serverHost+encodeURI(urlWfs), {method : 'GET', headers: headers})
-		.then(res=>res.text())
-		.then(data => {
-			console.log('WFS requisition sent, querying layers: ' + req.params.layer)
-			console.log(result.serverHost+encodeURI(urlWfs))
-			//data= JSON.parse(data)
+			fetch(result.serverHost+encodeURI(urlWfs), {method : 'GET', headers: headers})
+			.then(res=>res.text())
+			.then(data => {
+				console.log('WFS requisition sent, querying layers: ' + req.params.layer)
+				console.log(result.serverHost+encodeURI(urlWfs))
+				//data= JSON.parse(data)
+				
+					res.send(data)
 			
-				res.send(data)
-		
+			})
 		})
-})})
+})
+
 // Transforma uma string true or false em um elemento boolean
 function getBool(val) {
     return !!JSON.parse(String(val).toLowerCase());
@@ -950,9 +953,8 @@ app.get('/describeLayer/:layer/:host',(req,res) => {
 	}
 })
 
+app.get('/propertyname/:layer',(req,res) => { // O que essa rota faz?
 
-
-app.get('/propertyname/:layer',(req,res) => {
 	var layer_properties;
 	Layers.findAll({ 
 		raw: true,
@@ -984,11 +986,7 @@ app.get('/propertyname/:layer',(req,res) => {
 
 })
 
-app.route('/search')
+app.route('/search') // O que essa rota faz?
 	.get((req, res) => {
-		
-			res.render("search")
-
-		
-			
+		res.render("search")
 	})
