@@ -124,6 +124,7 @@ app.post('/authenticate', (req, res) => {
 		if(user != undefined){
 			if(bcrypt.compareSync(password, user.password)){
 				req.session.user = {
+					id: user.id,
 					name: user.userName,
 					group: user.group,
 					email: user.email
@@ -383,31 +384,27 @@ app.route('/users/edit/:id')
 app.route('/users/delete/:id')
 	.get((req,res) => {	
 		if(req.session.user){
-			Users.findOne({
-				raw: true,
-				where: {
-					id: req.params.id
-				}
-			})
-			.then(results => {
-				if (results.userName != req.session.user.name) {
-					/* Se o usuario a ser excluido for diferente do usuario logado
-					o sistema procederá com a exclusão normalmente */			
+			const ids = JSON.parse(req.params.id);
+			ids.forEach((id) => {
+				if(id != req.session.user.id){
+					/* Só irá excluir os usuários com ids diferente do id do 
+					usuário logado na sessão */
 					Users.destroy({
 						raw:true,
 						where: {
-							id: req.params.id
+							id: id
 						}
-					})
-					.then(() => {
+					}).then(() => {
 						res.redirect('/users')
 					})
-				} else {
-					/* Se o usuario a ser excluido for o mesmo usuario logado
-					o sistema procederá com a exclusão e terminará a sessão do
-					usuário, caso o usuário seja o único admin na base o sistema
-					recusará a exclusão */		
-					Users.count({where : {group: 'admin'}})
+				}
+			})
+			if(ids.indexOf(req.session.user.id) == 0){
+				/* Se o usuario a ser excluido for o mesmo usuario logado
+				o sistema procederá com a exclusão e terminará a sessão do
+				usuário, caso o usuário seja o único admin na base o sistema
+				recusará a exclusão */
+				Users.count({where : {group: 'admin'}})
 					.then(count => {
 						if(count == 1) {
 							res.render('error',{
@@ -418,7 +415,7 @@ app.route('/users/delete/:id')
 							Users.destroy({
 								raw:true,
 								where: {
-									id: req.params.id
+									id: req.session.user.id
 								}
 							})
 							.then(() => {
@@ -427,12 +424,9 @@ app.route('/users/delete/:id')
 							})
 						}
 					})
-				}
-			})			
-		} else {
-			res.redirect('/')
+			}
 		}
-})
+	})
 
 /* Rota para página de gerenciamento de camadas - Rota protegida pela sessão */
 app.route('/layers')

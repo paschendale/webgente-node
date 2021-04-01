@@ -6,7 +6,7 @@
       <div class="col-12">
           <table 
           class="table table-striped"        
-          id="table" 
+          id="tableUsers" 
 	        data-toggle="table" 
 	        data-url="/listusers" 
 	        data-search="true" 
@@ -33,8 +33,10 @@
   
   <script>
   
+    var usersId = [];
+
     $( document ).ready(function() {
-      $('.fixed-table-toolbar').prepend('<a class="btn btn-dark layer-toolbar" id="addNewUser" style="margin-right:5px;" href="/user/add">Novo Usuário</a>')
+      $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="removeUsers" style="margin-right:5px;" data-toggle="modal" data-target="#modalAllUsers" onclick="modalAllUsers()">Remover Usuários</button><a class="btn btn-dark layer-toolbar" id="addNewUser" style="margin-right:5px;" href="/user/add">Novo Usuário</a>')
     });
   
     function TableActions(value, row, index, field) {
@@ -44,17 +46,49 @@
       window.location.href = '/users/edit/'+index
       //todo: desenvolver função para chamar novo user
     }
-     function modalUser(userName, id){
+
+    function modalUser(userName, id){
+    $('#modalHere').html(`
+      <div class="modal fade" id="modalUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+              <p>Você está excluindo o usuário `+userName+`</p>
+              <p>Confirmar ação ?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" onclick="removeUser(`+id+`)">Sim</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+    }
+    function modalAllUsers(){
+    var usersName = [];
+    usersId = [];
+    //var usersId = [];
+    var $table = $('#tableUsers');
+
+    $.map($table.bootstrapTable('getSelections'), (row) => {
+        usersName.push(row.userName);
+        usersId.push(row.id);
+        console.log(usersName);
+    })
+
+    console.log(usersName);
+
       $('#modalHere').html(`
-        <div class="modal fade" id="modalUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="modalAllUsers" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-body">
-                <p>Você está excluindo o usuário `+userName+`</p>
+                <p>Você está excluindo os usuários: `+ usersName.join(', ') +`</p>
                 <p>Confirmar ação ?</p>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="removeUser(`+id+`)">Sim</button>
+                <button type="button" class="btn btn-primary" onclick="removeUsers()">Sim</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
               </div>
             </div>
@@ -62,11 +96,15 @@
         </div>
       `);
     }
-    function deleteAll(){
-      alert("Em breve");
-    }
-    function removeUser(index){
+    function removeUsers(){
+      let index = JSON.stringify(usersId);
       window.location.href = '/users/delete/'+index
+    }
+    function removeUser(id){
+      usersId = [];
+    usersId.push(id);
+    let index = JSON.stringify(usersId);
+        window.location.href = '/users/delete/'+index
     }
   </script>
   </div>
