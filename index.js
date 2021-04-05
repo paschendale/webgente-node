@@ -580,6 +580,21 @@ app.get('/listlayers', (req,res) => {
 app.route('/layers/delete/:id')
 	.get((req,res) => {	
 		if(req.session.user){
+			const ids = JSON.parse(req.params.id);
+			ids.forEach((id) => {
+				Layers.destroy({
+					raw:true,
+					where: {
+						id: id
+					}
+				}).then(() => {
+					res.redirect('/layers')
+				})
+			})
+		}else {
+			res.redirect('/')
+		}
+		/*if(req.session.user){
 			Layers.destroy({
 				raw:true,
 				where: {
@@ -591,7 +606,7 @@ app.route('/layers/delete/:id')
 			})			
 		} else {
 			res.redirect('/')
-		}
+		}*/
 	})
 
 /* Rota para página 'Sobre' na interface de administração - Rota protegida pela sessão */

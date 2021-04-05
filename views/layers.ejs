@@ -10,6 +10,7 @@
 
        <table 
           class="table table-striped" 
+          id="tableLayers"
           data-toggle="table" 
           data-url="/listlayers" 
           data-search="true"
@@ -43,8 +44,11 @@
 <link rel="stylesheet" type="text/css" href="/css/bootstrap-table/bootstrap-table.css">
 
 <script>
+
+  var layersId = []
+
   $( document ).ready(function() {
-    $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" onClick="removeMultipleLayers()">Remover Camadas</button> <a class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" href="/layers/add"">Nova Camada</a>')
+    $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" data-toggle="modal" data-target="#modalAllLayers"onClick="ModalAllLayers()">Remover Camadas</button> <a class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" href="/layers/add"">Nova Camada</a>')
   });
 
   /* Aplicação de raio e margem nos botões de ação*/
@@ -52,14 +56,35 @@
     return [`<button class="btn btn-dark btn-custom" id="removeLayer" data-toggle="modal" data-target="#modalLayer" onclick='modalLayer("`+row.layerName+`",`+row.id+`)'> <i class="fas fa-trash"></i></button>`, ' ', '<button class="btn btn-dark btn-custom2" id="editLayer" onclick="editLayer('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
   }
 
-  function removeMultipleLayers() {
-    alert('em breve: deletar layer')
-    //todo: desenvolver função para deletar layers marcadas
+  function ModalAllLayers() {
+   var layerName = [];
+   layerId = [];
+   var $table = $('#tableLayers');
+
+   $.map($table.bootstrapTable('getSelections'), (row) => {
+        layerName.push(row.layerName);
+        layerId.push(row.id);
+        console.log(layerName);
+
+        $('#modalHere').html(`
+        <div class="modal fade" id="modalAllLayers" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-body">
+                <p>Você está excluindo as camadas: `+ layerName.join(', ') +`</p>
+                <p>Confirmar ação ?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="removeLayers()">Sim</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+    })
   }
-  function removeLayer(index) {
-    alert('em breve: remover esta layer: ' + index)
-    //todo: desenvolver função para remover layer unica da tabela
-  }
+
   function editLayer(index) {
     //alert('em breve: editar esta layer: ' + index )
     window.location.href = '/layers/edit/'+index
@@ -83,7 +108,14 @@
       </div>
     `);
   }
-  function removeLayer(index){
+  function removeLayers(){
+      let index = JSON.stringify(layerId);
+      window.location.href = '/layers/delete/'+index
+    }
+  function removeLayer(id){
+  	usersId = [];
+    usersId.push(id);
+    let index = JSON.stringify(usersId);
     window.location.href = '/layers/delete/'+index
   }
 </script>

@@ -77,8 +77,6 @@
         console.log(usersName);
     })
 
-    console.log(usersName);
-
       $('#modalHere').html(`
         <div class="modal fade" id="modalAllUsers" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
@@ -101,9 +99,9 @@
       window.location.href = '/users/delete/'+index
     }
     function removeUser(id){
-      usersId = [];
-    usersId.push(id);
-    let index = JSON.stringify(usersId);
+      	usersId = [];
+    	usersId.push(id);
+    	let index = JSON.stringify(usersId);
         window.location.href = '/users/delete/'+index
     }
   </script>
