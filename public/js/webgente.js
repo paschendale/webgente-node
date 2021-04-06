@@ -180,6 +180,7 @@ var searchButton = L.easyButton({
                     searchButton.state('search_disabled');
                     btn.state('search_disabled'); 
                     $('#search').html(" ")
+                    closeTable()
                     document.getElementById('search').style.visibility = "hidden";
                      
                 }

@@ -1,242 +1,45 @@
-
 <div id="search_bar" class="form-group row">
   <p>Selecione uma camada para realizar a pesquisa:</p>
- <select id="search_list" class="form-control  form-control-sm" onchange="searchableFields()" style="outline: none;">
-  <option value="-1"> Nada selecionado</option>
-</select>
-<div id="search_fields" class="collapse " >
-<div class="input-group">
-  <div id="sub_search_fields" ></div>
-</div> 
-   <input class='btn btn-dark btn-sm' type="submit" id="okSearch" value="Ok" onclick="table_factory()"> 
-
-</div>
-<div id="load" class="spinner-border" role="status">
-  <span class="sr-only">Loading...</span>
-  </div>  
- </div>
- <div id="buttons_table"class="collapse " >
-  <button class="btn btn-dark btn-custom  btn-sm"  onclick="closeTable()"><i class="fas fa-arrow-left"></i></button>
-  <button class="btn btn-dark btn-custom  btn-sm"  onclick="zoomFeature(-1)"><i class="fas fa-search"></i></button>
-
-    <button class="btn btn-dark dropdown-toggle btn-sm" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-download"></i>
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-      <button class="dropdown-item" type="button"onclick="downloadFeature('shape-zip')">SHP</button>
-      <button class="dropdown-item" type="button"onclick="downloadFeature('GML3')">GML</button>
-      <button class="dropdown-item" type="button"onclick="downloadFeature('csv')">CSV</button>
+  <select id="search_list" class="form-control  form-control-sm" onchange="searchableFields()" style="outline: none;">
+    <option value="-1"> Nada selecionado</option>
+  </select>
+  <div id="search_fields" class="collapse ">
+    <div class="input-group">
+      <div id="sub_search_fields"></div>
     </div>
-  
+    <input class='btn btn-dark btn-sm' type="submit" id="okSearch" value="Ok" onclick="table_factory()">
+
+  </div>
+  <div id="load" class="spinner-border" role="status"></div>
+  <span class="sr-only">Loading...</span>
 </div>
- 
-  <table 
-  id="table"
-  > 
-  
-</table>   
+</div>
+<div id="buttons_table" class="collapse ">
+  <button class="btn btn-dark btn-custom  btn-sm" onclick="closeTable()"><i class="fas fa-arrow-left"></i></button>
+  <button class="btn btn-dark btn-custom  btn-sm" onclick="zoomFeature(-1)"><i class="fas fa-search"></i></button>
+
+  <button class="btn btn-dark dropdown-toggle btn-sm" type="button" id="dropdownMenu2" data-toggle="dropdown"
+    aria-haspopup="true" aria-expanded="false"><i class="fas fa-download"></i>
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+    <button class="dropdown-item" type="button" onclick="downloadFeature('shape-zip')">SHP</button>
+    <button class="dropdown-item" type="button" onclick="downloadFeature('GML3')">GML</button>
+    <button class="dropdown-item" type="button" onclick="downloadFeature('csv')">CSV</button>
+  </div>
+
+</div>
+
+<table id="table">
+
+</table>
 
 <!--Icones-->
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+  integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
 
 <!--Bootstrap-table-->
-<script src="/js/bootstrap-table/bootstrap-table.js" ></script>
+<script src="/js/bootstrap-table/bootstrap-table.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/bootstrap-table/bootstrap-table.css">
 
-  
-<script>
 
-//Adiciona camadas pesquisáveis ao selection
-selectOptions()  
-//Variavel global para armazenar resultados  
-var layersQuerrys=  new Array() //a consulta realizada em listqueryable 
-var resultWFS= new Array() //  o resultado da pesquisa em wfs
-var requestParams= new Object() // recolhe os parametros chave para requisição
-var focus_style=L.geoJSON().addTo(map); 
-
-function selectOptions(){
-  $.ajax({
-  url: '/listqueryable/',
- beforeSend: function () {
- 
-       },
- success: function (response) {
-  $("#load").hide()  
-  response.map(({
-      layer,
-      layerName
-    })=> {
-
-      $('#search_list').append(`<option>${layerName}</option>`);
-      
-    
-    })   
-    layersQuerrys=response    
-                 
-   } })  
-}
-
-//Fução que gera os os campos pesquisáveis 
-function searchableFields(){
- 
-if($('#search_list').prop('selectedIndex') >0){
-  $("#search_fields").show(); 
-var option=layersQuerrys[ $('#search_list').prop('selectedIndex')-1];
-
-var complete_sub= ""
-Object.keys(option.queryFields).map((element)=>{
-complete_sub+=`<input type="text" class="form-control form-control-sm" name="`+element+`" id="`+element+`" placeholder="`+option.queryFields[element].fieldAlias+`">`
-})
-$("#sub_search_fields").html(complete_sub)
-}else{
-  $("#search_fields").hide(); 
-}
-
-}
-
-//Função para concatenar filtro
-function filter_concate (){
-    var cql_filter=''
-      
-    for(query in requestParams.layerSelect.queryFields){
-     
-        var value = document.getElementById(query).value
-        //Adição da condição E para mais de uma propriedade
-        cql_filter+=(value!="" & cql_filter!="")? " and ": ""
-        //Verficação de tipo do campo
-        if(requestParams.layerSelect.queryFields[query].fieldType=="string"){
-           // cql_filter+= ("("+query+" LIKE "+ "'%"+value+"%')")
-            cql_filter+= ("("+query+" LIKE "+ "'%"+value+"%' or "+query+" LIKE "+ "'%"+(value.toLowerCase())+"%' or "+query+" LIKE "+ "'%"+(value.toUpperCase())+"%') " )
-        }else{
-            cql_filter+=(value!="")? (isNaN(value))? (query+" = 000"):(query+" = "+ ""+value+" "):"";
-        }
-    }
-   
-    requestParams.filter_all= cql_filter
-
-    
-    }
-
-
-
-//Adicionar elementos a tabela 
-function table_factory(){
-  $("#buttons_table").show()
-
-  var option=layersQuerrys[ $('#search_list').prop('selectedIndex')-1];
-  requestParams.layerSelect= option
-  addLayerByName(requestParams.layerSelect.layer)
-  filter_concate()
-  $.get('/propertyname/'+option.layer, function(data) {
-  requestParams.property_name= Object.keys(data[0].field)
-  requestParams.property_name.push("id")
-   var column= new Array()
-  
-    Object.keys(data[0].field).map((element)=>{
-     
-      if(element !='geom'){
-        column.push({
-                field: element,
-                title: element   })
-      
-        }   
-       })
-      
-      column.push({
-        formatter: TableActions,
-        title: "Zoom/Download"
-         })
-    //Adicionando colunas a tabela
-       $("#table").bootstrapTable({
-       columns: column
-        })
-     //Adicionando parametros a tabela  
-     $("#table").bootstrapTable('refreshOptions', {
-        ajax: 'ajaxRequest'
-      })
-
-})
-
-}
-//Requisição da tabela
-function ajaxRequest(params) {
- 
-  var option=layersQuerrys[ $('#search_list').prop('selectedIndex')-1];
-    var wfsParams={
-        layer: option.layer,
-        format:encodeURIComponent('application/json'),
-        property_name: new Array(requestParams.property_name),
-        cql_filter: encodeURI(requestParams.filter_all)
-       
-       }
- $("#search_fields").hide();     
- var url1='/wfs/'+ Object.values(wfsParams).join('/')
-   
- $.get(url1).then(function (response, URL,xhr) {
-response=JSON.parse(response)
- resultWFS=response
- zoomFeature(-1)
-   properties= response.features.map(e=>e.properties);
-      params.success(properties)
-    })
-    
-  }
-
-
-//Botbões da tabela
-  function TableActions(value, row, index, field) {
-    return ['<button class="btn btn-dark btn-custom btn-sm" id="downloadFeature" onclick="downloadFeature('+index+')"> <i class="fas fa-download"></i></button>', ' ', '<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature('+index+')"> <i class="fas fa-search"></i></button>'].join('');
-  }
-
-
-//Realiza requisição para o Download 
-function downloadFeature(index){
-console.log(index)
- /* var wfsParams={
-        layer: requestParams.layerSelect.layer,
-        format:encodeURIComponent("shape-zip"),
-        property_name: requestParams.property_name,
-        cql_filter: encodeURI(" id ="+resultWFS.features[index].properties.id )
-       }
-    
-  $.ajax({ 
-     url:'/wfs/'+ Object.values(wfsParams).join('/') ,
-   
-  success: function (response) {
-
-     console.log(decodeURIComponent( unescape( JSON.stringify(response))))
-        
-    },
-    error: function (xhr, status, error) {
-        console.log(error)
-  }})
-
-*/
-}
-//Aplica estilo e foca no local desejado 
-function zoomFeature (index){
-  focus_style.clearLayers()
-  var layer_focus =(index==-1)? resultWFS.features: resultWFS.features[index].geometry
-  data = JSON.parse( JSON.stringify(layer_focus))
-  focus_style.addData(data)
-  map.fitBounds(focus_style.getBounds())
-
-}
-//Apaga a tabela
-function closeTable(){
-  $("#table").bootstrapTable('destroy')
-  $("#buttons_table").hide()
-  removeLayerByName(requestParams.layerSelect.layer)
-  focus_style.clearLayers()
-  searchableFields()
-}
-  function addLayerByName(nameString) {
-	Lc._layers.find(x => x.layer.options.layers === nameString).layer.addTo(map)
-	return null
-}
-//Remove layer pelo controle de camadas
-function removeLayerByName(nameString) {
-	Lc._layers.find(x => x.layer.options.layers === nameString).layer.remove()
-	return null
-}
-</script>
-
+<script src="/js/search.js"></script>
