@@ -148,6 +148,8 @@ function TableActions(value, row, index, field) {
 
 //Realiza requisição para o Download 
 function downloadFeature(index_format) {
+    var format = index_format;
+
     var cql_define = ""
     //Organiza objetos com base no tipo de donwload: uma feição em shp ou todas em shp/gml/csv
     if (Number.isInteger(index_format)) {
@@ -164,22 +166,41 @@ function downloadFeature(index_format) {
         property_name: requestParams.property_name,
         cql_filter: encodeURI(cql_define)
     }
-    console.log(wfsParams)
-    /*   url= '/wfs/'+ Object.values(wfsParams).join('/')   
-       $.ajax({
-           url: url,
-           beforeSend: function () {
-               $("#load").show()
-           },
-           success (data) {
-               $("#load").hide()
-               var blob = new Blob([data]);
-               var url2 = window.URL.createObjectURL(blob);
-               window.open(url2, '_blank')
-           }
-       });  
-          
-      */
+
+    url= '/wfs/'+ Object.values(wfsParams).join('/')  
+
+    console.log(url);
+
+    $.ajax({
+       url: url,
+       beforeSend: function () {
+           $("#load").show()
+       },
+       success (data) {
+            $("#load").hide();
+            var blob = new Blob([data]);
+
+            console.log(data);
+
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+
+            if(format == 'csv'){
+                link.download = 'feicao.csv';
+            }
+            else if(format == 'GML3'){
+                link.download = 'feicao.gml';
+            }
+            else if(format == 'shape-zip'){
+                link.download = 'feicao.zip';
+            }
+
+            link.click();
+
+           //var url2 = window.URL.createObjectURL(blob);
+           //window.open(url2, '_blank')
+       }
+   });
 }
 //Aplica estilo e foca no local selecionado 
 function zoomFeature(index) {
