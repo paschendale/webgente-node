@@ -90,7 +90,6 @@ app.get('/', (req, res) => {
 	var buttons = true;
 	Config.findOne({ raw: true })
 		.then(results => {
-			console.log(results)
 			res.render("index", {
 				buttons: buttons,
 				startupLat: results.startupLat,
@@ -292,7 +291,6 @@ app.get('/listlayers', (req, res) => {
 		})
 			.then(
 				result => {
-
 					res.send(result)
 				}
 			)
@@ -479,7 +477,8 @@ app.route('/layers/add')
 						allowedFields: req.body.allowedFields,
 						queryFields: req.body.queryFields,
 						fieldAlias: req.body.fieldAlias,
-						fieldType: req.body.fieldType
+						fieldType: req.body.fieldType,
+						publicLayer: req.body.publicLayer
 					})
 				})
 				.then(console.log('Succesfully inserted data into database!', req.body))
@@ -711,37 +710,42 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		raw: true,
 		attributes: ['serverHost']
 	})
-		.then(results => {
-			console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
-			console.log(results.serverHost + urlParameters)
-			fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
-				.then(res => res.text())
-				.then(data => {
-					if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
-						console.log('Usuário logado, getFeatureInfo enviado!')
-						data = JSON.parse(data)
-						res.send(data);
-					} else {
-						console.log('Usuário requisitou getFeatureInfo sem login')
-						data = JSON.parse(data)
-						//restrição de dados		
-						restrictAttributes(data.features, 'id', 'properties')
-							.then(result => {
-								console.log(result)
-								if (result[0] != undefined) {
-									data.features = result
-									res.send(data)
-								} else { // Envia um array vazio caso a resposta do GFI seja nula
-									data.features = [];
-									res.send(data)
-								}
-							})
+	.then(results => {
+		console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
+		console.log(results.serverHost + urlParameters)
+		fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
+		.then(res => res.text())
+		.then(data => {
+
+			if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
+
+				console.log('Usuário logado, getFeatureInfo enviado!')
+				data = JSON.parse(data)
+				res.send(data);
+
+			} else {
+
+				console.log('Usuário requisitou getFeatureInfo sem login')
+				data = JSON.parse(data)
+				//restrição de dados		
+				restrictAttributes(data.features, 'id', 'properties')
+				.then(result => {
+
+					if (result[0] != undefined) {
+						data.features = result
+						res.send(data)
+					} else { // Envia um array vazio caso a resposta do GFI seja nula
+						data.features = [];
+						res.send(data)
 					}
 				})
-				.catch(err => {
-					res.send(err);
-				});
+			}
+
 		})
+		.catch(err => {
+			res.send(err);
+		});
+	})
 })
 
 /* Seleção de feições */
@@ -845,9 +849,20 @@ app.get('/listqueryable', (req, res) => {
 })
 
 /* Restringindo atributos de uma única feição */
+
 async function restrictAttributes(features, layerKey, fieldKey) {
+
 	var restrictedData = new Array();
+
 	for (feature of features) { // Itera em cada camada
+
+		// Se a camada não possuir conteudo em layerKey ela é um MDT (um raster, possivelmente), sendo assim ela não é restrita
+		if (feature[layerKey] == ''){ 
+						
+			feature[layerKey] = 'Raster.Values'
+			restrictedData.push(feature)
+			continue;
+		}
 
 		// Função para recuperar os campos permitidos de cada camada
 		async function getAllowedFields(feature) {

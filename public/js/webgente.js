@@ -44,7 +44,24 @@ Lc = L.control.groupedLayers(baseMaps,overlayMaps,optionsControl).addTo(map);
 var metadata = '<a href="/metadata/CAD_Lote.txt" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>'
 
 function addLayer (layer){
-    if (layer.type == 2) { // Adiciona como Overlay
+    
+    if (layer.type == 1) { // Adiciona como Base
+
+        var l = L.tileLayer.wms(layer.host,{
+            layers: layer.layer,
+            format: 'image/jpeg',
+            transparent: false,
+            attribution: layer.attribution,
+            maxZoom: 30
+        })
+        if (layer.defaultBaseLayer == 1) {
+            Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
+            l.addTo(map);
+        } else {
+            Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
+        };
+
+    } else if (layer.type == 2) { // Adiciona como Overlay
 
         var l = L.tileLayer.gfiWMS(layer.host,{
             layers: layer.layer,
@@ -65,18 +82,24 @@ function addLayer (layer){
             Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
         };
     
-    } else { // Adiciona como Base
-
-        var l = L.tileLayer.wms(layer.host,{
+    } else if (layer.type == 3) { // Adiciona como MDT, modalidade de camada base com GetFeatureInfo
+        
+        var l = L.tileLayer.gfiWMS(layer.host,{
             layers: layer.layer,
             format: 'image/jpeg',
             transparent: false,
+            tiled: false,
             attribution: layer.attribution,
             maxZoom: 30
-        })
+        });
         if (layer.defaultBaseLayer == 1) {
             Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
-            l.addTo(map);
+            
+            // O comportamento de defaultBaseLayer = true só é ativado se não houver indicação de camadas no hash
+            if(window.location.hash == '') {
+                l.addTo(map);
+            }
+
         } else {
             Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
         };
@@ -84,6 +107,21 @@ function addLayer (layer){
 };
 
 $.get('/listlayers',function(data){
+
+    // Reorder data: 1 -> Type 1 data (basemaps), Type 3 data (dem's) and Type 2 data (overlays)
+
+    baseLayers = [];
+    overlayLayers = [];
+    demLayers = [];
+
+    for (i = 0; i < data.length ; i++) {
+        if (data[i].type == 1) baseLayers.push(data[i]);
+        if (data[i].type == 2) overlayLayers.push(data[i]);
+        if (data[i].type == 3) demLayers.push(data[i]);
+    }
+
+    data = [].concat(baseLayers).concat(demLayers).concat(overlayLayers);
+
     for (let index = 0; index < data.length; index++) {
         const element = data[index];
         addLayer(element)

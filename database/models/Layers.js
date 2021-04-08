@@ -3,7 +3,7 @@ const connection = require('../connection');
 const { sequelize } = require('./User');
 
 const Layers = connection.define('Layers', {
-    type: { // Tipo da camada: 1 -> Camada Base, 2 -> Camada Overlay
+    type: { // Tipo da camada: 1 -> Camada Base, 2 -> Camada Overlay, 3 -> Modelo Digital de Elevação
         type: Sequelize.INTEGER
     },
     layerName: { // Nome de exibição da camada
