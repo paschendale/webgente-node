@@ -42,13 +42,13 @@
                             <label for="public-layer"><strong>Camada Pública:</strong></label>
                             <br>
                             <div class="form-check" id="public-layer">
-                                <input class="form-check-input" type="radio" name="publicLayer" id="publicLayertrue" value="1" checked>
+                                <input class="form-check-input" type="radio" name="publicLayer" id="publicLayertrue" value="1">
                                 <label class="form-check-label" for="publicLayertrue">
                                     Sim
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="publicLayer" id="publicLayerfalse" value="0">
+                                <input class="form-check-input" type="radio" name="publicLayer" id="publicLayerfalse" value="2" checked>
                                 <label class="form-check-label" for="publicLayerfalse">
                                     Não
                                 </label>
@@ -77,6 +77,12 @@
                                 <input class="form-check-input" type="radio" name="type" id="overlay" value="2" checked>
                                 <label class="form-check-label" for="overlay">
                                     Camada de Sobreposição
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="type" id="mdt" value="3">
+                                <label class="form-check-label" for="mdt">
+                                    Modelo Digital de Terreno
                                 </label>
                             </div>
                         </div>
@@ -188,8 +194,8 @@
             $.get("/describeLayer/" + layer + '/' + encodeURIComponent(host))
             .done(data => {   
                 data = JSON.parse(data);          
-                if ($('#basemap').is(':checked')) {
-                    $("#attributes-table").html('Camadas base não possuem atributos.')
+                if ($('#basemap').is(':checked') || $('#mdt').is(':checked')) {
+                    $("#attributes-table").html('Camadas base ou modelos de elevação não possuem atributos.')
                     $("#attributes-div").collapse('show')
                     $('#load-layer-attributes').removeClass().addClass('btn btn-success')
                     $('#load-layer-attributes').attr('state','basemap')
@@ -329,12 +335,14 @@
             
             if("<%=type%>" == 1) {
                 $('input:radio[name=type][value=1]').click();
+            } else if ("<%=type%>" == 3){
+                $('input:radio[name=type][value=3]').click();
             }
             if("<%=defaultBaseLayer%>" == 1) {
                 $('input:radio[name=defaultBaseLayer][value=1]').click();
             }  
-            if("<%=publicLayer%>" == 0) {
-                $('input:radio[name=publicLayer][value=0]').click();
+            if("<%=publicLayer%>" == 1) {
+                $('input:radio[name=publicLayer][value=1]').click();
             }
 
             loadLayerAttributes() // Carrega a tabela de atributos da Layer
