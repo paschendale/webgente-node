@@ -53,18 +53,18 @@ function filter_concate() {
     for (query in requestParams.layerSelect.queryFields) {
 
         var value = document.getElementById(query).value
-        if(!value.trim()==false){
-        //Adição da condição E para mais de uma propriedade
-        cql_filter += (value != "" & cql_filter != "") ? " and " : ""
-        //Verficação de tipo do campo
-        if (requestParams.layerSelect.queryFields[query].fieldType == "string") {
-            // cql_filter+= ("("+query+" LIKE "+ "'%"+value+"%')")
-            cql_filter += ("(" + query + " LIKE " + "'%" + value + "%' or " + query + " LIKE " + "'%" + (value.toLowerCase()) + "%' or " + query + " LIKE " + "'%" + (value.toUpperCase()) + "%') ")
-        } else {
-            cql_filter += (value != "") ? (isNaN(value)) ? (query + " = 000") : (query + " = " + "" + value + " ") : "";
+        if (!value.trim() == false) {
+            //Adição da condição E para mais de uma propriedade
+            cql_filter += (value != "" & cql_filter != "") ? " and " : ""
+            //Verficação de tipo do campo
+            if (requestParams.layerSelect.queryFields[query].fieldType == "string") {
+                // cql_filter+= ("("+query+" LIKE "+ "'%"+value+"%')")
+                cql_filter += ("(" + query + " LIKE " + "'%" + value + "%' or " + query + " LIKE " + "'%" + (value.toLowerCase()) + "%' or " + query + " LIKE " + "'%" + (value.toUpperCase()) + "%') ")
+            } else {
+                cql_filter += (value != "") ? (isNaN(value)) ? (query + " = 000") : (query + " = " + "" + value + " ") : "";
+            }
         }
     }
-}
     requestParams.filter_all = cql_filter
 
 }
@@ -79,9 +79,9 @@ function table_factory() {
     filter_concate()
     //Adquire campos habilitados para o usuário
     $.get('/propertyname/' + option.layer, function (data) {
-        
+
         requestParams.property_name = Object.keys(data.field)
-        requestParams.property_name.push("id","geom") // Adiciona o id e a geometria para utilizar em downloads e zoom
+        requestParams.property_name.push("id", "geom") // Adiciona o id e a geometria para utilizar em downloads e zoom
         var column = new Array()
         //Forma a coluna json
         Object.keys(data.field).map((element) => {
@@ -126,14 +126,15 @@ function ajaxRequest(params) {
     $.get(url1).then(function (response) {
         response = JSON.parse(response)
         //Condição para resultados vazios   
-        if (response.features.length == 0 ) {
+        if (response.features.length == 0) {
             params.success([])
         } else {
             resultWFS = response
+    
             zoomFeature(-1)
             properties = response.features.map(e => e.properties);
             params.success(properties)
-           
+
         }
     })
 
@@ -142,65 +143,61 @@ function ajaxRequest(params) {
 
 //Botbões da tabela
 function TableActions(value, row, index, field) {
-    return ['<button class="btn btn-dark btn-custom btn-sm" id="downloadFeature" onclick="downloadFeature(' + index + ')"> <i class="fas fa-download"></i></button>', ' ', '<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature(' + index + ')"> <i class="fas fa-search"></i></button>'].join('');
+    return ['<button class="btn btn-dark btn-custom btn-sm" id="downloadFeature" onclick="exportGeojson(' + index + ')"> <i class="fas fa-download"></i></button>', ' ', '<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature(' + index + ')"> <i class="fas fa-search"></i></button>'].join('');
 }
-
-
+//Utiliza o json obtido na pesquisa para exportar documento geoJson
+function exportGeojson(index) {
+    var data = ""
+    if (index == -1) {
+        data = JSON.stringify(resultWFS)
+    } else {
+        data = resultWFS
+        data.features = resultWFS.features[index]
+        data = JSON.stringify(data)
+    }
+    var blob = new Blob([data]);
+    let link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'feicao.geoJson'
+    link.click();
+}
 //Realiza requisição para o Download 
 function downloadFeature(index_format) {
-    var format = index_format;
-
-    var cql_define = ""
-    //Organiza objetos com base no tipo de donwload: uma feição em shp ou todas em shp/gml/csv
-    if (Number.isInteger(index_format)) {
-        requestParams.format = "shape-zip"
-        cql_define = " id =" + resultWFS.features[index_format].properties.id
-    } else {
-        requestParams.format = index_format
-        cql_define = requestParams.filter_all
-        
-    }
     var wfsParams = {
         layer: requestParams.layerSelect.layer,
-        format: encodeURIComponent(requestParams.format),
+        format: encodeURIComponent(index_format),
         property_name: requestParams.property_name,
-        cql_filter: encodeURI(cql_define)
+        cql_filter: encodeURI(requestParams.filter_all)
     }
 
-    url= '/wfs/'+ Object.values(wfsParams).join('/')  
+    url = '/wfs/' + Object.values(wfsParams).join('/')
 
-    console.log(url);
+
 
     $.ajax({
-       url: url,
-       beforeSend: function () {
-           $("#load").show()
-       },
-       success (data) {
+        url: url,
+        beforeSend: function () {
+            $("#load").show()
+        },
+        success(data) {
             $("#load").hide();
+        
             var blob = new Blob([data]);
 
-            console.log(data);
+
 
             let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-
-            if(format == 'csv'){
+            if (index_format == 'csv') {
                 link.download = 'feicao.csv';
             }
-            else if(format == 'GML3'){
+            else if (index_format == 'GML3') {
                 link.download = 'feicao.gml';
             }
-            else if(format == 'shape-zip'){
-                link.download = 'feicao.zip';
-            }
-
             link.click();
 
-           //var url2 = window.URL.createObjectURL(blob);
-           //window.open(url2, '_blank')
-       }
-   });
+        }
+    });
 }
 //Aplica estilo e foca no local selecionado 
 function zoomFeature(index) {
