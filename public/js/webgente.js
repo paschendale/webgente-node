@@ -109,7 +109,6 @@ function addLayer (layer){
 $.get('/listlayers',function(data){
 
     // Reorder data: 1 -> Type 1 data (basemaps), Type 3 data (dem's) and Type 2 data (overlays)
-
     baseLayers = [];
     overlayLayers = [];
     demLayers = [];

@@ -125,6 +125,15 @@ th {
 	border-radius: 10px;
 }
 
+.input-group {
+	padding: 5px 5px 5px 0px;
+}
+
+.webgente-search-form:hover {
+	background: rgb(216, 216, 216);
+	transition: background-color 0.5s ease;
+}
+
 @media (max-width: 768px) {
 
 	.webgente-search-container{

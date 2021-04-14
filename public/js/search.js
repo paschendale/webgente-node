@@ -37,7 +37,7 @@ function searchableFields() {
         var option = layersQuerrys[$('#search_list').prop('selectedIndex') - 1];
         var complete_sub = ""
         Object.keys(option.queryFields).map((element) => {
-            complete_sub += `<input type="text" class="form-control form-control-sm" name="` + element + `" id="` + element + `" placeholder="` + option.queryFields[element].fieldAlias + `">`
+            complete_sub += `<input type="text" class="form-control form-control-sm webgente-search-form" name="` + element + `" id="` + element + `" placeholder="` + option.queryFields[element].fieldAlias + `">`
         })
         $("#sub_search_fields").html(complete_sub)
     } else {
