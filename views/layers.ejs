@@ -45,44 +45,66 @@
 
 <script>
 
-  var layersId = []
+  var layerId = []
 
   $( document ).ready(function() {
-    $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" data-toggle="modal" data-target="#modalAllLayers"onClick="ModalAllLayers()">Remover Camadas</button> <a class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" href="/layers/add"">Nova Camada</a>')
+    $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" data-toggle="modal" data-target="#modalAllLayers"onClick="ModalAllLayers(null, null)">Remover Camadas</button> <a class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" href="/layers/add"">Nova Camada</a>')
   });
 
   /* Aplicação de raio e margem nos botões de ação*/
    function TableActions(value, row, index, field) {
-    return [`<button class="btn btn-dark btn-custom" id="removeLayer" data-toggle="modal" data-target="#modalLayer" onclick='modalLayer("`+row.layerName+`",`+row.id+`)'> <i class="fas fa-trash"></i></button>`, ' ', '<button class="btn btn-dark btn-custom2" id="editLayer" onclick="editLayer('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
+    return [`<button class="btn btn-dark btn-custom" id="removeLayer" data-toggle="modal" data-target="#modalLayer" onclick='ModalAllLayers("`+row.layerName+`",`+row.id+`)'> <i class="fas fa-trash"></i></button>`, ' ', '<button class="btn btn-dark btn-custom2" id="editLayer" onclick="editLayer('+row.id+')"> <i class="fas fa-edit"></i></button>'].join('');
   }
 
-  function ModalAllLayers() {
-   var layerName = [];
-   layerId = [];
-   var $table = $('#tableLayers');
+  function ModalAllLayers(layerName, id){
+  	if(layerName == null && id == null){
+   		var layerName = [];
+   		layerId = [];
+   		var $table = $('#tableLayers');
 
-   $.map($table.bootstrapTable('getSelections'), (row) => {
-        layerName.push(row.layerName);
-        layerId.push(row.id);
-        console.log(layerName);
+   		$.map($table.bootstrapTable('getSelections'), (row) => {
+        	layerName.push(row.layerName);
+        	layerId.push(row.id);
+        	console.log(layerName);
 
-        $('#modalHere').html(`
-        <div class="modal fade" id="modalAllLayers" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-body">
-                <p>Você está excluindo as camadas: `+ layerName.join(', ') +`</p>
-                <p>Confirmar ação ?</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="removeLayers()">Sim</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `);
-    })
+        	$('#modalHere').html(`
+	        	<div class="modal fade" id="modalAllLayers" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	          		<div class="modal-dialog" role="document">
+	            		<div class="modal-content">
+	              			<div class="modal-body">
+	                			<p>Você está excluindo as camadas: `+ layerName.join(', ') +`</p>
+	                			<p>Confirmar ação ?</p>
+	              			</div>
+	              			<div class="modal-footer">
+	                			<button type="button" class="btn btn-primary" onclick="removeLayer(null)">Sim</button>
+	                			<button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+	              			</div>
+	            		</div>
+	          		</div>
+	        	</div>
+      		`);
+        })
+    }
+    else if(layerName != null && id != null){
+    	console.log(id);
+
+    	$('#modalHere').html(`
+      		<div class="modal fade" id="modalLayer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        		<div class="modal-dialog" role="document">
+          			<div class="modal-content">
+            			<div class="modal-body">
+              				<p>Você está excluindo a camada: `+layerName+`</p>
+              				<p>Confirmar ação ?</p>
+            			</div>
+	            		<div class="modal-footer">
+	              			<button type="button" class="btn btn-primary" onclick="removeLayer(`+id+`)">Sim</button>
+	              			<button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+	            		</div>
+          			</div>
+        		</div>
+      		</div>
+    	`);
+    }
   }
 
   function editLayer(index) {
@@ -90,33 +112,18 @@
     window.location.href = '/layers/edit/'+index
     //todo: desenvolver função para editar layer
   }
-  function modalLayer(layerName, id){
-    $('#modalHere').html(`
-      <div class="modal fade" id="modalLayer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-body">
-              <p>Você está excluindo a camada `+layerName+`</p>
-              <p>Confirmar ação ?</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary" onclick="removeLayer(`+id+`)">Sim</button>
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `);
-  }
-  function removeLayers(){
-      let index = JSON.stringify(layerId);
-      window.location.href = '/layers/delete/'+index
-    }
+
   function removeLayer(id){
-  	usersId = [];
-    usersId.push(id);
-    let index = JSON.stringify(usersId);
-    window.location.href = '/layers/delete/'+index
+  	if(id == null){
+	    let index = JSON.stringify(layerId);
+	    window.location.href = '/layers/delete/'+index
+	}
+	else{
+		layerId = [];
+	    layerId.push(id);
+		let index = JSON.stringify(layerId);
+      	window.location.href = '/layers/delete/'+index
+	}
   }
 </script>
 </div>

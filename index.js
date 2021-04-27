@@ -605,19 +605,6 @@ app.route('/layers/delete/:id')
 		} else {
 			res.redirect('/')
 		}
-		/*if(req.session.user){
-			Layers.destroy({
-				raw:true,
-				where: {
-					id: req.params.id
-				}
-			})
-			.then(() => {
-				res.redirect('/layers')
-			})			
-		} else {
-			res.redirect('/')
-		}*/
 	})
 
 /* Rota para página 'Sobre' na interface de administração - Rota protegida pela sessão */
