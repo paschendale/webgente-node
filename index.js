@@ -713,6 +713,8 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 			} else {
 
 				console.log('Usuário requisitou getFeatureInfo sem login')
+				console.log(req.session.user)
+
 				data = JSON.parse(data)
 				//restrição de dados		
 				restrictAttributes(data.features, 'id', 'properties')
@@ -791,9 +793,10 @@ app.get('/listqueryable', (req, res) => {
 		attributes: ['layerName', 'layer', 'queryFields', 'publicLayer', 'fields', 'fieldAlias', 'fieldType'],
 		where: whereClausule
 	}).then(results => {
-		//Função para adaptar retorno do banco de dados	
+		//Função para adaptar retorno do banco de dados
+		
 		for (var n = 0; n < results.length; n++) {
-			//Objeto com o retorno ordenadado por propriedade:	
+			//Objeto com o retorno ordenadado por propriedade:
 			var fields = {
 				field: ((results[n].fields).split(',')),
 				queryFields: ((results[n].queryFields).split(',')),
@@ -816,22 +819,28 @@ app.get('/listqueryable', (req, res) => {
 				'layerName': results[n].layerName,
 				'layer': results[n].layer,
 				'queryFields': properties_order
-			}
-
-			//Restrição de atributos para usuário restrito
-			if (req.session.user == false) {
-				restrictAttributes(new Array(results[n]), 'layer', 'queryFields')
-					.then(result => {
-						results[n] = result
-					})
-			}
-
+			}			
+			
 			//Remove camadas que possuam queryFields vazio 
-			if (!Object.entries(results[n].queryFields).length) {
+		if (!Object.entries(results[n].queryFields).length) {
 				results.splice(n, 1)
+				n-=1
 			}
+			
 		}
-		res.send(results)
+		//Restrição de atributos para usuário restrito
+		if (req.session.user) {
+			res.send(results)
+		}else{
+			
+			restrictAttributes(results, 'layer', 'queryFields')
+				.then(result => {
+					res.send(result)
+				})
+			
+		}
+	
+		
 	})
 })
 
@@ -840,7 +849,7 @@ app.get('/listqueryable', (req, res) => {
 async function restrictAttributes(features, layerKey, fieldKey) {
 
 	var restrictedData = new Array();
-
+	
 	for (feature of features) { // Itera em cada camada
 
 		// Se a camada não possuir conteudo em layerKey ela é um MDT (um raster, possivelmente), sendo assim ela não é restrita
@@ -869,28 +878,31 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 				fields = results.fields.split(',')
 				allowedFields = results.allowedFields.split(',')
 			})
-
-
+	
 			if (allowedFields.indexOf('true') != -1) {
-				/* TODO: Caso a camada não possua nenhum campo permitido ela deve ser excluída  */
+				/* TODO: Verficação de camadas permitidas */
 				for (i = 0; i < fields.length; i++) {
+				
 					if (getBool(allowedFields[i])) {
 						restrict[fields[i]] = feature[fieldKey][fields[i]]
 					}
 				}
-
+			
 				feature[fieldKey] = restrict
 				return feature
 			} else {
-				feature[fieldKey] = [];
+				feature= false;
 				return feature
 			}
 		}
-
-		restrictedData.push(await getAllowedFields(feature))
+		/* TODO: Caso a camada não possua nenhum campo permitido ela não será adicionada  */
+		var getRestrict= await getAllowedFields(feature)
+		if(getRestrict!=false){
+		restrictedData.push(getRestrict)
+		}
 
 	}
-
+	
 	return restrictedData
 }
 
