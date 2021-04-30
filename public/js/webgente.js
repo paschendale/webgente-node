@@ -41,6 +41,14 @@ Lc = L.control.groupedLayers(baseMaps,overlayMaps,optionsControl).addTo(map);
 
 /* Lendo camadas da Base de Dados e adicionando ao controle */
 
+function addMetadata (metadata) {
+    if (metadata != "") {
+        return ' <a href="' + metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>'
+    } else {
+        return ''
+    }
+}
+
 var metadata = '<a href="/metadata/CAD_Lote.txt" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>'
 
 function addLayer (layer){
@@ -55,10 +63,10 @@ function addLayer (layer){
             maxZoom: 30
         })
         if (layer.defaultBaseLayer == 1) {
-            Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
+            Lc.addBaseLayer(l, layer.layerName + addMetadata(layer.metadata));
             l.addTo(map);
         } else {
-            Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
+            Lc.addBaseLayer(l, layer.layerName + addMetadata(layer.metadata));
         };
 
     } else if (layer.type == 2) { // Adiciona como Overlay
@@ -71,7 +79,7 @@ function addLayer (layer){
             maxZoom: 30
         });
         if (layer.defaultBaseLayer == 1) {
-            Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
+            Lc.addOverlay(l, layer.layerName + addMetadata(layer.metadata), layer.group);
             
             // O comportamento de defaultBaseLayer = true só é ativado se não houver indicação de camadas no hash
             if(window.location.hash == '') {
@@ -79,7 +87,7 @@ function addLayer (layer){
             }
 
         } else {
-            Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
+            Lc.addOverlay(l, layer.layerName + addMetadata(layer.metadata), layer.group);
         };
     
     } else if (layer.type == 3) { // Adiciona como MDT, modalidade de camada base com GetFeatureInfo
