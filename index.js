@@ -658,13 +658,18 @@ app.route('/config')
 					}
 				}
 			).then(() => {
+					Layers.update({host: req.body.serverHost},{where: {}})
+				}
+			).then(() => {
 				console.log('Dados de configuração atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
-			}).catch((error) => {
-				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
-				res.send('Ocorreu algum erro')
-			})
+				}
+			).catch((error) => {
+					console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
+					res.send('Ocorreu algum erro')
+				}
+			)
 		}
 		else {
 			res.redirect('/');
