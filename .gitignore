@@ -3,3 +3,4 @@ database/webgente.db
 node_modules
 public/img/favicon.ico
 public/img/webgente-fundo-escuro-120x40.png
+public/metadata
