@@ -376,3 +376,60 @@ function getMapStateFromURL () {
         }
     }
 };
+
+/* Exibição de coordenadas no mapa - Toda definição parte do código epsgCode
+A coordenada é transformada e exibida no sistema definido, sendo criado um
+link para a pagina do epsg.io para este também! */
+
+epsgCode = 31983;
+
+var projectionFromEPSG;
+
+/* Requisicao para recuperar projeção via código EPSG */
+$.get('http://epsg.io/'+ epsgCode +'.proj4 ',results => {projectionFromEPSG = results;})
+
+function coordinatesOnMouseMove() {
+    /* Criando o evento de mousemove para atualização do código */ 
+    map.on("mousemove",function (e) {
+        
+        lat = e.latlng.lat;
+        lng = e.latlng.lng;
+
+        projected = proj4(projectionFromEPSG,[lng,lat])
+
+        n = projected[1].toFixed(3);
+        e = projected[0].toFixed(3);
+
+        // Atualizando conteudo do container
+        $('#webgente-coordinates-container').html('<i onclick="searchByCoordinates()" class="fas fa-search webgente-search-coordinates"></i> N: ' + n + '; ' + 'E: ' + e + ' <a target="_blank" href="http://epsg.io/' + epsgCode + '">(EPSG:' + epsgCode + ')</a>')
+        
+        // Atualizando padding do panel com base na largura da escala gráfica
+        scaleMargin = document.getElementsByClassName('leaflet-control-scale')[0].clientWidth + 5
+        $('#webgente-coordinates-panel').css('padding-left', scaleMargin + 10)
+    })
+}
+
+coordinatesOnMouseMove();
+
+function goToCoordinates(){
+
+    unprojected = proj4(projectionFromEPSG).inverse([Number($('#x-coordinate').val()),Number($('#y-coordinate').val())]);
+    
+    map.panTo([unprojected[1],unprojected[0]],{animate: true});
+
+    coordinatesOnMouseMove();
+}
+
+function searchByCoordinates() {
+
+    map.off('mousemove');
+
+    var url = window.location.hash.split('/')
+
+    centerOfMap = proj4(projectionFromEPSG).forward([Number(url[2]),Number(url[1])])
+
+    form =  'N: <input class="webgente-coordinate-input webgente-search-form" type="text" name="y" id="y-coordinate" value='+centerOfMap[1].toFixed(3)+'> E: <input class="webgente-coordinate-input webgente-search-form" type="text" name="x" id="x-coordinate" value='+centerOfMap[0].toFixed(3)+'> <i onclick="goToCoordinates()" class="fas fa-search webgente-search-coordinates"></i>'
+
+    $('#webgente-coordinates-container').html( form + ' <a target="_blank" href="http://epsg.io/' + epsgCode + '">(EPSG:' + epsgCode + ')</a>')
+}
+
