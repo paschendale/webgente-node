@@ -386,7 +386,7 @@ epsgCode = 31983;
 var projectionFromEPSG;
 
 /* Requisicao para recuperar projeção via código EPSG */
-$.get('http://epsg.io/'+ epsgCode +'.proj4 ',results => {projectionFromEPSG = results;})
+$.get('https://epsg.io/'+ epsgCode +'.proj4 ',results => {projectionFromEPSG = results;})
 
 function coordinatesOnMouseMove() {
     /* Criando o evento de mousemove para atualização do código */ 
@@ -401,7 +401,7 @@ function coordinatesOnMouseMove() {
         e = projected[0].toFixed(3);
 
         // Atualizando conteudo do container
-        $('#webgente-coordinates-container').html('<i onclick="searchByCoordinates()" class="fas fa-search webgente-search-coordinates"></i> N: ' + n + '; ' + 'E: ' + e + ' <a target="_blank" href="http://epsg.io/' + epsgCode + '">(EPSG:' + epsgCode + ')</a>')
+        $('#webgente-coordinates-container').html('<i onclick="searchByCoordinates()" class="fas fa-search webgente-search-coordinates"></i> N: ' + n + '; ' + 'E: ' + e + ' <a target="_blank" href="https://epsg.io/' + epsgCode + '">(EPSG:' + epsgCode + ')</a>')
         
         // Atualizando padding do panel com base na largura da escala gráfica
         scaleMargin = document.getElementsByClassName('leaflet-control-scale')[0].clientWidth + 5
