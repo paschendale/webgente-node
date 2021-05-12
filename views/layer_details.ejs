@@ -23,10 +23,10 @@
         <!--Início do fomrulário-->
         <div class="container shadow-sm" id="container-form-layerdetails">
                 <% if (edit) { %> <!-- Switch entre rotas do modo de edição e criação de camadas -->
-                    <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST">
+                    <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST" enctype="multipart/form-data">
                     <h3>Edição de Camada</h3>
                 <% } else { %>
-                    <form action="/layers/add" onsubmit="return validateForm()" method="POST">
+                    <form action="/layers/add" onsubmit="return validateForm()" method="POST" enctype="multipart/form-data" >
                     <h3>Adição de Camada</h3>
                 <% } %>
                 <hr>
@@ -125,8 +125,8 @@
             <div class="row">
                     <div class="col">
                         <label for="host"><strong>Link para Metadados:</strong></label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="metadata" name="metadata" placeholder="/metadata/CAD_Lote.html">
+                        <div class="form-group" >
+                            <input type="file" class="form-control" id="metadata" name="metadata" >
                         </div>
                     </div>
                 </div>       
@@ -176,7 +176,7 @@
     </div>   
 
     <script>
-
+     
         var edit = false; // Habilita ou nao carregamento de fieldAlias, queryFields e allowedFields ao finalizar carregamento da tabela
 
         /* Preenche automaticamente o host no campo desabilitado,
@@ -259,7 +259,11 @@
                 $('#fields').val().split(',').length,
                 $('#fieldType').val().split(',').length
             ]
-
+            var file=$('#metadata').val().split('.')
+            if( file[file.length-1]!='html' && file[file.length-1]!='gml'){
+                alert('Extensão de metadatas não compatível, por favor insira o arquivo no formato padrão!')
+                return false;
+            }
             if(!fieldLength.every( (val, i, arr) => val === arr[0] )){
                 alert('Há algum erro na entrada dos dados, por favor, recarregue a página e reinsira os dados novamente')
                 return false;
@@ -272,7 +276,7 @@
                 alert('Verifique os atributos da camada antes de salva-la')
                 return false
             }
-            
+           
             // Verifica se a camada existe antes de salva-la
 
 
