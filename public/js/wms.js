@@ -127,7 +127,9 @@ function attributeFormatter(element,keys) {
         // Formatação de strings
         if(keys.indexOf('path_360_min') > -1) { 
             // Substitui o HTML do Popup (leaflet-popup-content) por um visualizador 360
-            return '<a href =#  dir="'+element+'"  id = "path_360_min" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
+            return '<a href =#  dir="'+element+'"  id = "path_360" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
+        } else if (keys.indexOf('path_360') > -1) {
+            return '<a href =#  dir="'+element+'"  id = "path_360" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
         } else if (element.includes('http')){ 
             // Se um dos valores contiver a substring 'http' formatar como link
             return '<a target="_blank" href="'+element+'">Link</a>'
@@ -139,16 +141,38 @@ function attributeFormatter(element,keys) {
 
 function open360Viewer() {
  
-    element = $('#path_360_min').attr('dir');
+    element = $('#path_360').attr('dir');
 
-    old_html = $('.leaflet-popup-content').html()
+    if(element.includes('http')) {
+        old_html = $('.leaflet-popup-content').html()
 
-    html = '<div id="container-psv"></div>'
+        html = '<div id="container-psv"></div>'
+    
+        $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
 
-    $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
+        var div = document.getElementById('container-psv');
+        var PSV = new PhotoSphereViewer({
+            panorama: element,
+            container: div,
+            time_anim: 3000,
+            //caption: 'Legenda toDo',
+            minFov: 5,
+            loading_img: 'img/loading.gif',
+            navbar: ['autorotate', 'zoom'],
+            navbar_style: {
+                backgroundColor: 'rgba(58, 67, 77, 0.7)'
+            },
+        });
+    } else {
 
-    var div = document.getElementById('container-psv');
-    var PSV = new PhotoSphereViewer({
+        old_html = $('.leaflet-popup-content').html()
+
+        html = '<div id="container-psv"></div>'
+    
+        $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
+    
+        var div = document.getElementById('container-psv');
+        var PSV = new PhotoSphereViewer({
             panorama: window.location.origin + element,
             container: div,
             time_anim: 3000,
@@ -160,6 +184,7 @@ function open360Viewer() {
                 backgroundColor: 'rgba(58, 67, 77, 0.7)'
             },
         });
+    }
 }
 
 /* Função para obter a legenda do Geoserver */
