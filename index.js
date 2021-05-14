@@ -246,50 +246,71 @@ app.route('/layers/edit/:id')
 		if (req.session.user) {
 			const form = new formidable.IncomingForm();
 			//formidable recebe campos e arquivos
-			form.parse(req, (err, fields, files) => {	
+			form.parse(req, (err, fields, files) => {
 				if (err) {
 					console.log('Failed to save the file.')
 					return;
-				  }else{
-			Config.findOne({
-				raw: true,
-				attributes: ['serverHost']
-			})
-				.then(results => {
-					
-					Layers.update({
-						type: fields.type,
-						layerName: fields.layerName,
-						group: fields.group,
-						host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-						layer: fields.layer,
-						defaultBaseLayer: fields.defaultBaseLayer,
-						fields: fields.fields,
-						allowedFields: fields.allowedFields,
-						queryFields: fields.queryFields,
-						fieldAlias: fields.fieldAlias,
-						fieldType: fields.fieldType,
-						metadata: "/metadata/"+files.metadata.name,
-						publicLayer: fields.publicLayer
-					},
-						{
-							where: {
-								id: req.params.id
-							}
+				} else {
+					Config.findOne({
+						raw: true,
+						attributes: ['serverHost']
+					})
+						.then(results => {
+
+							Layers.update({
+								type: fields.type,
+								layerName: fields.layerName,
+								group: fields.group,
+								host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+								layer: fields.layer,
+								defaultBaseLayer: fields.defaultBaseLayer,
+								fields: fields.fields,
+								allowedFields: fields.allowedFields,
+								queryFields: fields.queryFields,
+								fieldAlias: fields.fieldAlias,
+								fieldType: fields.fieldType,
+								metadata: "/metadata/" + files.metadata.name,
+								publicLayer: fields.publicLayer
+							},
+								{
+									where: {
+										id: req.params.id
+									}
+								})
 						})
-				})
-				.then(console.log('Succesfully inserted data into database!', fields))
-				.then(()=>{
-					//Upload metadata
-					const oldpath = files.metadata.path;
-					const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
-					console.log('Successfully File saved !')
-					fs.renameSync(oldpath, newpath);
-					res.render("layers")})
-				.catch((error) => { console.log('Failed to update database. ' + error) })
-			}
-	})	
-			} else {
+						.then(console.log('Succesfully inserted data into database!', fields))
+						.then(() => {
+							//Upload metadata
+							const oldpath = files.metadata.path;
+							const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+
+							fs.readFile(oldpath, function (err, data) {
+								if (err) throw err
+								// Write the file
+								fs.writeFile(newpath, data, function (err) {
+									if (err) throw err
+								})
+
+								// Delete the file
+								fs.unlink(oldpath, function (err) {
+									if (err) throw err
+								})
+								console.log('Successfully File saved!')
+								res.render("layers")
+							})
+
+
+						})
+						.catch((error) => {
+							console.log('Failed to insert data into database. ' + error)
+							res.render('error', {
+								errorCode: 100,
+								errorMessage: 'Não foi possível editar a camada!'
+							})
+						})
+				}
+			})
+		} else {
 			res.redirect('/')
 		}
 	})
@@ -486,53 +507,70 @@ app.route('/layers/add')
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 
 		if (req.session.user) {
-		const form = new formidable.IncomingForm();
-		//formidable recebe campos e arquivos
-		form.parse(req, (err, fields, files) => {	
-			if (err) {
-				console.log('Failed to save the file.')
-				return;
-			  }else{			
-			Config.findOne({
-				raw: true,
-				attributes: ['serverHost']
-			})
-				.then(results => {
-					Layers.create({
-						type: fields.type,
-						layerName: fields.layerName,
-						group: fields.group,
-						host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-						layer: fields.layer,
-						defaultBaseLayer: fields.defaultBaseLayer,
-						fields: fields.fields,
-						allowedFields: fields.allowedFields,
-						queryFields: fields.queryFields,
-						fieldAlias: fields.fieldAlias,
-						fieldType: fields.fieldType,
-						metadata:"/metadata/"+files.metadata.name,
-						publicLayer: fields.publicLayer
+			const form = new formidable.IncomingForm();
+			//formidable recebe campos e arquivos
+			form.parse(req, (err, fields, files) => {
+				if (err) {
+					console.log('Failed to save the file.')
+					return;
+				} else {
+					Config.findOne({
+						raw: true,
+						attributes: ['serverHost']
 					})
-				})
-				.then(console.log('Succesfully inserted data into database!',fields))
-				.then(()=>{
-				//Upload metadata
-				const oldpath = files.metadata.path;
-				const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
-				console.log('Successfully File saved !')
-				fs.renameSync(oldpath, newpath);
-				  
-			res.render("layers")
-				
-			
-				})
-	.catch((error) => { console.log('Failed to insert data into database. ' + error) })
-			}	
-})
-} else {
-	res.redirect('/')
-}
-		}	)
+						.then(results => {
+							Layers.create({
+								type: fields.type,
+								layerName: fields.layerName,
+								group: fields.group,
+								host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+								layer: fields.layer,
+								defaultBaseLayer: fields.defaultBaseLayer,
+								fields: fields.fields,
+								allowedFields: fields.allowedFields,
+								queryFields: fields.queryFields,
+								fieldAlias: fields.fieldAlias,
+								fieldType: fields.fieldType,
+								metadata: "/metadata/" + files.metadata.name,
+								publicLayer: fields.publicLayer
+							})
+						})
+						.then(console.log('Succesfully inserted data into database!', fields))
+						.then(() => {
+							//Upload metadata
+							const oldpath = files.metadata.path;
+							const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+
+							fs.readFile(oldpath, function (err, data) {
+								if (err) throw err
+								// Write the file
+								fs.writeFile(newpath, data, function (err) {
+									if (err) throw err
+								})
+
+								// Delete the file
+								fs.unlink(oldpath, function (err) {
+									if (err) throw err
+								})
+								console.log('Successfully File saved!')
+								res.render("layers")
+							})
+
+
+						})
+						.catch((error) => {
+							console.log('Failed to insert data into database. ' + error)
+							res.render('error', {
+								errorCode: 100,
+								errorMessage: 'Não foi possível salvar a camada!'
+							})
+						})
+				}
+			})
+		} else {
+			res.redirect('/')
+		}
+	})
 
 
 /* Rota para obtênção de lista de camadas */
@@ -634,17 +672,17 @@ app.route('/config')
 					}
 				}
 			).then(() => {
-					Layers.update({host: req.body.serverHost},{where: {}})
-				}
+				Layers.update({ host: req.body.serverHost }, { where: {} })
+			}
 			).then(() => {
 				console.log('Dados de configuração atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
-				}
+			}
 			).catch((error) => {
-					console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
-					res.send('Ocorreu algum erro')
-				}
+				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
+				res.send('Ocorreu algum erro')
+			}
 			)
 		}
 		else {
