@@ -1,5 +1,4 @@
 const express = require('express');
-const port = require('./port')
 const app = new express(); // Inicializando objeto do express para execução do servidor HTTP
 const bodyParser = require("body-parser");
 const { Op } = require("sequelize");
@@ -77,6 +76,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 /* Inicializando o servidor HTTP */
+port = 3000; // Porta de inicialização do servidor
 app.listen(port, () => {
 	console.log('WebGENTE de ' + cityName + ' started at http://localhost:' + port)
 });
@@ -634,18 +634,13 @@ app.route('/config')
 					}
 				}
 			).then(() => {
-					Layers.update({host: req.body.serverHost},{where: {}})
-				}
-			).then(() => {
 				console.log('Dados de configuração atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
-				}
-			).catch((error) => {
-					console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
-					res.send('Ocorreu algum erro')
-				}
-			)
+			}).catch((error) => {
+				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
+				res.send('Ocorreu algum erro')
+			})
 		}
 		else {
 			res.redirect('/');

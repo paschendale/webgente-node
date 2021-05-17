@@ -41,14 +41,6 @@ Lc = L.control.groupedLayers(baseMaps,overlayMaps,optionsControl).addTo(map);
 
 /* Lendo camadas da Base de Dados e adicionando ao controle */
 
-function addMetadata (metadata) {
-    if (metadata != "") {
-        return ' <a href="' + metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>'
-    } else {
-        return ''
-    }
-}
-
 var metadata = '<a href="/metadata/CAD_Lote.txt" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>'
 
 function addLayer (layer){
@@ -63,10 +55,10 @@ function addLayer (layer){
             maxZoom: 30
         })
         if (layer.defaultBaseLayer == 1) {
-            Lc.addBaseLayer(l, layer.layerName + addMetadata(layer.metadata));
+            Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
             l.addTo(map);
         } else {
-            Lc.addBaseLayer(l, layer.layerName + addMetadata(layer.metadata));
+            Lc.addBaseLayer(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>');
         };
 
     } else if (layer.type == 2) { // Adiciona como Overlay
@@ -79,7 +71,7 @@ function addLayer (layer){
             maxZoom: 30
         });
         if (layer.defaultBaseLayer == 1) {
-            Lc.addOverlay(l, layer.layerName + addMetadata(layer.metadata), layer.group);
+            Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
             
             // O comportamento de defaultBaseLayer = true só é ativado se não houver indicação de camadas no hash
             if(window.location.hash == '') {
@@ -87,7 +79,7 @@ function addLayer (layer){
             }
 
         } else {
-            Lc.addOverlay(l, layer.layerName + addMetadata(layer.metadata), layer.group);
+            Lc.addOverlay(l, layer.layerName + ' <a href="' + layer.metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>', layer.group);
         };
     
     } else if (layer.type == 3) { // Adiciona como MDT, modalidade de camada base com GetFeatureInfo
@@ -376,60 +368,3 @@ function getMapStateFromURL () {
         }
     }
 };
-
-/* Exibição de coordenadas no mapa - Toda definição parte do código epsgCode
-A coordenada é transformada e exibida no sistema definido, sendo criado um
-link para a pagina do epsg.io para este também! */
-
-epsgCode = 31983;
-
-var projectionFromEPSG;
-
-/* Requisicao para recuperar projeção via código EPSG */
-$.get('https://epsg.io/'+ epsgCode +'.proj4 ',results => {projectionFromEPSG = results;})
-
-function coordinatesOnMouseMove() {
-    /* Criando o evento de mousemove para atualização do código */ 
-    map.on("mousemove",function (e) {
-        
-        lat = e.latlng.lat;
-        lng = e.latlng.lng;
-
-        projected = proj4(projectionFromEPSG,[lng,lat])
-
-        n = projected[1].toFixed(3);
-        e = projected[0].toFixed(3);
-
-        // Atualizando conteudo do container
-        $('#webgente-coordinates-container').html('<i onclick="searchByCoordinates()" class="fas fa-search webgente-search-coordinates"></i> N: ' + n + '; ' + 'E: ' + e + ' <a target="_blank" href="https://epsg.io/' + epsgCode + '">(EPSG:' + epsgCode + ')</a>')
-        
-        // Atualizando padding do panel com base na largura da escala gráfica
-        scaleMargin = document.getElementsByClassName('leaflet-control-scale')[0].clientWidth + 5
-        $('#webgente-coordinates-panel').css('padding-left', scaleMargin + 10)
-    })
-}
-
-coordinatesOnMouseMove();
-
-function goToCoordinates(){
-
-    unprojected = proj4(projectionFromEPSG).inverse([Number($('#x-coordinate').val()),Number($('#y-coordinate').val())]);
-    
-    map.panTo([unprojected[1],unprojected[0]],{animate: true});
-
-    coordinatesOnMouseMove();
-}
-
-function searchByCoordinates() {
-
-    map.off('mousemove');
-
-    var url = window.location.hash.split('/')
-
-    centerOfMap = proj4(projectionFromEPSG).forward([Number(url[2]),Number(url[1])])
-
-    form =  'N: <input class="webgente-coordinate-input webgente-search-form" type="text" name="y" id="y-coordinate" value='+centerOfMap[1].toFixed(3)+'> E: <input class="webgente-coordinate-input webgente-search-form" type="text" name="x" id="x-coordinate" value='+centerOfMap[0].toFixed(3)+'> <i onclick="goToCoordinates()" class="fas fa-search webgente-search-coordinates"></i>'
-
-    $('#webgente-coordinates-container').html( form + ' <a target="_blank" href="http://epsg.io/' + epsgCode + '">(EPSG:' + epsgCode + ')</a>')
-}
-
