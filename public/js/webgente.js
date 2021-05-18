@@ -381,7 +381,7 @@ function getMapStateFromURL () {
 A coordenada é transformada e exibida no sistema definido, sendo criado um
 link para a pagina do epsg.io para este também! */
 
-epsgCode = 31983;
+epsgCode = referenceSystem;
 
 var projectionFromEPSG;
 

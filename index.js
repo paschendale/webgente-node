@@ -98,7 +98,8 @@ app.get('/', (req, res) => {
 				startupLat: results.startupLat,
 				startupLong: results.startupLong,
 				startupZoom: results.startupZoom,
-				cityName: results.cityName
+				cityName: results.cityName,
+				referenceSystem: results.referenceSystem
 			})
 		})
 
@@ -645,7 +646,8 @@ app.route('/config')
 							startupLat: results.startupLat,
 							startupLong: results.startupLong,
 							startupZoom: results.startupZoom,
-							cityName: results.cityName
+							cityName: results.cityName,
+							referenceSystem: results.referenceSystem
 						})
 				})
 		}
@@ -664,7 +666,8 @@ app.route('/config')
 					startupLat: req.body.startupLat,
 					startupLong: req.body.startupLong,
 					startupZoom: req.body.startupZoom,
-					cityName: req.body.cityName
+					cityName: req.body.cityName,
+					referenceSystem: req.body.referenceSystem
 				},
 				{
 					where: {
@@ -899,7 +902,6 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 			})
 
 			if (allowedFields.indexOf('true') != -1) {
-				/* TODO: Verficação de camadas permitidas */
 				for (i = 0; i < fields.length; i++) {
 
 					if (getBool(allowedFields[i])) {
@@ -947,16 +949,15 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 		raw: true,
 		attributes: ['serverHost']
 	})
-		.then(result => {
-			fetch(result.serverHost + encodeURI(urlWfs), { method: 'GET', headers: headers })
-				.then(res => res.text())
-				.then(data => {
-					console.log('WFS requisition sent, querying layers: ' + req.params.layer)
-					console.log(result.serverHost + encodeURI(urlWfs))
-					res.send(data)
-
-				})
+	.then(result => {
+		fetch(result.serverHost + encodeURI(urlWfs), { method: 'GET', headers: headers })
+		.then(res => res.text())
+		.then(data => {
+			console.log('WFS requisition sent, querying layers: ' + req.params.layer)
+			console.log(result.serverHost + encodeURI(urlWfs))
+			res.send(data)
 		})
+	})
 })
 
 // Transforma uma string true or false em um elemento boolean
