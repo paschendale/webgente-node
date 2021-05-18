@@ -20,10 +20,8 @@ function getFeature(e) {
         var index=activeLayers.length
         params = {	
             layers: activeLayers[index-1],       
-            lat1: e.latlng.lat-0.5*pixelSize,
-            lng1: e.latlng.lng-0.5*pixelSize,
-            lat2: e.latlng.lat+0.5*pixelSize,
-            lng2: e.latlng.lng+0.5*pixelSize, 
+            lat: e.latlng.lat-0.5*pixelSize,
+            lng: e.latlng.lng-0.5*pixelSize,
             srs: 'urn:ogc:def:crs:EPSG:4326'
         }
             wfs_recursive(params,index)

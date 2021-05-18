@@ -760,7 +760,14 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 })
 
 /* Seleção de feições */
-app.get('/select/:layer/:lat1/:lng1/:lat2/:lng2/:srs', (req, res) => {
+app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
+
+	filter = {
+		part_1: 'INTERSECTS(geom, SRID=4326;Point(',
+		part_2: req.params.lng,
+		part_3: req.params.lat,
+		part_4: '))'
+	}
 
 	params = {
 		service: 'WFS',
@@ -769,27 +776,27 @@ app.get('/select/:layer/:lat1/:lng1/:lat2/:lng2/:srs', (req, res) => {
 		typeNames: req.params.layer,
 		outputformat: 'application/json',
 		srsName: 'EPSG:4326',
-		bbox: req.params.lat1 + ',' + req.params.lng1 + ',' + req.params.lat2 + ',' + req.params.lng2 + ',' + req.params.srs,
-		count: 1
+		count: 1,
+		cql_filter: encodeURI(Object.values(filter).join(' '))
 	}
 
 	Config.findOne({
 		raw: true,
 		attributes: ['serverHost']
 	})
-		.then(results => {
+	.then(results => {
 
-			url = results.serverHost + Object.entries(params).map(e => e.join('=')).join('&');
+		url = results.serverHost + Object.entries(params).map(e => e.join('=')).join('&');
 
-			fetch(url, { method: 'GET', headers: headers })
-				.then(res => res.text())
-				.then(data => {
-					console.log('WFS requisition sent: ' + url)
-					data = removeProperties(data)
-					res.send(data)
-				})
-				.catch(error => res.send(error))
+		fetch(url, { method: 'GET', headers: headers })
+		.then(res => res.text())
+		.then(data => {
+			console.log('WFS requisition sent: ' + url)
+			data = removeProperties(data)
+			res.send(data)
 		})
+		.catch(error => res.send(error))
+	})
 
 	function removeProperties(data) {
 		data = JSON.parse(data)
