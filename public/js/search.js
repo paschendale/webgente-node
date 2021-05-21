@@ -36,7 +36,7 @@ function searchableFields() {
         $("#search_fields").show();
         var option = layersQuerrys[$('#search_list').prop('selectedIndex') - 1];
         var complete_sub = ""
-
+      
         Object.keys(option.queryFields).map((element) => {
             complete_sub += `<input type="text" class="form-control form-control-sm webgente-search-form" name="` + element + `" id="` + element + `" placeholder="` + option.queryFields[element].fieldAlias + `">`
         })
@@ -132,7 +132,7 @@ function ajaxRequest(params) {
             params.success([])
         } else {
             resultWFS = response
-
+    
             zoomFeature(-1)
             properties = response.features.map(e => e.properties);
             params.success(properties)
@@ -183,7 +183,7 @@ function downloadFeature(index_format) {
         },
         success(data) {
             $("#load").hide();
-
+        
             var blob = new Blob([data]);
 
 
@@ -212,15 +212,15 @@ function zoomFeature(index) {
 
 }
 //Remove todas os alterações feitas com a tabela
-function closeTable() {
-    if ($.isEmptyObject(requestParams) == false) {
+function closeTable() { 
+    if ($.isEmptyObject(requestParams) == false){
         removeLayerByName(requestParams.layerSelect.layer)
         $("#table").bootstrapTable('destroy')
         $("#buttons_table").hide()
         searchableFields()
     }
-    focus_style.clearLayers()
-
+        focus_style.clearLayers()
+    
 }
 //Adiciona layer pelo controle de camadas
 function addLayerByName(nameString) {

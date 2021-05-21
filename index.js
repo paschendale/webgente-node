@@ -10,9 +10,6 @@ const Layers = require("./database/models/Layers.js")
 const Users = require("./database/models/User.js")
 const Config = require("./database/models/Config.js")
 const fetch = require('node-fetch');
-const formidable = require('formidable');
-const fs = require('fs');
-const path = require('path');
 const sanitize = require('sanitize')
 const { query, config } = require('./database/connection.js');
 
@@ -310,7 +307,6 @@ app.route('/layers/edit/:id')
 					})
 				}
 			})
-
 		} else {
 			res.redirect('/')
 		}
@@ -507,8 +503,7 @@ app.route('/layers/add')
 	})
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
-
-			const form = formidable({ keepExtension: false, uploadDir: __dirname + "\\public\\metadata" })
+      const form = formidable({ keepExtension: false, uploadDir: __dirname + "\\public\\metadata" })
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 
@@ -568,12 +563,10 @@ app.route('/layers/add')
 						})
 				}
 			})
-
 		} else {
 			res.redirect('/')
 		}
 	})
-
 
 
 /* Rota para obtênção de lista de camadas */
@@ -677,17 +670,17 @@ app.route('/config')
 					}
 				}
 			).then(() => {
-				Layers.update({ host: req.body.serverHost }, { where: {} })
-			}
+					Layers.update({host: req.body.serverHost},{where: {}})
+				}
 			).then(() => {
 				console.log('Dados de configuração atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
-			}
+				}
 			).catch((error) => {
-				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
-				res.send('Ocorreu algum erro')
-			}
+					console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
+					res.send('Ocorreu algum erro')
+				}
 			)
 		}
 		else {
@@ -721,44 +714,44 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		raw: true,
 		attributes: ['serverHost']
 	})
-		.then(results => {
-			console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
-			console.log(results.serverHost + urlParameters)
-			fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
-				.then(res => res.text())
-				.then(data => {
+	.then(results => {
+		console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
+		console.log(results.serverHost + urlParameters)
+		fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
+		.then(res => res.text())
+		.then(data => {
 
-					if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
+			if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
 
-						console.log('Usuário logado, getFeatureInfo enviado!')
-						data = JSON.parse(data)
-						res.send(data);
+				console.log('Usuário logado, getFeatureInfo enviado!')
+				data = JSON.parse(data)
+				res.send(data);
 
-					} else {
+			} else {
 
-						console.log('Usuário requisitou getFeatureInfo sem login')
-						console.log(req.session.user)
+				console.log('Usuário requisitou getFeatureInfo sem login')
+				console.log(req.session.user)
 
-						data = JSON.parse(data)
-						//restrição de dados		
-						restrictAttributes(data.features, 'id', 'properties')
-							.then(result => {
+				data = JSON.parse(data)
+				//restrição de dados		
+				restrictAttributes(data.features, 'id', 'properties')
+				.then(result => {
 
-								if (result[0] != undefined) {
-									data.features = result
-									res.send(data)
-								} else { // Envia um array vazio caso a resposta do GFI seja nula
-									data.features = [];
-									res.send(data)
-								}
-							})
+					if (result[0] != undefined) {
+						data.features = result
+						res.send(data)
+					} else { // Envia um array vazio caso a resposta do GFI seja nula
+						data.features = [];
+						res.send(data)
 					}
-
 				})
-				.catch(err => {
-					res.send(err);
-				});
+			}
+
 		})
+		.catch(err => {
+			res.send(err);
+		});
+	})
 })
 
 /* Seleção de feições */
@@ -824,7 +817,7 @@ app.get('/listqueryable', (req, res) => {
 		where: whereClausule
 	}).then(results => {
 		//Função para adaptar retorno do banco de dados
-
+		
 		for (var n = 0; n < results.length; n++) {
 			//Objeto com o retorno ordenadado por propriedade:
 			var fields = {
@@ -849,28 +842,28 @@ app.get('/listqueryable', (req, res) => {
 				'layerName': results[n].layerName,
 				'layer': results[n].layer,
 				'queryFields': properties_order
-			}
-
+			}			
+			
 			//Remove camadas que possuam queryFields vazio 
-			if (!Object.entries(results[n].queryFields).length) {
+		if (!Object.entries(results[n].queryFields).length) {
 				results.splice(n, 1)
-				n -= 1
+				n-=1
 			}
-
+			
 		}
 		//Restrição de atributos para usuário restrito
 		if (req.session.user) {
 			res.send(results)
-		} else {
-
+		}else{
+			
 			restrictAttributes(results, 'layer', 'queryFields')
 				.then(result => {
 					res.send(result)
 				})
-
+			
 		}
-
-
+	
+		
 	})
 })
 
@@ -879,12 +872,12 @@ app.get('/listqueryable', (req, res) => {
 async function restrictAttributes(features, layerKey, fieldKey) {
 
 	var restrictedData = new Array();
-
+	
 	for (feature of features) { // Itera em cada camada
 
 		// Se a camada não possuir conteudo em layerKey ela é um MDT (um raster, possivelmente), sendo assim ela não é restrita
-		if (feature[layerKey] == '') {
-
+		if (feature[layerKey] == ''){ 
+						
 			feature[layerKey] = 'Raster.Values'
 			restrictedData.push(feature)
 			continue;
@@ -908,30 +901,30 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 				fields = results.fields.split(',')
 				allowedFields = results.allowedFields.split(',')
 			})
-
+	
 			if (allowedFields.indexOf('true') != -1) {
 				for (i = 0; i < fields.length; i++) {
-
+				
 					if (getBool(allowedFields[i])) {
 						restrict[fields[i]] = feature[fieldKey][fields[i]]
 					}
 				}
-
+			
 				feature[fieldKey] = restrict
 				return feature
 			} else {
-				feature = false;
+				feature= false;
 				return feature
 			}
 		}
 		/* TODO: Caso a camada não possua nenhum campo permitido ela não será adicionada  */
-		var getRestrict = await getAllowedFields(feature)
-		if (getRestrict != false) {
-			restrictedData.push(getRestrict)
+		var getRestrict= await getAllowedFields(feature)
+		if(getRestrict!=false){
+		restrictedData.push(getRestrict)
 		}
 
 	}
-
+	
 	return restrictedData
 }
 
@@ -1044,12 +1037,12 @@ app.get('/propertyname/:layer', (req, res) => {
 			layer: req.params.layer,
 			field: properties
 		}
-
+	
 		if (req.session.user) {
 			res.send(layer_properties)
 		} else {
 			restrictAttributes(new Array(layer_properties), 'layer', 'field').then(result => {
-
+				
 				res.send(result[0])
 
 			})
