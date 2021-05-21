@@ -202,7 +202,7 @@ app.route('/user/add')
 					group: req.body.group
 				}
 			).then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("users"))
+			.then(res.render("users"))
 		} else {
 			res.redirect('/')
 		}
@@ -218,27 +218,27 @@ app.route('/layers/edit/:id')
 					id: req.params.id
 				}
 			})
-				.then(layerData => {
-					console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
-					res.render('layer_details.ejs', {
-						edit: true,
-						id: layerData.id,
-						layerName: layerData.layerName,
-						group: layerData.group,
-						layer: layerData.layer,
-						type: layerData.type,
-						host: layerData.host,
-						defaultBaseLayer: layerData.defaultBaseLayer,
-						allowedFields: layerData.allowedFields,
-						fieldAlias: layerData.fieldAlias,
-						queryFields: layerData.queryFields,
-						metadata: layerData.metadata,
-						publicLayer: layerData.publicLayer
-					})
+			.then(layerData => {
+				console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
+				res.render('layer_details.ejs', {
+					edit: true,
+					id: layerData.id,
+					layerName: layerData.layerName,
+					group: layerData.group,
+					layer: layerData.layer,
+					type: layerData.type,
+					host: layerData.host,
+					defaultBaseLayer: layerData.defaultBaseLayer,
+					allowedFields: layerData.allowedFields,
+					fieldAlias: layerData.fieldAlias,
+					queryFields: layerData.queryFields,
+					metadata: layerData.metadata,
+					publicLayer: layerData.publicLayer
 				})
-				.catch(() => {
-					res.redirect('/layers')
-				})
+			})
+			.catch(() => {
+				res.redirect('/layers')
+			})
 		} else {
 			res.redirect('/')
 		}
@@ -256,58 +256,58 @@ app.route('/layers/edit/:id')
 						raw: true,
 						attributes: ['serverHost']
 					})
-						.then(results => {
-							var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "Não há arquivos de metadados";
-							Layers.update({
-								type: fields.type,
-								layerName: fields.layerName,
-								group: fields.group,
-								host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-								layer: fields.layer,
-								defaultBaseLayer: fields.defaultBaseLayer,
-								fields: fields.fields,
-								allowedFields: fields.allowedFields,
-								queryFields: fields.queryFields,
-								fieldAlias: fields.fieldAlias,
-								fieldType: fields.fieldType,
-								metadata: metadata_path,
-								publicLayer: fields.publicLayer
-							},
-								{
-									where: {
-										id: req.params.id
-									}
-								})
-						})
-						.then(console.log('Succesfully inserted data into database!', fields))
-						.then(() => {
-							const oldpath = files.metadata.path;
-
-							fs.readFile(oldpath, function (err, data) {
-								if (err) throw err
-								// Write the file
-								if (files.metadata.size > 0) {
-									const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
-									fs.writeFile(newpath, data, function (err) {
-										if (err) throw err
-									})
+					.then(results => {
+						var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
+						Layers.update({
+							type: fields.type,
+							layerName: fields.layerName,
+							group: fields.group,
+							host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+							layer: fields.layer,
+							defaultBaseLayer: fields.defaultBaseLayer,
+							fields: fields.fields,
+							allowedFields: fields.allowedFields,
+							queryFields: fields.queryFields,
+							fieldAlias: fields.fieldAlias,
+							fieldType: fields.fieldType,
+							metadata: metadata_path,
+							publicLayer: fields.publicLayer
+						},
+							{
+								where: {
+									id: req.params.id
 								}
-								// Delete the file
-								fs.unlink(oldpath, function (err) {
+							})
+					})
+					.then(console.log('Succesfully inserted data into database!', fields))
+					.then(() => {
+						const oldpath = files.metadata.path;
+
+						fs.readFile(oldpath, function (err, data) {
+							if (err) throw err
+							// Write the file
+							if (files.metadata.size > 0) {
+								const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+								fs.writeFile(newpath, data, function (err) {
 									if (err) throw err
-
-									res.render("layers")
 								})
-							})
+							}
+							// Delete the file
+							fs.unlink(oldpath, function (err) {
+								if (err) throw err
 
-						})
-						.catch((error) => {
-							console.log('Failed to insert data into database. ' + error)
-							res.render('error', {
-								errorCode: 100,
-								errorMessage: 'Não foi possível editar a camada!'
+								res.render("layers")
 							})
 						})
+
+					})
+					.catch((error) => {
+						console.log('Failed to insert data into database. ' + error)
+						res.render('error', {
+							errorCode: 100,
+							errorMessage: 'Não foi possível editar a camada!'
+						})
+					})
 				}
 			})
 
@@ -516,7 +516,7 @@ app.route('/layers/add')
 					console.log('Failed to save the file.')
 					return;
 				} else {
-					var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "Não há arquivos de metadados";
+					var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
 					Config.findOne({
 						raw: true,
 						attributes: ['serverHost']
@@ -778,7 +778,6 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 		typeNames: req.params.layer,
 		outputformat: 'application/json',
 		srsName: 'EPSG:4326',
-		count: 1,
 		cql_filter: encodeURI(Object.values(filter).join(' '))
 	}
 

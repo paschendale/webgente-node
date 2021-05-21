@@ -138,13 +138,14 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <label for="host"><strong>Link para Metadados:</strong></label>
+                                            <label for="host"><strong>Arquivo de Metadados:</strong></label>
                                             <div class="custom-file">
                                                 <input type="file" accept=".html,.xml" class="custom-file-input"
                                                     id="metadata" name="metadata">
                                                 <label class="custom-file-label" for="metadata" id="c-metadata">Nenhum
                                                     arquivo selecionado...</label>
                                             </div>
+                                            <p>O arquivo de metadados deve ser inserido nos formatos HTML ou XML.</p>
                                         </div>
                                     </div>
             </div>
@@ -200,6 +201,7 @@
         entretanto, o backend ignorará qualquer entrada de host que diferir
         daquela em /config */
         $('#host').val("<%=host%>")
+
         $('#metadata').on("change", function (event) {
             if (!$('#metadata').val()) {
                 $('#c-metadata').html("Nenhum arquivo selecionado...")
@@ -355,7 +357,12 @@
                 $('#group').val("<%=group%>")
                 $('#layer').val("<%=layer%>")
                 $('#host').val("<%=host%>")
-                $('#c-metadata').html("<%=metadata%>")
+
+                if ("<%=metadata%>" != "none" && "<%=metadata%>" != "") {
+                    $('#c-metadata').html("<%=metadata%>")
+                } else {
+                    $('#c-metadata').html("Não há arquivo de metadados.")
+                }
 
                 if ("<%=type%>" == 1) {
                     $('input:radio[name=type][value=1]').click();

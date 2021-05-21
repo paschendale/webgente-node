@@ -48,7 +48,6 @@ function wfs_recursive(params, index){
 }
 function loadFeatureAsLayer (data) {
     data = JSON.parse(data)
-    console.log(data)
     selectedLayers.addData(data)
     updateSelectedDownloadLink() // Atualiza o link de download após a exibição das feições selecionadas
 
