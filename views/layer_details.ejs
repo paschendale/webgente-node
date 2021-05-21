@@ -1,7 +1,7 @@
-<%- include('partials/admin/header.ejs') %> 
-<div>
+<%- include('partials/admin/header.ejs') %>
+    <div>
 
-    <!-- Notas sobre o comportamento da adição e edição de Layers nesta página
+        <!-- Notas sobre o comportamento da adição e edição de Layers nesta página
     
         Toda vez que esta página for chamada como 'EDIÇÃO' ela deve verificar se 
         a lista de campos armazenada em Layer.fields corresponde com a lista de 
@@ -11,144 +11,158 @@
         Eventuais problemas podem surgir com essa diferença entre os campos armazenados
         e os campos no Geoserver, neste caso, basta o administrador abrir a camada em
         edição e recarregar os campos para adicionar os novos
-
-        TODO: Ao dar reload nos campos a tabela deverá apenas adicionar campos inexistentes
-        de forma que a configuração anterior não seja prejudicada.
-
-        TODO: Permitir reordenar os campos para exibição nas interfaces
     
     -->
+        <div class="container" style="margin-left: 5%;">
+            <!--Início do fomrulário-->
+            <div class="container shadow-sm" id="container-form-layerdetails">
+                <% if (edit) { %>
+                    <!--Switch entre rotas do modo de edição e criação de camadas -->
+                    <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST"
+                        enctype="multipart/form-data">
+                        <h3>Edição de Camada</h3>
+                        <% } else { %>
+                            <form action="/layers/add" onsubmit="return validateForm()" method="POST"
+                                enctype="multipart/form-data">
+                                <h3>Adição de Camada</h3>
+                                <% } %>
 
-    <div class= "container" style="margin-left: 5%;">
-        <!--Início do fomrulário-->
-        <div class="container shadow-sm" id="container-form-layerdetails">
-                <% if (edit) { %> <!-- Switch entre rotas do modo de edição e criação de camadas -->
-                    <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST">
-                    <h3>Edição de Camada</h3>
-                <% } else { %>
-                    <form action="/layers/add" onsubmit="return validateForm()" method="POST">
-                    <h3>Adição de Camada</h3>
-                <% } %>
-                <hr>
-                <div class="row">
-                    <div class="col">
-                        <label for="layerName"><strong>Nome de exibição da camada no menu de camadas:</strong></label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="layerName" name="layerName" placeholder="Nome de Exibição da Camada">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="public-layer"><strong>Camada Pública:</strong></label>
-                            <br>
-                            <div class="form-check" id="public-layer">
-                                <input class="form-check-input" type="radio" name="publicLayer" id="publicLayertrue" value="1">
-                                <label class="form-check-label" for="publicLayertrue">
-                                    Sim
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="publicLayer" id="publicLayerfalse" value="2" checked>
-                                <label class="form-check-label" for="publicLayerfalse">
-                                    Não
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label for="group"><strong>Grupo da camada no menu de camadas:</strong></label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="group" name="group" placeholder="Grupo da Camada">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="layer-type"><strong>Tipo de Camada:</strong></label>
-                            <br>
-                            <div class="form-check" id="layer-type">
-                                <input class="form-check-input" type="radio" name="type" id="basemap" value="1">
-                                <label class="form-check-label" for="basemap">
-                                    Camada Base
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="type" id="overlay" value="2" checked>
-                                <label class="form-check-label" for="overlay">
-                                    Camada de Sobreposição
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="type" id="mdt" value="3">
-                                <label class="form-check-label" for="mdt">
-                                    Modelo Digital de Terreno
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label for="layer"><strong>Nome da camada no servidor de mapas:</strong></label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="layer" name="layer" placeholder="workspace:camada">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="default-layer"><strong>Camada Padrão:</strong></label>
-                            <br>
-                            <div class="form-check" id="default-layer">
-                                <input class="form-check-input" type="radio" name="defaultBaseLayer" value="1">
-                                <label class="form-check-label" for="true">
-                                    Sim
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="defaultBaseLayer" value="2" checked>
-                                <label class="form-check-label" for="false">
-                                    Não
-                                </label>
-                            </div>
-                        </div>
-                    </div>  
-                </div>
-            <div class="row">
-                <div class="col">
-                    <label for="host"><strong>Endereço do servidor de mapas:</strong></label>
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="host" name="host" placeholder="http://localhost/geoserver/gianetti/wms?" disabled>
-                    </div>
-                </div>
-            </div>   
-            <div class="row">
-                    <div class="col">
-                        <label for="host"><strong>Link para Metadados:</strong></label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="metadata" name="metadata" placeholder="/metadata/CAD_Lote.html">
-                        </div>
-                    </div>
-                </div>       
-                <button type="button" id="load-layer-attributes" class="btn btn-dark" onClick="loadLayerAttributes()">
-                    <span class="fas fa-sync-alt"></span>  Carregar atributos da camada
-                </button>
+
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="layerName"><strong>Nome de exibição da camada no menu de
+                                                    camadas:</strong></label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="layerName" name="layerName"
+                                                    placeholder="Nome de Exibição da Camada">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <label for="public-layer"><strong>Camada Pública:</strong></label>
+                                                <br>
+                                                <div class="form-check" id="public-layer">
+                                                    <input class="form-check-input" type="radio" name="publicLayer"
+                                                        id="publicLayertrue" value="1">
+                                                    <label class="form-check-label" for="publicLayertrue">
+                                                        Sim
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="publicLayer"
+                                                        id="publicLayerfalse" value="2" checked>
+                                                    <label class="form-check-label" for="publicLayerfalse">
+                                                        Não
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="group"><strong>Grupo da camada no menu de
+                                                    camadas:</strong></label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="group" name="group"
+                                                    placeholder="Grupo da Camada">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <label for="layer-type"><strong>Tipo de Camada:</strong></label>
+                                                <br>
+                                                <div class="form-check" id="layer-type">
+                                                    <input class="form-check-input" type="radio" name="type"
+                                                        id="basemap" value="1">
+                                                    <label class="form-check-label" for="basemap">
+                                                        Camada Base
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="type"
+                                                        id="overlay" value="2" checked>
+                                                    <label class="form-check-label" for="overlay">
+                                                        Camada de Sobreposição
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="type" id="mdt"
+                                                        value="3">
+                                                    <label class="form-check-label" for="mdt">
+                                                        Modelo Digital de Terreno
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="layer"><strong>Nome da camada no servidor de
+                                                    mapas:</strong></label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="layer" name="layer"
+                                                    placeholder="workspace:camada">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <label for="default-layer"><strong>Camada Padrão:</strong></label>
+                                                <br>
+                                                <div class="form-check" id="default-layer">
+                                                    <input class="form-check-input" type="radio" name="defaultBaseLayer"
+                                                        value="1">
+                                                    <label class="form-check-label" for="true">
+                                                        Sim
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="defaultBaseLayer"
+                                                        value="2" checked>
+                                                    <label class="form-check-label" for="false">
+                                                        Não
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="host"><strong>Endereço do servidor de mapas:</strong></label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="host" name="host"
+                                                    placeholder="http://localhost/geoserver/gianetti/wms?" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="host"><strong>Arquivo de Metadados:</strong></label>
+                                            <div class="custom-file">
+                                                <input type="file" accept=".html,.xml" class="custom-file-input"
+                                                    id="metadata" name="metadata">
+                                                <label class="custom-file-label" for="metadata" id="c-metadata">Nenhum
+                                                    arquivo selecionado...</label>
+                                            </div>
+                                            <p>O arquivo de metadados deve ser inserido nos formatos HTML ou XML.</p>
+                                        </div>
+                                    </div>
+            </div>
+            <button type="button" id="load-layer-attributes" class="btn btn-dark" onClick="loadLayerAttributes()">
+                <span class="fas fa-sync-alt"></span> Carregar atributos da camada
+            </button>
         </div>
         <!--Fim do formulário-->
         <hr>
         <div id="attributes-div" class="collapse">
-            <table 
-                id="attributes-table"
-                class="table table-striped" 
-                data-toggle="table" 
-                data-pagination="false"> 
+            <table id="attributes-table" class="table table-striped" data-toggle="table" data-pagination="false">
                 <thead class="thead-dark">
                     <tr>
-                    <th data-field="name">Nome do Atributo</th>
-                    <th data-field="allowed" data-halign="center">Permitido</th>
-                    <th data-field="queryable" data-halign="center">Pesquisável</th>
-                    <th data-field="alias" data-halign="center">Apelido</th>
-                    <th data-field="type" data-halign="center">Tipo</th>
+                        <th data-field="name">Nome do Atributo</th>
+                        <th data-field="allowed" data-halign="center">Permitido</th>
+                        <th data-field="queryable" data-halign="center">Pesquisável</th>
+                        <th data-field="alias" data-halign="center">Apelido</th>
+                        <th data-field="type" data-halign="center">Tipo</th>
                 </thead>
             </table>
         </div>
@@ -158,7 +172,8 @@
             <input type="hidden" class="form-control" id="fields" name="fields" placeholder="fields">
         </div>
         <div class="form-group">
-            <input type="hidden" class="form-control" id="allowedFields" name="allowedFields" placeholder="allowedFields">
+            <input type="hidden" class="form-control" id="allowedFields" name="allowedFields"
+                placeholder="allowedFields">
         </div>
         <div class="form-group">
             <input type="hidden" class="form-control" id="queryFields" name="queryFields" placeholder="queryFields">
@@ -170,10 +185,10 @@
             <input type="hidden" class="form-control" id="fieldType" name="fieldType" placeholder="fieldAlias">
         </div>
         <div id="align5">
-        <button type="submit" class="btn btn-dark">Salvar</button>
+            <button type="submit" class="btn btn-dark">Salvar</button>
         </div>
         </form>
-    </div>   
+    </div>
 
     <script>
 
@@ -186,35 +201,44 @@
         daquela em /config */
         $('#host').val("<%=host%>")
 
-        async function loadLayerAttributes(){
+        $('#metadata').on("change", function (event) {
+            if (!$('#metadata').val()) {
+                $('#c-metadata').html("Nenhum arquivo selecionado...")
+            } else {
+                var file = $('#metadata').val().split('\\')
+                $('#c-metadata').html(file[file.length - 1])
+
+            }
+        })
+        async function loadLayerAttributes() {
 
             host = $('#host').val()
             layer = $('#layer').val()
 
             $.get("/describeLayer/" + layer + '/' + encodeURIComponent(host))
-            .done(data => {   
-                data = JSON.parse(data);          
-                if ($('#basemap').is(':checked') || $('#mdt').is(':checked')) {
-                    $("#attributes-table").html('Camadas base ou modelos de elevação não possuem atributos.')
-                    $("#attributes-div").collapse('show')
-                    $('#load-layer-attributes').removeClass().addClass('btn btn-success')
-                    $('#load-layer-attributes').attr('state','basemap')
-                    return null
-                } else if(data.featureTypes != undefined) {
-                    createAttributesTable(data.featureTypes[0].properties);
-                    $('#load-layer-attributes').removeClass().addClass('btn btn-success')
-                    $('#load-layer-attributes').attr('state','success')
-                } else {
-                    alert('Não existe a camada ' + layer + ' no host ' + host)
-                    $('#load-layer-attributes').removeClass().addClass('btn btn-danger')                    
-                    $('#load-layer-attributes').attr('state','error')
-                }
-            })
-            .fail(function() {
-                $('#load-layer-attributes').removeClass().addClass('btn btn-danger')                    
-                $('#load-layer-attributes').attr('state','error')
-                alert('Não foi possível recuperar a lista de atributos da camada');
-            });
+                .done(data => {
+                    data = JSON.parse(data);
+                    if ($('#basemap').is(':checked') || $('#mdt').is(':checked')) {
+                        $("#attributes-table").html('Camadas base ou modelos de elevação não possuem atributos.')
+                        $("#attributes-div").collapse('show')
+                        $('#load-layer-attributes').removeClass().addClass('btn btn-success')
+                        $('#load-layer-attributes').attr('state', 'basemap')
+                        return null
+                    } else if (data.featureTypes != undefined) {
+                        createAttributesTable(data.featureTypes[0].properties);
+                        $('#load-layer-attributes').removeClass().addClass('btn btn-success')
+                        $('#load-layer-attributes').attr('state', 'success')
+                    } else {
+                        alert('Não existe a camada ' + layer + ' no host ' + host)
+                        $('#load-layer-attributes').removeClass().addClass('btn btn-danger')
+                        $('#load-layer-attributes').attr('state', 'error')
+                    }
+                })
+                .fail(function () {
+                    $('#load-layer-attributes').removeClass().addClass('btn btn-danger')
+                    $('#load-layer-attributes').attr('state', 'error')
+                    alert('Não foi possível recuperar a lista de atributos da camada');
+                });
         }
 
         function createAttributesTable(properties) {
@@ -225,9 +249,9 @@
             for (property of properties) {
                 data = {
                     name: property.name,
-                    allowed: '<div class="form-group" id="align3"><input class="form-check-input allowed-col" type="checkbox" value="true" id="allowed-field-'+n+'"></div>',
-                    queryable: '<div class="form-group" id="align4"><input class="form-check-input queryable-col" type="checkbox" value="true" id="queryable-field-'+n+'"></div>',
-                    alias: '<div class="form-group" id="align5"><input type="text" class="form-control alias-col" value="" id="alias-'+n+'"></div>',
+                    allowed: '<div class="form-group" id="align3"><input class="form-check-input allowed-col" type="checkbox" value="true" id="allowed-field-' + n + '"></div>',
+                    queryable: '<div class="form-group" id="align4"><input class="form-check-input queryable-col" type="checkbox" value="true" id="queryable-field-' + n + '"></div>',
+                    alias: '<div class="form-group" id="align5"><input type="text" class="form-control alias-col" value="" id="alias-' + n + '"></div>',
                     type: property.localType
                 }
                 fieldsString.push(property.name) // Criando o campo Fields
@@ -244,12 +268,12 @@
             $("#attributes-div").collapse('show');
         }
 
-        function validateForm(){ // Função para validar dados de entrada antes de envia-los ao backend
+        function validateForm() { // Função para validar dados de entrada antes de envia-los ao backend
 
             // Recupera todos os campos com id #alias-n, #queryable-n e #enabled-n, constrói strings e submete no input em um campo com tipo 'hidden'
 
-            fillHiddenForms();            
-            
+            fillHiddenForms();
+
             // Check se as strings de fields, queryFields, allowedFields e fieldAlias possuem mesmo comprimento
 
             fieldLength = [
@@ -260,7 +284,8 @@
                 $('#fieldType').val().split(',').length
             ]
 
-            if(!fieldLength.every( (val, i, arr) => val === arr[0] )){
+
+            if (!fieldLength.every((val, i, arr) => val === arr[0])) {
                 alert('Há algum erro na entrada dos dados, por favor, recarregue a página e reinsira os dados novamente')
                 return false;
             }
@@ -268,17 +293,16 @@
             // TODO: Deixar bonito essa validação com JS colorindo os campos errados
 
             // Verifica se os atributos da camada foram carregados com sucesso
-            if($('#load-layer-attributes').attr('state') == 'error' || $('#load-layer-attributes').attr('state') == undefined) {
+            if ($('#load-layer-attributes').attr('state') == 'error' || $('#load-layer-attributes').attr('state') == undefined) {
                 alert('Verifique os atributos da camada antes de salva-la')
                 return false
             }
-            
             // Verifica se a camada existe antes de salva-la
 
 
         }
 
-        function fillHiddenForms(){
+        function fillHiddenForms() {
 
             /*  O campo fields é preenchido na chamada da tabela em createAttributeTable */
 
@@ -290,20 +314,20 @@
             queryableString = [];
             allowedString = [];
 
-            for (i = 0; i < alias.length; i++){
+            for (i = 0; i < alias.length; i++) {
                 aliasString.push(alias[i].value)
             }
 
-            for (i = 0; i < allowed.length; i++){
-                if(allowed[i].checked){
+            for (i = 0; i < allowed.length; i++) {
+                if (allowed[i].checked) {
                     allowedString.push('true')
                 } else {
                     allowedString.push('false')
-                }                
+                }
             }
 
-            for (i = 0; i < queryable.length; i++){
-                if(queryable[i].checked){
+            for (i = 0; i < queryable.length; i++) {
+                if (queryable[i].checked) {
                     queryableString.push('true')
                 } else {
                     queryableString.push('false')
@@ -318,69 +342,74 @@
     </script>
 
     <!-- A variável edit é passada como true se o modo for edição -->
-    <% if (edit) { %> 
+    <% if (edit) { %>
 
-    <script>
+        <script>
 
-        var edit = true // Habilita o preenchimento dos campos para edição
+            var edit = true // Habilita o preenchimento dos campos para edição
 
-        $(document).ready(loadLayerDataForEditing())
+            $(document).ready(loadLayerDataForEditing())
 
-        function loadLayerDataForEditing(){    
-            $('#layerName').val("<%=layerName%>")
-            $('#group').val("<%=group%>")
-            $('#layer').val("<%=layer%>")
-            $('#host').val("<%=host%>")
-            $('#metadata').val("<%=metadata%>")
-            
-            if("<%=type%>" == 1) {
-                $('input:radio[name=type][value=1]').click();
-            } else if ("<%=type%>" == 3){
-                $('input:radio[name=type][value=3]').click();
-            }
-            if("<%=defaultBaseLayer%>" == 1) {
-                $('input:radio[name=defaultBaseLayer][value=1]').click();
-            }  
-            if("<%=publicLayer%>" == 1) {
-                $('input:radio[name=publicLayer][value=1]').click();
-            }
+            function loadLayerDataForEditing() {
+                $('#layerName').val("<%=layerName%>")
+                $('#group').val("<%=group%>")
+                $('#layer').val("<%=layer%>")
+                $('#host').val("<%=host%>")
 
-            loadLayerAttributes() // Carrega a tabela de atributos da Layer
-                       
-        }
-
-        function fillTableForEditing() {
-            allowedFields = "<%=allowedFields%>".split(',')
-            queryFields = "<%=queryFields%>".split(',')
-            fieldAlias = "<%=fieldAlias%>".split(',')
-
-            alias = $('.alias-col')
-            allowed = $('.allowed-col')
-            queryable = $('.queryable-col')
-            
-            for (i = 0; i < allowedFields.length; i++) {
-                if (allowedFields[i] == 'true') {
-                    allowed[i].checked = true
-                }
-            }
-
-            for (i = 0; i < queryable.length; i++) {
-                if (queryFields[i] == 'true') {
-                    queryable[i].checked = true
-                }
-            }
-
-            for (i = 0; i < alias.length; i++) {
-                if (fieldAlias[i] != undefined){
-                    alias[i].value = fieldAlias[i]
+                if ("<%=metadata%>" != "none" && "<%=metadata%>" != "") {
+                    $('#c-metadata').html("<%=metadata%>")
                 } else {
-                    alias[i].value = ''
+                    $('#c-metadata').html("Não há arquivo de metadados.")
+                }
+
+                if ("<%=type%>" == 1) {
+                    $('input:radio[name=type][value=1]').click();
+                } else if ("<%=type%>" == 3) {
+                    $('input:radio[name=type][value=3]').click();
+                }
+                if ("<%=defaultBaseLayer%>" == 1) {
+                    $('input:radio[name=defaultBaseLayer][value=1]').click();
+                }
+                if ("<%=publicLayer%>" == 1) {
+                    $('input:radio[name=publicLayer][value=1]').click();
+                }
+
+                loadLayerAttributes() // Carrega a tabela de atributos da Layer
+
+            }
+
+            function fillTableForEditing() {
+                allowedFields = "<%=allowedFields%>".split(',')
+                queryFields = "<%=queryFields%>".split(',')
+                fieldAlias = "<%=fieldAlias%>".split(',')
+
+                alias = $('.alias-col')
+                allowed = $('.allowed-col')
+                queryable = $('.queryable-col')
+
+                for (i = 0; i < allowedFields.length; i++) {
+                    if (allowedFields[i] == 'true') {
+                        allowed[i].checked = true
+                    }
+                }
+
+                for (i = 0; i < queryable.length; i++) {
+                    if (queryFields[i] == 'true') {
+                        queryable[i].checked = true
+                    }
+                }
+
+                for (i = 0; i < alias.length; i++) {
+                    if (fieldAlias[i] != undefined) {
+                        alias[i].value = fieldAlias[i]
+                    } else {
+                        alias[i].value = ''
+                    }
                 }
             }
-        }
-    </script>
-       
-    <% } %>
+        </script>
 
-</div>
-<%- include('partials/admin/footer.ejs') %> 
+        <% } %>
+
+            </div>
+            <%- include('partials/admin/footer.ejs') %>

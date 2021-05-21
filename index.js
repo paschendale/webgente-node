@@ -95,7 +95,8 @@ app.get('/', (req, res) => {
 				startupLat: results.startupLat,
 				startupLong: results.startupLong,
 				startupZoom: results.startupZoom,
-				cityName: results.cityName
+				cityName: results.cityName,
+				referenceSystem: results.referenceSystem
 			})
 		})
 
@@ -198,7 +199,7 @@ app.route('/user/add')
 					group: req.body.group
 				}
 			).then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("users"))
+			.then(res.render("users"))
 		} else {
 			res.redirect('/')
 		}
@@ -214,57 +215,98 @@ app.route('/layers/edit/:id')
 					id: req.params.id
 				}
 			})
-				.then(layerData => {
-					console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
-					res.render('layer_details.ejs', {
-						edit: true,
-						id: layerData.id,
-						layerName: layerData.layerName,
-						group: layerData.group,
-						layer: layerData.layer,
-						type: layerData.type,
-						host: layerData.host,
-						defaultBaseLayer: layerData.defaultBaseLayer,
-						allowedFields: layerData.allowedFields,
-						fieldAlias: layerData.fieldAlias,
-						queryFields: layerData.queryFields,
-						metadata: layerData.metadata,
-						publicLayer: layerData.publicLayer
-					})
+			.then(layerData => {
+				console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
+				res.render('layer_details.ejs', {
+					edit: true,
+					id: layerData.id,
+					layerName: layerData.layerName,
+					group: layerData.group,
+					layer: layerData.layer,
+					type: layerData.type,
+					host: layerData.host,
+					defaultBaseLayer: layerData.defaultBaseLayer,
+					allowedFields: layerData.allowedFields,
+					fieldAlias: layerData.fieldAlias,
+					queryFields: layerData.queryFields,
+					metadata: layerData.metadata,
+					publicLayer: layerData.publicLayer
 				})
-				.catch(() => {
-					res.redirect('/layers')
-				})
+			})
+			.catch(() => {
+				res.redirect('/layers')
+			})
 		} else {
 			res.redirect('/')
 		}
 	})
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
-			Layers.update(
-				{
-					type: req.body.type,
-					layerName: req.body.layerName,
-					group: req.body.group,
-					host: req.body.host,
-					layer: req.body.layer,
-					defaultBaseLayer: req.body.defaultBaseLayer,
-					fields: req.body.fields,
-					allowedFields: req.body.allowedFields,
-					queryFields: req.body.queryFields,
-					fieldAlias: req.body.fieldAlias,
-					fieldType: req.body.fieldType,
-					metadata: req.body.metadata,
-					publicLayer: req.body.publicLayer
-				},
-				{
-					where: {
-						id: req.params.id
-					}
+			const form = formidable({ keepExtension: false, uploadDir: __dirname + "\\public\\metadata" })
+			//formidable recebe campos e arquivos
+			form.parse(req, (err, fields, files) => {
+				if (err) {
+					console.log('Failed to save the file.')
+					return;
+				} else {
+					Config.findOne({
+						raw: true,
+						attributes: ['serverHost']
+					})
+					.then(results => {
+						var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
+						Layers.update({
+							type: fields.type,
+							layerName: fields.layerName,
+							group: fields.group,
+							host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+							layer: fields.layer,
+							defaultBaseLayer: fields.defaultBaseLayer,
+							fields: fields.fields,
+							allowedFields: fields.allowedFields,
+							queryFields: fields.queryFields,
+							fieldAlias: fields.fieldAlias,
+							fieldType: fields.fieldType,
+							metadata: metadata_path,
+							publicLayer: fields.publicLayer
+						},
+							{
+								where: {
+									id: req.params.id
+								}
+							})
+					})
+					.then(console.log('Succesfully inserted data into database!', fields))
+					.then(() => {
+						const oldpath = files.metadata.path;
+
+						fs.readFile(oldpath, function (err, data) {
+							if (err) throw err
+							// Write the file
+							if (files.metadata.size > 0) {
+								const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+								fs.writeFile(newpath, data, function (err) {
+									if (err) throw err
+								})
+							}
+							// Delete the file
+							fs.unlink(oldpath, function (err) {
+								if (err) throw err
+
+								res.render("layers")
+							})
+						})
+
+					})
+					.catch((error) => {
+						console.log('Failed to insert data into database. ' + error)
+						res.render('error', {
+							errorCode: 100,
+							errorMessage: 'Não foi possível editar a camada!'
+						})
+					})
 				}
-			).then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("layers"))
-				.catch((error) => { console.log('Failed to update database. ' + error) })
+			})
 		} else {
 			res.redirect('/')
 		}
@@ -461,103 +503,71 @@ app.route('/layers/add')
 	})
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
-			Config.findOne({
-				raw: true,
-				attributes: ['serverHost']
-			})
-				.then(results => {
-					Layers.create({
-						type: req.body.type,
-						layerName: req.body.layerName,
-						group: req.body.group,
-						host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-						layer: req.body.layer,
-						defaultBaseLayer: req.body.defaultBaseLayer,
-						fields: req.body.fields,
-						allowedFields: req.body.allowedFields,
-						queryFields: req.body.queryFields,
-						fieldAlias: req.body.fieldAlias,
-						fieldType: req.body.fieldType,
-						publicLayer: req.body.publicLayer
+      const form = formidable({ keepExtension: false, uploadDir: __dirname + "\\public\\metadata" })
+			//formidable recebe campos e arquivos
+			form.parse(req, (err, fields, files) => {
+
+				if (err) {
+					console.log('Failed to save the file.')
+					return;
+				} else {
+					var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
+					Config.findOne({
+						raw: true,
+						attributes: ['serverHost']
 					})
-				})
-				.then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("layers"))
-				.catch((error) => { console.log('Failed to insert data into database. ' + error) })
+						.then(results => {
+							Layers.create({
+								type: fields.type,
+								layerName: fields.layerName,
+								group: fields.group,
+								host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+								layer: fields.layer,
+								defaultBaseLayer: fields.defaultBaseLayer,
+								fields: fields.fields,
+								allowedFields: fields.allowedFields,
+								queryFields: fields.queryFields,
+								fieldAlias: fields.fieldAlias,
+								fieldType: fields.fieldType,
+								metadata: metadata_path,
+								publicLayer: fields.publicLayer
+							})
+						})
+						.then(console.log('Succesfully inserted data into database!', fields))
+						.then(() => {
+							//Upload metadata
+							const oldpath = files.metadata.path;
+							fs.readFile(oldpath, function (err, data) {
+								if (err) throw err
+								// Write the file
+								if (files.metadata.size > 0) {
+									const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+									fs.writeFile(newpath, data, function (err) {
+										if (err) throw err
+									})
+								}
+								// Delete the file
+								fs.unlink(oldpath, function (err) {
+									if (err) throw err
+									res.render("layers")
+								})
+							})
+
+						})
+						.catch((error) => {
+							console.log('Failed to insert data into database. ' + error)
+							res.render('error', {
+								errorCode: 100,
+								errorMessage: 'Não foi possível salvar a camada!'
+							})
+						})
+				}
+			})
 		} else {
 			res.redirect('/')
 		}
 	})
 
-app.route('/layers/edit/:id')
-	.get((req, res) => {
-		if (req.session.user) {
-			Layers.findOne({
-				raw: true,
-				where: {
-					id: req.params.id
-				}
-			})
-				.then(layerData => {
-					console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
-					res.render('layer_details.ejs', {
-						edit: true,
-						id: layerData.id,
-						layerName: layerData.layerName,
-						group: layerData.group,
-						layer: layerData.layer,
-						type: layerData.type,
-						host: layerData.host,
-						defaultBaseLayer: layerData.defaultBaseLayer,
-						allowedFields: layerData.allowedFields,
-						fieldAlias: layerData.fieldAlias,
-						queryFields: layerData.queryFields,
-						metadata: layerData.metadata,
-						publicLayer: layerData.publicLayer
-					})
-				})
-				.catch(() => {
-					res.redirect('/layers')
-				})
-		} else {
-			res.redirect('/')
-		}
-	})
-	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
-		if (req.session.user) {
-			Config.findOne({
-				raw: true,
-				attributes: ['serverHost']
-			})
-				.then(results => {
-					Layers.update({
-						type: req.body.type,
-						layerName: req.body.layerName,
-						group: req.body.group,
-						host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-						layer: req.body.layer,
-						defaultBaseLayer: req.body.defaultBaseLayer,
-						fields: req.body.fields,
-						allowedFields: req.body.allowedFields,
-						queryFields: req.body.queryFields,
-						fieldAlias: req.body.fieldAlias,
-						fieldType: req.body.fieldType,
-						metadata: req.body.metadata,
-						publicLayer: req.body.publicLayer
-					},
-						{
-							where: {
-								id: req.params.id
-							}
-						})
-				})
-				.then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("layers"))
-				.catch((error) => { console.log('Failed to update database. ' + error) })
-		} else {
-			res.redirect('/')
-		}
-	})
 
 /* Rota para obtênção de lista de camadas */
 app.get('/listlayers', (req, res) => {
@@ -631,7 +641,8 @@ app.route('/config')
 							startupLat: results.startupLat,
 							startupLong: results.startupLong,
 							startupZoom: results.startupZoom,
-							cityName: results.cityName
+							cityName: results.cityName,
+							referenceSystem: results.referenceSystem
 						})
 				})
 		}
@@ -650,7 +661,8 @@ app.route('/config')
 					startupLat: req.body.startupLat,
 					startupLong: req.body.startupLong,
 					startupZoom: req.body.startupZoom,
-					cityName: req.body.cityName
+					cityName: req.body.cityName,
+					referenceSystem: req.body.referenceSystem
 				},
 				{
 					where: {
@@ -743,7 +755,14 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 })
 
 /* Seleção de feições */
-app.get('/select/:layer/:lat1/:lng1/:lat2/:lng2/:srs', (req, res) => {
+app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
+
+	filter = {
+		part_1: 'INTERSECTS(geom, SRID=4326;Point(',
+		part_2: req.params.lng,
+		part_3: req.params.lat,
+		part_4: '))'
+	}
 
 	params = {
 		service: 'WFS',
@@ -752,8 +771,7 @@ app.get('/select/:layer/:lat1/:lng1/:lat2/:lng2/:srs', (req, res) => {
 		typeNames: req.params.layer,
 		outputformat: 'application/json',
 		srsName: 'EPSG:4326',
-		bbox: req.params.lat1 + ',' + req.params.lng1 + ',' + req.params.lat2 + ',' + req.params.lng2 + ',' + req.params.srs,
-		count: 1
+		cql_filter: encodeURI(Object.values(filter).join(' '))
 	}
 
 	Config.findOne({
@@ -885,7 +903,6 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 			})
 	
 			if (allowedFields.indexOf('true') != -1) {
-				/* TODO: Verficação de camadas permitidas */
 				for (i = 0; i < fields.length; i++) {
 				
 					if (getBool(allowedFields[i])) {
@@ -940,7 +957,6 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 					console.log('WFS requisition sent, querying layers: ' + req.params.layer)
 					console.log(result.serverHost + encodeURI(urlWfs))
 					res.send(data)
-
 				})
 		})
 })
