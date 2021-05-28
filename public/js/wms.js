@@ -83,7 +83,7 @@ function JSONcontentParser (data) {
         
         const element = data.features[i];
 
-        content.push('<div class="popup-inner-div"><p><a class="link-table-collapse" style="color:black;font-weight: bold;" data-toggle="collapse" href="#row-'+i+'">'+element.id.split('.')[0]+': '+featureCadasterId(element)+'</a></p></div><div id="row-'+i+'" class="panel-collapse collapse"><div class="panel-body">');
+        content.push('<div class="popup-inner-div"><p><a class="link-table-collapse" data-toggle="collapse" href="#row-'+i+'">'+element.id.split('.')[0]+': '+featureCadasterId(element)+'</a></p></div><div id="row-'+i+'" class="panel-collapse collapse"><div class="panel-body">');
         var table = ['<table><tr><th>Atributo</th><th>Valor</th></tr>'];
 
         for (j = 0; j < Object.keys(element.properties).length; j++) {    
@@ -193,10 +193,12 @@ function getLegendGraphics(layer) {
         request: 'GetLegendGraphic',
         version: layer.wmsParams.version,
         format: 'image/png',
-        layer: layer.options.layers
+        layer: layer.options.layers,
+        transparent: true
     } 
 
     url = layer._url + Object.entries(params).map(e => e.join('=')).join('&');
+    console.log(url)
 
     $.ajax({
         url: url,
@@ -206,7 +208,7 @@ function getLegendGraphics(layer) {
         success (data) {
            const url = window.URL || window.webkitURL;
            const src = url.createObjectURL(data);
-           img = '<div class="webgente-legend-graphic-container" id="legend-'+layer.options.layers+'"><p class="webgente-legend-layer-title">'+layer.options.layers.split(':')[1]+'</p><img id="legend-graphic-'+layer.options.layers+'" src="'+src+'"></img></div>'
+           img = '<div class="webgente-legend-graphic-container" id="legend-'+layer.options.layers+'"><p class="webgente-legend-layer-title">'+layer.options.layers.split(':')[1]+'</p><img id="legend-graphic-'+layer.options.layers+'" class="legend-image" src="'+src+'"></img></div>'
            $('.webgente-legend-container').append(img)
         }
     });    

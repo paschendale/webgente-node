@@ -44,7 +44,7 @@ var dummyData = [{
     profile: 'webgente-default',
     serverUser: 'webgente',
     serverPassword: 'webgente',
-    serverHost: 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?',
+    serverHost: 'https://maps.genteufv.com.br/geoserver/gianetti/wms?',
     startupLat: -20.754649,
     startupLong: -42.873321,
     startupZoom: 20,

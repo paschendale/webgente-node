@@ -1,13 +1,20 @@
 <%- include('partials/header.ejs') %> 
 
 <body>
-    <%- include('partials/navbar.ejs') %> 
+    <!-- <%- include('partials/navbar.ejs') %>  -->
     <div id="map">
-
+        <div id="logo" class="leaflet-top leaflet-left webgente-logo">
+            <img src="img/webgente-fundo-escuro-120x40.png" alt="Logo do WebGENTE">
+            <!-- <% if (cityName != undefined) { %>
+                <span class="navbar-text">
+                  <%=cityName%>
+                </span>
+            <%} %> -->
+        </div>
         <div id="search" class="container col-3 col-sm-4 col-lg-4 leaflet-top leaflet-left webgente-search-container"></div>
         <div id='webgente-legend-container' class='leaflet-bottom leaflet-right webgente-legend-container shadow p-3'></div>
         <div id='webgente-coordinates-panel' class="webgente-coordinates-panel leaflet-bottom leaflet-left">
-            <div id='webgente-coordinates-container' class="webgente-coordinates-container"></div>
+            <div id='webgente-coordinates-container' class="webgente-coordinates-container" title="Pesquisa por coordenadas"></div>
         </div>
     </div>
 </body>

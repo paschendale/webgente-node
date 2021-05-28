@@ -1,6 +1,19 @@
 /* Inicializando o mapa, initView é inicializado dentro de uma tag script do index.ejs pois recebe dados do backend */
 
-var map = L.map('map').setView([initView.lat, initView.lng], initView.zoom);
+var map = L.map('map',{
+    zoomControl: false
+}).setView([initView.lat, initView.lng], initView.zoom);
+
+/* Adicionando botões de login e depois zoom */
+
+var login = L.easyButton('fas fa-user-lock', 
+    () => {
+        window.location = '/login'
+    },
+    'Acesso às interfaces restritas')
+    .addTo(map);
+
+L.control.zoom().addTo(map);
 
 /* Adicionando escala gráfica ao mapa */
 
@@ -10,6 +23,31 @@ var optionsScale = {
 };
 
 L.control.scale(optionsScale).addTo(map);
+
+/* Adicionando botão de ajuda */
+
+var help = L.easyButton({
+    id: 'webgente-help',
+    position: 'bottomleft',
+    states: [
+        {
+            stateName: 'help',
+            onClick: () => {
+                window.open("https://www.webgente.genteufv.com.br", "_blank")
+            },
+            title: 'Me ajuda!',
+            icon: 'fas fa-question'
+        }
+    ]
+}).addTo(map)
+
+/* Detectando dark mode */
+
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    console.log('We are dark!')
+} else {
+    console.log('We are light!')
+}
 
 /* Camadas base do OpenStreetMaps e Google */
 
@@ -148,7 +186,7 @@ function existsBasemap(data){
 /* Inicializando botões de ferramentas */
 
 // Adicionando botão de set view para visao inicial
-var home = L.easyButton('<img src="img/home.png">', function(btn, map){
+var home = L.easyButton('fas fa-home', function(btn, map){
     var initial = [initView.lat,initView.lng];
     map.setView(initial,initView.zoom);
 },'Voltar o mapa à vista inicial').addTo(map);
@@ -159,7 +197,7 @@ var selectButton = L.easyButton({
     states: [{
                 stateName: 'select_disabled',
                 icon:      'fas fa-hand-pointer',
-                title:     'Habilita a ferramenta de seleção de feições das camadas ligadas',   
+                title:     'Clique sobre um elemento de uma camada ligada para seleciona-lo',   
                 onClick: function(btn) {       
                     selectButton.state('select_enabled');
                     btn.state('select_enabled');  
@@ -169,7 +207,7 @@ var selectButton = L.easyButton({
             }, {
                 stateName: 'select_enabled',   
                 icon:      'far fa-hand-pointer',               
-                title:     'Desabilita a ferramenta de seleção de feições das camadas ligadas',
+                title:     'Desabilita a ferramenta de seleção de feições',
                 onClick: function(btn) {
                     selectButton.state('select_disabled');
                     btn.state('select_disabled'); 
@@ -177,15 +215,15 @@ var selectButton = L.easyButton({
                     Lc.removeLayer(selectedLayers)
                 }
         }]
-    }).addTo(map);
+    });
 
 // Adiciona o botao de visualizar informacoes com dois estados
 var gfi = false; // Variável que habilita o GetFeatureInfo
 var infoButton = L.easyButton({
     states: [{
                 stateName: 'info_disabled',
-                icon:      '<img src="img/info_enabled.png">',
-                title:     'Habilita a ferramenta de visualização de informações das camadas',   
+                icon:      'fas fa-info-circle',
+                title:     'Clique sobre um elemento de uma camada ligada para visualizar seus atributos',   
                 onClick: function(btn) {       
                     infoButton.state('info_enabled');
                     btn.state('info_enabled');  
@@ -193,22 +231,22 @@ var infoButton = L.easyButton({
                 }
             }, {
                 stateName: 'info_enabled',   
-                icon:      '<img src="img/info_disabled.png">',               
-                title:     'Desabilita a ferramenta de visualização de informações das camadas',
+                icon:      '<i class="fas fa-info-circle" style="color: gray;"></i>',               
+                title:     'Desabilita a ferramenta de visualização de atributos das camadas',
                 onClick: function(btn) {
                     infoButton.state('info_disabled');
                     btn.state('info_disabled'); 
                     gfi=false;   
                 }
         }]
-    }).addTo(map);
+    });
 
 // Adiciona botao para ativar a ferramenta de pesquisas
 var searchButton = L.easyButton({
     states: [{
-                stateName: 'search_disabled',
-                icon:      '<img src="/img/search_enabled.png">',
-                title:     'Habilitar ferramenta de pesquisa por atributo nas camadas',   
+                stateName: 'search_disabled',                
+                icon:      '<img src="/img/search_disabled.png"">',
+                title:     'Pesquise elementos das camadas pelos seus atributos',   
                 onClick: function(btn) {       
                     searchButton.state('search_enabled');
                     btn.state('search_enabled');  
@@ -219,8 +257,8 @@ var searchButton = L.easyButton({
                 }
             }, {
                 stateName: 'search_enabled',   
-                icon:      '<img src="/img/search_disabled.png"">',               
-                title:     'Desabilitar ferramenta de pesquisa por atributo nas camadas',
+                icon:      '<img src="/img/search_enabled.png">',               
+                title:     'Desabilita ferramenta de pesquisa por atributo nas camadas',
                 onClick: function(btn) {
                     searchButton.state('search_disabled');
                     btn.state('search_disabled'); 
@@ -230,7 +268,7 @@ var searchButton = L.easyButton({
                      
                 }
         }]
-    }).addTo(map);
+    });
 
 // 
 L.DomEvent.disableScrollPropagation(L.DomUtil.get('search'));
@@ -258,11 +296,12 @@ var legendButton = L.easyButton({
                     document.getElementById('webgente-legend-container').style.visibility = "visible";
                 }
         }]
-    }).addTo(map);
+    });
 
 /* Geolocalização */
 
 var geolocationButton = L.easyButton({
+    id: 'geolocationButton',
     states: [{
             stateName: 'geolocation_disabled',
             icon:      'fas fa-map-marker-alt',
@@ -275,7 +314,7 @@ var geolocationButton = L.easyButton({
         },
         {
             stateName: 'geolocation_enabled',   
-            icon:      'fas fa-map-marker-alt',               
+            icon:      '<i class="fas fa-map-marker-alt" style="color: gray;"></i>',               
             title:     'Parar de me seguir',
             onClick: function(btn) {
                 geolocationButton.state('geolocation_disabled');
@@ -283,7 +322,7 @@ var geolocationButton = L.easyButton({
                 map.stopLocate()
             }
         }]
-    }).addTo(map);
+    });
 
 var locationMarker = null;
 
@@ -307,26 +346,28 @@ map.on('locationerror', onLocationError);
 // Adiciona botão para habilitar ou desabilitar ferramentas de medição
 
 var measurementButton = L.easyButton({
+    id: 'measurementButton',
     states: [{
                 stateName: 'measurement_enabled',   
                 icon:      'fas fa-ruler',               
-                title:     'Habilita as Ferramentas de Medição',
+                title:     'Clique para abrir as ferramentas de medição de distâncias e áreas',
                 onClick: function(btn) {
                     measurementButton.state('measurement_disabled');
                     btn.state('measurement_disabled');
                     document.getElementsByClassName('leaflet-draw-toolbar')[0].style.visibility = 'visible'
+                    tooltipForDrawing()
                 }
             }, {
                 stateName: 'measurement_disabled',
                 icon:      'fas fa-ruler',
-                title:     'Desabilita as Ferramentas de Medição',   
+                title:     'Desabilita as ferramentas de medição',   
                 onClick: function(btn) {       
                     measurementButton.state('measurement_enabled');
                     btn.state('measurement_enabled');
                     document.getElementsByClassName('leaflet-draw-toolbar')[0].style.visibility = 'hidden'
                 }
         }]
-    }).addTo(map);
+    });
 
 /* Manutenção de camadas pelo nome de chamada no LayerControl */
 
@@ -433,3 +474,57 @@ function searchByCoordinates() {
     $('#webgente-coordinates-container').html( form + ' <a target="_blank" href="http://epsg.io/' + epsgCode + '">(EPSG:' + epsgCode + ')</a>')
 }
 
+/* Adiciona a barra de ferramentas com os botões definidos */
+
+var buttonsBar = [
+    selectButton,
+    infoButton,
+    searchButton,
+    legendButton,
+    geolocationButton,
+    measurementButton
+]
+
+L.easyBar(buttonsBar).addTo(map);
+
+/* Adicionando tooltips aos botões */
+
+$('button').tooltip({
+    placement: 'left',
+    trigger : 'hover'
+})
+
+$('.leaflet-control-layers-toggle').attr("title","Controle de Camadas");
+$('.leaflet-control-layers-toggle').tooltip({
+    placement: 'right',
+    trigger : 'hover'
+})
+
+$('#webgente-coordinates-container').tooltip({
+    placemente: 'top',
+    trigger : 'hover'
+})
+
+$('.leaflet-control-zoom-in').tooltip({
+    placemente: 'left',
+    title: 'Controles de Zoom',
+    trigger : 'hover'
+})
+
+$('.leaflet-control-zoom-out').tooltip({
+    placemente: 'right',
+    title: 'Controles de Zoom',
+    trigger : 'hover'
+})
+
+function tooltipForDrawing () { // Chamada sempre que for habilitada a ferramenta de desenho
+    $("[class*='leaflet-draw-draw']").tooltip({
+        placement: 'right',
+        trigger : 'hover'
+    })
+}
+
+// Remoção de tooltips no clique fora da tooltip em mobile
+$('body').on('click', function () {
+    if ($("[id*='tooltip']") != undefined) $("[id*='tooltip']").tooltip('hide')
+})
