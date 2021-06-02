@@ -16,7 +16,7 @@
 
         <div class="container" style="margin-left: 5%;">
             <!--Início do fomrulário-->
-            <div class="container shadow-sm" id="container-form-layerdetails">
+            <div class="container shadow-sm container-form-webgente-admin">
                 <% if (edit) { %>
                     <!--Switch entre rotas do modo de edição e criação de camadas -->
                     <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST"
@@ -133,6 +133,16 @@
                                                 <input type="text" class="form-control" id="host" name="host"
                                                     placeholder="http://localhost/geoserver/gianetti/wms?" disabled>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id='attribution-div'>
+                                        <div class="col">
+                                            <label for="attribution"><strong>Atribuição da camada:</strong></label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="attribution" name="attribution"
+                                                    placeholder='GENTE - 2021'>
+                                            </div>
+                                            <p>A atribuição da camada é exibida no canto inferior direito da tela para as camadas base ou modelos digitais de terreno. Pode ser utilizado HTML para a estilização do elemento.</p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -355,6 +365,19 @@
             $('#queryFields').val('').val(queryableString);
 
         }
+
+    /* Oculta o campo de Attribution e exibe quando a camada é base ou sobreposição */
+    $("#attribution-div").hide()
+
+    $("#basemap, #mdt, #overlay").click(() => {
+        console.log($("#basemap").val())
+        if ($("#basemap").prop('checked') || $("#mdt").prop('checked')) {
+            $("#attribution-div").show('0.3s')
+        } else {
+            $("#attribution-div").hide('0.3s')
+        }
+    })
+
     </script>
 
     <!-- A variável edit é passada como true se o modo for edição -->
@@ -367,10 +390,14 @@
             $(document).ready(loadLayerDataForEditing())
 
             function loadLayerDataForEditing() {
+
+
+
                 $('#layerName').val("<%=layerName%>")
                 $('#group').val("<%=group%>")
                 $('#layer').val("<%=layer%>")
                 $('#host').val("<%=host%>")
+                $('#attribution').val(decodeURI("<%=attribution%>"))
                 if ("<%=metadata%>" != "none" && "<%=metadata%>" != "") {
                     $('#c-metadata').html("<%=metadata%>")
                     $("#remove_file").attr("disabled", false)
@@ -388,6 +415,10 @@
                 if ("<%=publicLayer%>" == 1) {
                     $('input:radio[name=publicLayer][value=1]').click();
                 }
+
+                if ($("#basemap").prop('checked') || $("#mdt").prop('checked')) {
+                    $("#attribution-div").show('0.3s')
+                } 
 
                 loadLayerAttributes() // Carrega a tabela de atributos da Layer
 
@@ -422,6 +453,7 @@
                     }
                 }
             }
+
         </script>
 
         <% } %>

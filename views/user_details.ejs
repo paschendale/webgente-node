@@ -1,50 +1,91 @@
 <%- include('partials/admin/header.ejs') %> 
 <div>
-	<div class="container">
-        <% if (edit) { %>
-		  <form action="" method="POST">
-        <% } else { %>
-            <form action="/user/add" method="POST">
-        <% } %>
-            <div class="row">
-    			<div class="form-group">
-                	<input type="text" class="form-control" id="userName" name="userName" placeholder="Nome de usuário" required>
-            	</div>
-            </div>
-            <div class="row">
-    			<div class="form-group">
-                	<input type="text" class="form-control" id="group" name="group" placeholder="Grupo do Usuário" required>
-            	</div>
-            </div>
-            <div class="row">
-            	<div class="form-group">
-                    <label for="layerName">Data de Nascimento</label>
-                	<input type="date" class="form-control" id="birthDate" name="birthDate" placeholder="Data de Nascimento" required>
-            	</div>
-            </div>
-            <div class="row">
-            	<div class="form-group">
-                	<input type="email" class="form-control" id="email" name="email" placeholder="Email do usuário" required>
-            	</div>
-            </div>
-            <% if (!edit) { %>
+    <div class=" shadow-sm container-form-webgente-admin">
+        <div class="container">
+            <% if (edit) { %>
+                <form action="" method="POST" onsubmit="return validateForm()">
+                <h3>Edição de Usuário</h3>
+            <% } else { %>
+                <form action="/user/add" method="POST" onsubmit="return validateForm()"> 
+                <h3>Adição de Usuário</h3>
+            <% } %>
+            <hr>
                 <div class="row">
-                    <div class="form-group">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Senha" required>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="userName">Nome do Usuário:</label>
+                            <input type="text" class="form-control" id="userName" name="userName" placeholder="Nome de usuário" required>
+                        </div>
                     </div>
                 </div>
-            <% } %>
-            	<button type="submit" class="btn btn-dark">Salvar</button>
-            </div>
-		</form>
-	</div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="group">Grupo do Usuário:</label>
+                            <select name="group" class="form-control" id="group">
+                                <option value="admin">Administrador</option>
+                                <option value="users">Usuário Convencional</option>
+                            </select>
+                            <!-- <input type="text" class="form-control" id="group" name="group" placeholder="Grupo do Usuário" required> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label for="email">Email do Usuário:</label>
+                        <div class="form-group">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email do usuário" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label for="password">Senha:</label>
+                        <div class="form-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label for="password-check">Confirme a senha:</label>
+                        <div class="form-group">
+                            <input type="password" class="form-control" id="password-check" required>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-dark">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
     $('#userName').val("<%=userName%>");
-    $('#group').val("<%=group%>");
-    $('#birthDate').val("<%=birthDate%>");
+
+    if ("<%=group%>" == 'admin') {
+        $('#group').val("admin");
+    } else {
+        $('#group').val("users");
+    }
+    
     $('#email').val("<%=email%>");
+
+    function validateForm() {
+        if ($("#password").val() != $("#password-check").val()) {
+            alert('As senhas não conferem!')
+            return false
+        }
+    }
+
+    $("#password-check, #password").on('input', function(e){
+        if ($("#password").val() != $("#password-check").val()) {
+            $("#password-check").css('background-color','#ff8888')
+        } else {
+            $("#password-check").css('background-color','#8aff88')
+        }
+    });
 </script>
 
 <%- include('partials/admin/footer.ejs') %> 

@@ -528,3 +528,36 @@ function tooltipForDrawing () { // Chamada sempre que for habilitada a ferrament
 $('body').on('click', function () {
     if ($("[id*='tooltip']") != undefined) $("[id*='tooltip']").tooltip('hide')
 })
+
+
+
+
+
+
+/* DEIXAR POR ÚLTIMO NO CÓDIGO: Desativando funções desabilitadas pelas configurações */
+
+if (home_enabled == 0) {
+    home.removeFrom(map)
+}
+if (select_enabled == 0) {
+    selectButton.removeFrom(map)
+}
+if (information_enabled == 0) {
+    infoButton.removeFrom(map)
+}
+if (search_enabled == 0) {
+    searchButton.removeFrom(map)
+}
+if (legend_enabled == 0) {
+    legendButton.removeFrom(map)
+    $("#webgente-legend-container").hide()
+}
+if (geolocation_enabled == 0) {
+    geolocationButton.removeFrom(map)
+}
+if (measurement_enabled == 0) { 
+    measurementButton.removeFrom(map)
+}
+if (coordinates_enabled == 0) {
+    $("#webgente-coordinates-panel").hide()
+}

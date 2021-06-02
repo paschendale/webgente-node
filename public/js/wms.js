@@ -208,8 +208,24 @@ function getLegendGraphics(layer) {
         success (data) {
            const url = window.URL || window.webkitURL;
            const src = url.createObjectURL(data);
-           img = '<div class="webgente-legend-graphic-container" id="legend-'+layer.options.layers+'"><p class="webgente-legend-layer-title">'+layer.options.layers.split(':')[1]+'</p><img id="legend-graphic-'+layer.options.layers+'" class="legend-image" src="'+src+'"></img></div>'
-           $('.webgente-legend-container').append(img)
+
+            /* Switch para o caso de utilização de legendas customizadas
+            Tais legendas são definidas no Geoserver e devem conter uma
+            espécie de cabeçalho ou texto indicando a que se refere o 
+            símbolo, caso o administrador prefira pelo não emprego das 
+            legendas customizadas o sistema irá atribuir o título da camada
+            sobre o símbolo */
+
+            if (custom_legend_enabled == 1) {
+                img = '<div class="webgente-legend-graphic-container" id="legend-'+layer.options.layers+'"><img id="legend-graphic-'+layer.options.layers+'" class="legend-image" src="'+src+'"></img></div>'
+                if (document.getElementById('webgente-legend-container').children.length != 0) { // Caso exista mais de uma imagem na legenda a imagem é adicionada com um <hr> acima
+                 img = '<div class="webgente-legend-graphic-container" id="legend-'+layer.options.layers+'"><hr><img id="legend-graphic-'+layer.options.layers+'" class="legend-image" src="'+src+'"></img></div>'
+                }
+            } else {
+                img = '<div class="webgente-legend-graphic-container" id="legend-'+layer.options.layers+'"><p class="webgente-legend-layer-title">'+layer.options.layers.split(':')[1]+'</p><img id="legend-graphic-'+layer.options.layers+'" class="legend-image" src="'+src+'"></img></div>'
+            }
+           
+            $('.webgente-legend-container').append(img)
         }
     });    
     return null

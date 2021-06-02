@@ -2,26 +2,13 @@
 
 
 <div id='config'>
-    <div class="container shadow-sm" id="container-form-layerdetails">
+    <div class="container shadow-sm container-form-webgente-admin">
     <h3>Configurações Gerais do WebGENTE</h3>
     <hr>
-
     <form action="/config" method="post" novalidate onsubmit="return validateForm()">
         <div class="form-group">
             <label for="cityName"><strong>Nome do Município (Título do WebGENTE):</strong></label>
             <input type="text" class="form-control" id="cityName" name="cityName" value='<%=cityName%>'>
-        </div>
-        <div class="form-group">
-            <label for="serverHost"><strong>Endereço do endpoint do Servidor de Mapas:</strong></label>
-            <input type="text" class="form-control" id="serverHost" name="serverHost" value='<%=serverHost%>'>
-        </div>
-        <div class="form-group">
-            <label for="serverUser"><strong>Usuário no Servidor de Mapas (alteração neste parâmetro exige um restart do sistema):</strong></label>
-            <input type="text" class="form-control" id="serverUser" name="serverUser" value='<%=serverUser%>'>
-        </div>
-        <div class="form-group">
-            <label for="serverPassword"><strong>Senha do Usuário no Servidor de Mapas (alteração neste parâmetro exigem um restart do sistema):</strong></label>
-            <input type="password" class="form-control" id="serverPassword" name="serverPassword" value='<%=serverPassword%>'>
         </div>
         <div class="form-group">
             <label for="startupLat"><strong>Latitude de Inicialização:</strong></label>
@@ -40,6 +27,34 @@
             <input type="number" class="form-control" id="referenceSystem" min="0" step="1" name="referenceSystem" value='<%=referenceSystem%>'>
             <p>Utilizado para a exibição e pesquisa por coordenadas na ferramenta de coordenadas do WebGENTE.</p>
         </div>
+        <hr>
+        <div class="form-group">
+            <label for="serverHost"><strong>Endereço do endpoint do Servidor de Mapas:</strong></label>
+            <input type="text" class="form-control" id="serverHost" name="serverHost" value='<%=serverHost%>'>
+        </div>
+        <div class="form-group">
+            <label for="serverUser"><strong>Usuário no Servidor de Mapas (alteração neste parâmetro exige um restart do sistema):</strong></label>
+            <input type="text" class="form-control" id="serverUser" name="serverUser" value='<%=serverUser%>'>
+        </div>
+        <div class="form-group">
+            <label for="serverPassword"><strong>Senha do Usuário no Servidor de Mapas (alteração neste parâmetro exigem um restart do sistema):</strong></label>
+            <input type="password" class="form-control" id="serverPassword" name="serverPassword" value='<%=serverPassword%>'>
+        </div>
+        <div class="container" id='geoserver-check'>
+            <div class="row geoserver-check">
+                <a id="check-again-link" onclick="doTheChecking()" style="visibility: hidden">+ Checar se credenciais são válidas</a>
+                <ul>
+                    <li><p id="check-getmap">Permissões WMS para GetMap <img src="img/ajax-loader.gif" alt="Carregando" id='check-getmap-img' style="height: 20px; width: 20px;"></p></li>
+                    <li><p id="check-getfeatureinfo">Permissões WMS para GetFeatureInfo <img src="img/ajax-loader.gif" alt="Carregando" id='check-getfeatureinfo-img' style="height: 20px; width: 20px;"></p></li>
+                    <li><p id="check-getlegendgraphic">Permissões WMS para GetLegendGraphic <img src="img/ajax-loader.gif" alt="Carregando" id='check-getlegendgraphic-img' style="height: 20px; width: 20px;"></p></li>
+                    <li><p id="check-getfeature">Permissões WFS para GetFeature <img src="img/ajax-loader.gif" alt="Carregando" id='check-getfeature-img' style="height: 20px; width: 20px;"></p></li>
+                    <li><p id="check-describefeature">Permissões WFS para DescribeFeatureType <img src="img/ajax-loader.gif" alt="Carregando" id='check-describefeature-img' style="height: 20px; width: 20px;"></p></li>
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <a href="/config_tools">+ Configure as ferramentas disponíveis no WebGENTE</a>
+        <hr>
         <button class="btn btn-dark" type='submit'>Salvar</button>
     </form>
 
@@ -52,10 +67,65 @@
                 return false
             } else {
                 return true
-            }
-
-            // TODO: Validação da senha e usuário do Geoserver
+            }            
         }
+
+        $('#geoserver-check').hide()
+        // TODO: Validação da senha e usuário do Geoserver pelo backend retornando status code apenas
+
+        // function enableRecheck() {
+        //     $('#check-again-link').show('0.3s')
+        // }
+
+        // function disableRecheck() {
+        //     $('#check-again-link').hide('0.3s')
+        // }
+
+        // function checkGeoserverCredentials(url,id) {
+
+        //     $('#geoserver-check').show('0.3s')
+            
+        //     $.get({
+        //         url: url,
+        //         headers: {'Authorization': 'Basic ' + btoa($('#serverUser').val() + ':' + $('#serverPassword').val())},
+        //         statusCode: {
+        //             200: function (xhr) {
+        //                 $(id+"-img").attr('src','img/check-pass.png')
+        //             },
+        //             201: function (xhr) {
+        //                 $(id+"-img").attr('src','img/check-pass.png')
+        //             },
+        //             403: function (xhr) {
+        //                 $(id+"-img").attr('src','img/check-fail.png')
+        //                 $(id).append(' Erro 403: Acesso negado')
+        //             },
+        //             404: function (xhr) {
+        //                 $(id+"-img").attr('src','img/check-fail.png')
+        //                 $(id).append(' Erro 404: Endpoint não encontrado')
+        //             },
+        //             405: function (xhr) {
+        //                 $(id+"-img").attr('src','img/check-fail.png')
+        //                 $(id).append(' Erro 405: Método não permitido no endpoint')
+        //             },
+        //             500: function (xhr) {
+        //                 $(id+"-img").attr('src','img/check-fail.png')
+        //                 $(id).append(' Erro 500: Erro interno no servidor')
+        //             },
+        //         }
+        //     })
+        // }
+ 
+        // Exemplos de urls para teste de permissões
+
+        // http://mapas.genteufv.com.br/geoserver/gianetti/wms?service=WMS&version=1.1.1&request=GetFeatureInfo
+        // http://mapas.genteufv.com.br/geoserver/gianetti/wms?service=WMS&version=1.1.1&request=GetMap
+        // http://mapas.genteufv.com.br/geoserver/gianetti/wms?service=WMS&version=1.1.1&request=GetLegendGraphic
+        // http://mapas.genteufv.com.br/geoserver/gianetti/wms?service=WFS&version=1.1.1&request=GetFeature&typeNames=gianetti:CAD_Edificacao
+        // http://mapas.genteufv.com.br/geoserver/gianetti/wms?service=WFS&version=1.1.1&request=DescribeFeatureType
+
+        // function doTheChecking() {
+        //     checkGeoserverCredentials('http://mapas.genteufv.com.br/geoserver/gianetti/wms?service=WMS&version=1.1.1&request=GetMap','check-getmap')
+        // }
     </script>
     </div>
 </div>
