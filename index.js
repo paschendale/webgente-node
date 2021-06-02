@@ -253,7 +253,7 @@ app.route('/layers/edit/:id')
 	})
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
-			const form = formidable({ keepExtension: false, uploadDir: __dirname + "\\public\\metadata" })
+			const form = formidable({ keepExtension: false, uploadDir: __dirname + "/public/metadata" })
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 				if (err) {
@@ -514,7 +514,7 @@ app.route('/layers/add')
 	})
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
-      const form = formidable({ keepExtension: false, uploadDir: __dirname + "\\public\\metadata" })
+      const form = formidable({ keepExtension: false, uploadDir: __dirname + "/public/metadata" })
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 
