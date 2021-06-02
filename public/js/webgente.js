@@ -284,7 +284,8 @@ var legendButton = L.easyButton({
                 onClick: function(btn) {
                     legendButton.state('legend_disabled');
                     btn.state('legend_disabled');
-                    document.getElementById('webgente-legend-container').style.visibility = "hidden";
+                    $('#webgente-legend-container').data('state','disabled');
+                    checkLegendContainer()
                 }
             }, {
                 stateName: 'legend_disabled',
@@ -293,7 +294,8 @@ var legendButton = L.easyButton({
                 onClick: function(btn) {       
                     legendButton.state('legend_enabled');
                     btn.state('legend_enabled');
-                    document.getElementById('webgente-legend-container').style.visibility = "visible";
+                    $('#webgente-legend-container').data('state','enabled')
+                    checkLegendContainer()
                 }
         }]
     });

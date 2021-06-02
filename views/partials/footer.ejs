@@ -43,7 +43,7 @@
     }
 
     function disableLegendContainer () {
-        if ($(window).width() < 1000) {
+        if ($(window).width() < 1000 && legend_enabled == 1) {
             document.getElementById('legend-button').click();
         } 
     }

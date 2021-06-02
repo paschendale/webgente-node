@@ -226,12 +226,25 @@ function getLegendGraphics(layer) {
             }
            
             $('.webgente-legend-container').append(img)
+            checkLegendContainer()
         }
     });    
     return null
 }
 
+function checkLegendContainer() {
+    if ($('.webgente-legend-graphic-container').length != 0 && $('#webgente-legend-container').data('state') == 'enabled' && legend_enabled == 1) {
+        $('.webgente-legend-container').show('0.3s')
+    } else {
+        $('.webgente-legend-container').hide()
+    }
+}
+
+
+$(document).ready(checkLegendContainer()); // Verifica se o container da legenda deveria estar aparecendo 
+
 function removeLegendGraphics(layer) {
-    document.getElementById('legend-'+layer.options.layers).remove()
+    document.getElementById('legend-'+layer.options.layers).remove()    
+    checkLegendContainer()
     return null
 }
