@@ -1,13 +1,20 @@
 <%- include('partials/header.ejs') %> 
 
 <body>
-    <%- include('partials/navbar.ejs') %> 
+    <!-- <%- include('partials/navbar.ejs') %>  -->
     <div id="map">
-
+        <div id="logo" class="leaflet-top leaflet-left webgente-logo">
+            <img src="img/webgente-fundo-escuro-120x40.png" alt="Logo do WebGENTE">
+            <!-- <% if (cityName != undefined) { %>
+                <span class="navbar-text">
+                  <%=cityName%>
+                </span>
+            <%} %> -->
+        </div>
         <div id="search" class="container col-3 col-sm-4 col-lg-4 leaflet-top leaflet-left webgente-search-container"></div>
-        <div id='webgente-legend-container' class='leaflet-bottom leaflet-right webgente-legend-container shadow p-3'></div>
+        <div id='webgente-legend-container' data-state='enabled' class='leaflet-bottom leaflet-right webgente-legend-container shadow p-3'></div>
         <div id='webgente-coordinates-panel' class="webgente-coordinates-panel leaflet-bottom leaflet-left">
-            <div id='webgente-coordinates-container' class="webgente-coordinates-container"></div>
+            <div id='webgente-coordinates-container' class="webgente-coordinates-container" title="Pesquisa por coordenadas"></div>
         </div>
     </div>
 </body>
@@ -18,6 +25,16 @@
         lng: '<%=startupLong%>', // Longitude Inicial
         zoom: '<%=startupZoom%>' // Zoom Inicial
     };
+
+    var home_enabled = '<%= home_enabled%>'
+    var select_enabled = '<%=select_enabled %>'
+    var information_enabled = '<%=information_enabled %>'
+    var search_enabled = '<%=search_enabled %>'
+    var legend_enabled = '<%=legend_enabled %>'
+    var geolocation_enabled = '<%=geolocation_enabled %>'
+    var measurement_enabled = '<%=measurement_enabled %>'
+    var custom_legend_enabled = '<%= custom_legend_enabled%>'
+    var coordinates_enabled = '<%=coordinates_enabled %>'
 
     var referenceSystem = '<%=referenceSystem%>' // EPSG do Sistema de Referência da Ferramenta de Coordenadas
 

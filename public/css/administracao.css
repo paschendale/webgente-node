@@ -147,7 +147,7 @@ table{
     color: black;
 }
 
-#container-form-layerdetails {
+.container-form-webgente-admin {
 
     z-index: 10;
     padding: 20px;
@@ -168,11 +168,11 @@ table{
     background: #343a40f3;
 }
 
-a {
+.menu-link {
     color: white;
 }
 
-a:hover {
+.menu-link:hover {
     color: #97bbf0;
 }
 
@@ -214,4 +214,11 @@ margin: 12px 15px;
 
 .pointer {
     cursor: pointer;
+}
+
+/* CSS da área de configuração */
+
+.geoserver-check p{
+    font-size: 0.8em;
+    margin: 2px;
 }

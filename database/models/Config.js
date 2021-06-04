@@ -36,6 +36,51 @@ const Config = connection.define('config', {
     referenceSystem: {
         type: Sequelize.INTEGER,
         defaultValue: 31983
+    },
+    home_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
+    select_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
+    information_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
+    search_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
+    legend_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
+    custom_legend_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
+    geolocation_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
+    measurement_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false     
+    },
+    coordinates_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     }
 })
 
@@ -44,14 +89,24 @@ var dummyData = [{
     profile: 'webgente-default',
     serverUser: 'webgente',
     serverPassword: 'webgente',
-    serverHost: 'https://mapas.genteufv.com.br/geoserver/gianetti/wms?',
+    serverHost: 'https://maps.genteufv.com.br/geoserver/ufv/wms?',
     startupLat: -20.754649,
     startupLong: -42.873321,
     startupZoom: 20,
     createdAt: new Date(),
     updatedAt: new Date(),
     cityName: 'Universidade Federal de Viçosa',
-    referenceSystem: 31983
+    referenceSystem: 31983,
+    home_enabled: true,
+    select_enabled: true,
+    information_enabled: true,
+    search_enabled: false,
+    legend_enabled: true,
+    geolocation_enabled: true,
+    measurement_enabled: true,
+    custom_legend_enabled: false,
+    coordinates_enabled: true
+
 }];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
@@ -73,3 +128,4 @@ Config.sync({
 });
 
 module.exports = Config;
+

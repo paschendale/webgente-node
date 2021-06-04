@@ -9,6 +9,9 @@ const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
 const conn = require("./database/connection.js")
+const formidable = require('formidable');
+const fs = require('fs');
+const path = require('path');
 const Layers = require("./database/models/Layers.js")
 const Users = require("./database/models/User.js")
 const Config = require("./database/models/Config.js")
@@ -99,7 +102,17 @@ app.get('/', (req, res) => {
 				startupLong: results.startupLong,
 				startupZoom: results.startupZoom,
 				cityName: results.cityName,
-				referenceSystem: results.referenceSystem
+				referenceSystem: results.referenceSystem,
+				home_enabled: results.home_enabled,
+				select_enabled: results.select_enabled,
+				information_enabled: results.information_enabled,
+				search_enabled: results.search_enabled,
+				legend_enabled: results.legend_enabled,
+				geolocation_enabled: results.geolocation_enabled,
+				measurement_enabled: results.measurement_enabled,
+				custom_legend_enabled: results.custom_legend_enabled,
+				coordinates_enabled: results.coordinates_enabled
+
 			})
 		})
 
@@ -182,8 +195,7 @@ app.route('/user/add')
 				edit: false,
 				userName: null,
 				group: null,
-				email: null,
-				birthDate: null
+				email: null
 			})
 		} else {
 			res.redirect('/')
@@ -197,7 +209,6 @@ app.route('/user/add')
 				{
 					userName: req.body.userName,
 					password: password,
-					birthDate: req.body.birthDate,
 					email: req.body.email,
 					group: req.body.group
 				}
@@ -233,7 +244,9 @@ app.route('/layers/edit/:id')
 					fieldAlias: layerData.fieldAlias,
 					queryFields: layerData.queryFields,
 					metadata: layerData.metadata,
-					publicLayer: layerData.publicLayer
+					publicLayer: layerData.publicLayer,
+					attribution: layerData.attribution
+
 				})
 			})
 			.catch(() => {
@@ -245,7 +258,8 @@ app.route('/layers/edit/:id')
 	})
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
-			const form = formidable({ keepExtension: false, uploadDir: __dirname + "\\public\\metadata" })
+			const form = formidable({ keepExtension: false, uploadDir: __dirname + "/public/metadata" })
+
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 				if (err) {
@@ -271,7 +285,9 @@ app.route('/layers/edit/:id')
 							fieldAlias: fields.fieldAlias,
 							fieldType: fields.fieldType,
 							metadata: metadata_path,
-							publicLayer: fields.publicLayer
+							publicLayer: fields.publicLayer,
+							attribution: fields.attribution
+
 						},
 							{
 								where: {
@@ -349,7 +365,7 @@ app.get('/listusers', (req, res) => {
 	if (req.session.user) {
 		Users.findAll({
 			raw: true,
-			attributes: ['id', 'userName', 'birthDate', 'email', 'group']
+			attributes: ['id', 'userName', 'email', 'group']
 		})
 			.then(
 				result => {
@@ -390,20 +406,19 @@ app.route('/users/edit/:id')
 					id: req.params.id
 				}
 			})
-				.then(UserData => {
-					const dateFormat = UserData.birthDate.replace(/(\d*)-(\d*)-(\d*).*/, '$1-$2-$3');
+			.then(UserData => {
 					res.render('user_details.ejs', {
-						edit: true,
-						id: UserData.id,
-						userName: UserData.userName,
-						group: UserData.group,
-						email: UserData.email,
-						birthDate: dateFormat
-					})
+					edit: true,
+					id: UserData.id,
+					userName: UserData.userName,
+					group: UserData.group,
+					email: UserData.email,
+					password: UserData.password
 				})
-				.catch(() => {
-					res.redirect('/users')
-				})
+			})
+			.catch(() => {
+				res.redirect('/users')
+			})
 		} else {
 			res.redirect('/')
 		}
@@ -415,7 +430,7 @@ app.route('/users/edit/:id')
 					userName: req.body.userName,
 					group: req.body.group,
 					email: req.body.email,
-					birthDate: req.body.birthDate
+					password: req.body.password
 				},
 				{
 					where: {
@@ -423,8 +438,8 @@ app.route('/users/edit/:id')
 					}
 				}
 			).then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("users"))
-				.catch((error) => { console.log('Failed to update database. ' + error) })
+			.then(res.render("users"))
+			.catch((error) => { console.log('Failed to update database. ' + error) })
 		}
 		else {
 			res.redirect('/')
@@ -506,7 +521,8 @@ app.route('/layers/add')
 	})
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
-      const form = formidable({ keepExtension: false, uploadDir: __dirname + "\\public\\metadata" })
+      const form = formidable({ keepExtension: false, uploadDir: __dirname + "/public/metadata" })
+
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 
@@ -533,7 +549,9 @@ app.route('/layers/add')
 								fieldAlias: fields.fieldAlias,
 								fieldType: fields.fieldType,
 								metadata: metadata_path,
-								publicLayer: fields.publicLayer
+								publicLayer: fields.publicLayer,
+								attribution: fields.attribution
+
 							})
 						})
 						.then(console.log('Succesfully inserted data into database!', fields))
@@ -690,6 +708,78 @@ app.route('/config')
 			res.redirect('/');
 		}
 	});
+
+/* Rota para configurações de ferramentas do WebGENTE na interface de administração 
+
+	home_enabled
+    select_enabled
+    information_enabled
+    search_enabled
+    legend_enabled
+    geolocation_enabled
+    measurement_enabled
+    custom_legend_enabled
+    coordinates_enabled
+
+*/
+app.route('/config_tools')
+.get((req, res) => {
+	if (req.session.user) {
+		Config.findOne({ raw: true })
+		.then(results => {
+			res.render("config_tools",
+				{
+					home_enabled: results.home_enabled,
+					select_enabled: results.select_enabled,
+					information_enabled: results.information_enabled,
+					search_enabled: results.search_enabled,
+					legend_enabled: results.legend_enabled,
+					geolocation_enabled: results.geolocation_enabled,
+					measurement_enabled: results.measurement_enabled,
+					custom_legend_enabled: results.custom_legend_enabled,
+					coordinates_enabled: results.coordinates_enabled
+				})
+		})
+	}
+	else {
+		res.redirect('/');
+	}
+})
+.post((req, res) => {
+	console.log(req.body)
+	if (req.session.user) {
+		Config.update(
+			{
+				home_enabled: (req.body.home_enabled != null) ? req.body.home_enabled : 0,
+				select_enabled: (req.body.select_enabled != null) ? req.body.select_enabled : 0,
+				information_enabled: (req.body.information_enabled != null) ? req.body.information_enabled : 0,
+				search_enabled: (req.body.search_enabled != null) ? req.body.search_enabled : 0,
+				legend_enabled: (req.body.legend_enabled != null) ? req.body.legend_enabled : 0,
+				geolocation_enabled: (req.body.geolocation_enabled != null) ? req.body.geolocation_enabled : 0,
+				measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
+				custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
+				coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0
+			},
+			{
+				where: {
+					profile: 'webgente-default'
+				}
+			}
+		).then(() => {
+			console.log('Dados de configuração das ferramentas atualizados com sucesso')
+			setHeaders();
+			res.redirect('/config')
+			}
+		).catch((error) => {
+				console.log('Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
+				res.send('Ocorreu algum erro')
+			}
+		)
+	}
+	else {
+		res.redirect('/');
+	}
+});
 
 /* GetFeatureInfo e filtragem de informações */
 

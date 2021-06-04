@@ -1,0 +1,87 @@
+<%- include('partials/admin/header.ejs') %> 
+
+
+<div id='config'>
+    <div class="container shadow-sm container-form-webgente-admin">
+    <h3>Ferramentas Disponíveis no Sistema</h3>
+    <hr>
+
+    <form action="/config_tools" method="post" novalidate>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="home_enabled" name="home_enabled">
+            <label class="custom-control-label" for="home_enabled">Ferramenta de retorno à vista inicial</label>
+        </div>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="select_enabled" name="select_enabled">
+            <label class="custom-control-label" for="select_enabled">Ferramenta de seleção de feições</label>
+        </div>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="information_enabled" name="information_enabled">
+            <label class="custom-control-label" for="information_enabled">Ferramenta de visualização de atributos das feições</label>
+        </div>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="search_enabled" name="search_enabled">
+            <label class="custom-control-label" for="search_enabled">Ferramenta de pesquisa por atributos</label>
+        </div>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="legend_enabled" name="legend_enabled">
+            <label class="custom-control-label" for="legend_enabled">Ferramenta de legendas das camadas</label>
+        </div>        
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="custom_legend_enabled" name="custom_legend_enabled">
+            <label class="custom-control-label" for="custom_legend_enabled">Modo de legendas personalizadas no Geoserver</label>
+        </div>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="geolocation_enabled" name="geolocation_enabled">
+            <label class="custom-control-label" for="geolocation_enabled">Ferramenta de geolocalização</label>
+        </div>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="measurement_enabled" name="measurement_enabled">
+            <label class="custom-control-label" for="measurement_enabled">Ferramenta de medição de áreas e distâncias</label>
+        </div>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" value='true' class="custom-control-input" id="coordinates_enabled" name="coordinates_enabled">
+            <label class="custom-control-label" for="coordinates_enabled">Ferramenta de coordenadas</label>
+        </div>
+        <br>
+        <button class="btn btn-dark" type='submit'>Salvar</button>
+    </form>
+
+    <script>
+        function fillForm() {
+            if ("<%=home_enabled %>" == 1) {
+                $('#home_enabled').prop('checked',true)
+            }
+            if ("<%=select_enabled %>" == 1) {
+                $('#select_enabled').prop('checked',true)
+            }
+            if ("<%=information_enabled %>" == 1) {
+                $('#information_enabled').prop('checked',true)
+            }
+            if ("<%=search_enabled %>" == 1) {
+                $('#search_enabled').prop('checked',true)
+            }
+            if ("<%=legend_enabled %>" == 1) {
+                $('#legend_enabled').prop('checked',true)
+            }
+            if ("<%=geolocation_enabled %>" == 1) {
+                $('#geolocation_enabled').prop('checked',true)
+            }
+            if ("<%=measurement_enabled %>" == 1) {
+                $('#measurement_enabled').prop('checked',true)
+            }
+            if ("<%=custom_legend_enabled %>" == 1) {
+                $('#custom_legend_enabled').prop('checked',true)
+            }
+            if ("<%=coordinates_enabled %>" == 1) {
+                $('#coordinates_enabled').prop('checked',true)
+            }
+        }
+
+        fillForm()
+        
+    </script>
+    </div>
+</div>
+
+<%- include('partials/admin/footer.ejs') %> 

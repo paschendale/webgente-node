@@ -13,17 +13,17 @@
         edição e recarregar os campos para adicionar os novos
     
     -->
+
         <div class="container" style="margin-left: 5%;">
             <!--Início do fomrulário-->
-            <div class="container shadow-sm" id="container-form-layerdetails">
+            <div class="container shadow-sm container-form-webgente-admin">
                 <% if (edit) { %>
                     <!--Switch entre rotas do modo de edição e criação de camadas -->
                     <form action="/layers/edit/<%=id%>" onsubmit="return validateForm()" method="POST"
                         enctype="multipart/form-data">
                         <h3>Edição de Camada</h3>
                         <% } else { %>
-                            <form action="/layers/add" onsubmit="return validateForm()" method="POST"
-                                enctype="multipart/form-data">
+                            <form action="/layers/add" method="POST"  onsubmit="return validateForm()" enctype="multipart/form-data">
                                 <h3>Adição de Camada</h3>
                                 <% } %>
 
@@ -135,16 +135,32 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row" id='attribution-div'>
+                                        <div class="col">
+                                            <label for="attribution"><strong>Atribuição da camada:</strong></label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="attribution" name="attribution"
+                                                    placeholder='GENTE - 2021'>
+                                            </div>
+                                            <p>A atribuição da camada é exibida no canto inferior direito da tela para as camadas base ou modelos digitais de terreno. Pode ser utilizado HTML para a estilização do elemento.</p>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="col">
                                             <label for="host"><strong>Arquivo de Metadados:</strong></label>
-                                            <div class="custom-file">
-                                                <input type="file" accept=".html,.xml" class="custom-file-input"
-                                                    id="metadata" name="metadata">
-                                                <label class="custom-file-label" for="metadata" id="c-metadata">Nenhum
-                                                    arquivo selecionado...</label>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <button class="btn btn-outline-secondary text-white" type="button"
+                                                        id="remove_file" disabled>X</button>
+                                                </div>
+                                                <div class="custom-file">
+                                                    <input type="file" accept=".html,.xml" class="custom-file-input"
+                                                        id="metadata" name="metadata">
+                                                    <label class="custom-file-label" for="metadata"
+                                                        id="c-metadata">Nenhum
+                                                        arquivo selecionado...</label>
+                                                </div>
                                             </div>
-                                            <p>O arquivo de metadados deve ser inserido nos formatos HTML ou XML.</p>
                                         </div>
                                     </div>
             </div>
@@ -200,15 +216,24 @@
         entretanto, o backend ignorará qualquer entrada de host que diferir
         daquela em /config */
         $('#host').val("<%=host%>")
-
         $('#metadata').on("change", function (event) {
             if (!$('#metadata').val()) {
                 $('#c-metadata').html("Nenhum arquivo selecionado...")
+                $("#remove_file").html(" ")
+                $("#remove_file").attr("disabled", true)
             } else {
                 var file = $('#metadata').val().split('\\')
                 $('#c-metadata').html(file[file.length - 1])
+                $("#remove_file").attr("disabled", false)
+                $("#remove_file").css('background-color', '#343a40')
 
             }
+        })
+        $("#remove_file").on("click", function (event) {
+            $('#metadata').val("")
+            $('#c-metadata').html("Nenhum arquivo selecionado...")
+            $("#remove_file").attr("disabled", true)
+            $("#remove_file").css('background-color', '#FFF')
         })
         async function loadLayerAttributes() {
 
@@ -339,6 +364,19 @@
             $('#queryFields').val('').val(queryableString);
 
         }
+
+    /* Oculta o campo de Attribution e exibe quando a camada é base ou sobreposição */
+    $("#attribution-div").hide()
+
+    $("#basemap, #mdt, #overlay").click(() => {
+        console.log($("#basemap").val())
+        if ($("#basemap").prop('checked') || $("#mdt").prop('checked')) {
+            $("#attribution-div").show('0.3s')
+        } else {
+            $("#attribution-div").hide('0.3s')
+        }
+    })
+
     </script>
 
     <!-- A variável edit é passada como true se o modo for edição -->
@@ -351,15 +389,18 @@
             $(document).ready(loadLayerDataForEditing())
 
             function loadLayerDataForEditing() {
+
+
+
                 $('#layerName').val("<%=layerName%>")
                 $('#group').val("<%=group%>")
                 $('#layer').val("<%=layer%>")
                 $('#host').val("<%=host%>")
-
+                $('#attribution').val(decodeURI("<%=attribution%>"))
                 if ("<%=metadata%>" != "none" && "<%=metadata%>" != "") {
                     $('#c-metadata').html("<%=metadata%>")
-                } else {
-                    $('#c-metadata').html("Não há arquivo de metadados.")
+                    $("#remove_file").attr("disabled", false)
+                    $("#remove_file").css('background-color', '#343a40')
                 }
 
                 if ("<%=type%>" == 1) {
@@ -373,6 +414,10 @@
                 if ("<%=publicLayer%>" == 1) {
                     $('input:radio[name=publicLayer][value=1]').click();
                 }
+
+                if ($("#basemap").prop('checked') || $("#mdt").prop('checked')) {
+                    $("#attribution-div").show('0.3s')
+                } 
 
                 loadLayerAttributes() // Carrega a tabela de atributos da Layer
 
@@ -407,9 +452,10 @@
                     }
                 }
             }
+
         </script>
 
-        <% } %>
+    <% } %>
 
-            </div>
-            <%- include('partials/admin/footer.ejs') %>
+</div>
+<%- include('partials/admin/footer.ejs') %>
