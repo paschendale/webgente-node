@@ -106,6 +106,7 @@ var dummyData = [{
     measurement_enabled: true,
     custom_legend_enabled: false,
     coordinates_enabled: true
+
 }];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */

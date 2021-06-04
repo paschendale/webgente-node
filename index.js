@@ -5,6 +5,9 @@ const bodyParser = require("body-parser");
 const { Op } = require("sequelize");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
+const formidable = require('formidable');
+const fs = require('fs');
+const path = require('path');
 const conn = require("./database/connection.js")
 const formidable = require('formidable');
 const fs = require('fs');
@@ -109,6 +112,7 @@ app.get('/', (req, res) => {
 				measurement_enabled: results.measurement_enabled,
 				custom_legend_enabled: results.custom_legend_enabled,
 				coordinates_enabled: results.coordinates_enabled
+
 			})
 		})
 
@@ -242,6 +246,7 @@ app.route('/layers/edit/:id')
 					metadata: layerData.metadata,
 					publicLayer: layerData.publicLayer,
 					attribution: layerData.attribution
+
 				})
 			})
 			.catch(() => {
@@ -254,6 +259,7 @@ app.route('/layers/edit/:id')
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
 			const form = formidable({ keepExtension: false, uploadDir: __dirname + "/public/metadata" })
+
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 				if (err) {
@@ -281,6 +287,7 @@ app.route('/layers/edit/:id')
 							metadata: metadata_path,
 							publicLayer: fields.publicLayer,
 							attribution: fields.attribution
+
 						},
 							{
 								where: {
@@ -515,6 +522,7 @@ app.route('/layers/add')
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
       const form = formidable({ keepExtension: false, uploadDir: __dirname + "/public/metadata" })
+
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 
@@ -543,6 +551,7 @@ app.route('/layers/add')
 								metadata: metadata_path,
 								publicLayer: fields.publicLayer,
 								attribution: fields.attribution
+
 							})
 						})
 						.then(console.log('Succesfully inserted data into database!', fields))
