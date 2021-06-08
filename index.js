@@ -109,7 +109,7 @@ app.get('/', (req, res) => {
 				measurement_enabled: results.measurement_enabled,
 				custom_legend_enabled: results.custom_legend_enabled,
 				coordinates_enabled: results.coordinates_enabled,
-				download_enabled: (req.session.user) ? results.download_enabled : 0
+				download_enabled: results.download_enabled
 
 			})
 		})
@@ -1047,7 +1047,7 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 		SrsName: 'EPSG:4326',
 		cql_filter: req.params.cql_filter
 	}
-
+	console.log(req.params.format)
 	let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
 
 	Config.findOne({
@@ -1060,7 +1060,21 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 				.then(data => {
 					console.log('WFS requisition sent, querying layers: ' + req.params.layer)
 					console.log(result.serverHost + encodeURI(urlWfs))
-					res.send(data)
+					if (req.params.format == 'application/json') {
+						res.send(data)
+					} else {
+						//Verficação para download desabilitados/habilitados
+						Config.findOne({
+							raw: true,
+							attributes: ['download_enabled']
+						}).then(acess => {
+							if (acess == 0) {
+								res.send("none")
+							} else {
+								res.send(data)
+							}
+						})
+					}
 				})
 		})
 })

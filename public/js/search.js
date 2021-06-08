@@ -162,6 +162,7 @@ function TableActions(value, row, index, field) {
 //Utiliza o json obtido na pesquisa para exportar documento geoJson
 function exportGeojson(index) {
     var data = ""
+    if (download_enabled != 0) { 
     if (index == -1) {
         data = JSON.stringify(resultWFS)
     } else {
@@ -175,6 +176,7 @@ function exportGeojson(index) {
     link.download = 'feicao.geoJson'
     link.click();
 }
+}
 //Realiza requisição para o Download 
 function downloadFeature(index_format) {
     var wfsParams = {
@@ -187,7 +189,6 @@ function downloadFeature(index_format) {
     url = '/wfs/' + Object.values(wfsParams).join('/')
 
 
-
     $.ajax({
         url: url,
         beforeSend: function () {
@@ -195,7 +196,9 @@ function downloadFeature(index_format) {
         },
         success(data) {
             $("#load").hide();
-
+        if(data=="none"){  
+            alert("Feições não encontradas!")
+        }else{
             var blob = new Blob([data]);
             let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
@@ -207,6 +210,7 @@ function downloadFeature(index_format) {
             }
             link.click();
 
+        }
         }
     });
 }

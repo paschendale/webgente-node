@@ -29,10 +29,10 @@
                     <label class="custom-control-label" for="search_enabled">Ferramenta de pesquisa por
                         atributos</label>
                 </div>
-                <div class="ml-4  custom-control custom-switch" id="d_search">
+                <div class="custom-control custom-switch" >
                     <input type="checkbox" value='true' class="custom-control-input" id="download_enabled"
                         name="download_enabled">
-                    <label class="custom-control-label" for="download_enabled">Download de feições</label>
+                    <label class="custom-control-label" for="download_enabled">Download de feições da ferramenta de pesquisa </label>
                 </div>
 
                 <div class="custom-control custom-switch">
@@ -81,12 +81,7 @@
                     }
                     if ("<%=search_enabled %>" == 1) {
                         $('#search_enabled').prop('checked', true)
-                    } else {
-                        $('#d_search').children().prop('disabled', true)
-                    }
-                    if ("<%=download_enabled %>" == 1) {
-                        $('#download_enabled').prop('checked', true)
-                    }
+                    } 
                     if ("<%=legend_enabled %>" == 1) {
                         $('#legend_enabled').prop('checked', true)
                     }
@@ -100,22 +95,14 @@
                         $('#custom_legend_enabled').prop('checked', true)
                     }
                     if ("<%=coordinates_enabled %>" == 1) {
-
                         $('#coordinates_enabled').prop('checked', true)
                     }
-
+                    if ("<%=download_enabled %>" == 1) {
+                        $('#download_enabled').prop('checked', true)
+                    }
                 }
 
                 fillForm()
-                $('#search_enabled:checkbox').change(function () {
-                    if ($(this).is(':checked')) {
-                        $('#d_search').children().prop('disabled', false)
-                    } else {
-
-                        $('#d_search').children().prop('disabled', true)
-                        $('#download_enabled').prop('checked', false)
-                    }
-                })
 
             </script>
         </div>
