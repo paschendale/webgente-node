@@ -8,6 +8,8 @@ De forma a evitar eventuais problemas de compatibilidade entre as duas versões 
 
 [Demonstração do sistema](https://webgente.genteufv.com.br/)
 
+Veja [aqui em nosso Roadmap](https://trello.com/b/m0kp6VkF) o que está por vir nas próximas atualizações do WebGENTE e nos acompanhe!
+
 A equipe de desenvolvimento do WebGENTE é composta por:
 
 ## Coordenação
