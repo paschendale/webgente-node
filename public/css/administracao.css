@@ -222,3 +222,46 @@ margin: 12px 15px;
     font-size: 0.8em;
     margin: 2px;
 }
+
+/* CSS da área de reordenamento de camadas */
+
+.sortable {
+    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+.sortable:active {
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}
+
+.layers-list {
+    list-style-type: none
+}
+
+.list-title {
+    width: 20%;
+}
+
+.layer-list-item {
+    width: 30vw;
+}
+
+.groups-list {
+    list-style-type: none
+}
+
+.group-list-item {
+
+}
+
+.draggable-group {
+
+}
+
+.draggable-layer {
+
+}

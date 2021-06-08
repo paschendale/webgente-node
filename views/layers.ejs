@@ -47,8 +47,14 @@
 
   var layerId = []
 
+  /* Adição dos botões de remover e adicionar camadas */
   $( document ).ready(function() {
     $('.fixed-table-toolbar').prepend('<button class="btn btn-dark layer-toolbar" id="remove-layers"  style="margin-right:5px;" data-toggle="modal" data-target="#modalAllLayers"onClick="ModalAllLayers(null, null)">Remover Camadas</button> <a class="btn btn-dark layer-toolbar" id="addNewLayer"  style="margin-left:5px;" href="/layers/add"">Nova Camada</a>')
+  });
+
+  /* Adição do botão de reordenar camadas */
+  $( document ).ready(function() {
+    $('.fixed-table-toolbar').append('<a class="btn btn-dark layer-toolbar" id="reorderLayers"  style="margin-left:5px;" href="/layers/reorder"">Reordernar camadas</a>')
   });
 
   /* Aplicação de raio e margem nos botões de ação*/

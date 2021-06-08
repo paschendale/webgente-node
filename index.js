@@ -267,62 +267,117 @@ app.route('/layers/edit/:id')
 						raw: true,
 						attributes: ['serverHost']
 					})
-						.then(results => {
-							var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
-							Layers.update({
-								type: fields.type,
-								layerName: fields.layerName,
-								group: fields.group,
-								host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-								layer: fields.layer,
-								defaultBaseLayer: fields.defaultBaseLayer,
-								fields: fields.fields,
-								allowedFields: fields.allowedFields,
-								queryFields: fields.queryFields,
-								fieldAlias: fields.fieldAlias,
-								fieldType: fields.fieldType,
-								metadata: metadata_path,
-								publicLayer: fields.publicLayer,
-								attribution: fields.attribution
+					.then(results => {
+						var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
+						Layers.update({
+							type: fields.type,
+							layerName: fields.layerName,
+							group: fields.group,
+							host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+							layer: fields.layer,
+							defaultBaseLayer: fields.defaultBaseLayer,
+							fields: fields.fields,
+							allowedFields: fields.allowedFields,
+							queryFields: fields.queryFields,
+							fieldAlias: fields.fieldAlias,
+							fieldType: fields.fieldType,
+							metadata: metadata_path,
+							publicLayer: fields.publicLayer,
+							attribution: fields.attribution
 
-							},
-								{
-									where: {
-										id: req.params.id
-									}
-								})
-						})
-						.then(console.log('Succesfully inserted data into database!', fields))
-						.then(() => {
-							const oldpath = files.metadata.path;
-
-							fs.readFile(oldpath, function (err, data) {
-								if (err) throw err
-								// Write the file
-								if (files.metadata.size > 0) {
-									const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
-									fs.writeFile(newpath, data, function (err) {
-										if (err) throw err
-									})
+						},
+							{
+								where: {
+									id: req.params.id
 								}
-								// Delete the file
-								fs.unlink(oldpath, function (err) {
+							})
+					})
+					.then(console.log('Succesfully inserted data into database!', fields))
+					.then(() => {
+						const oldpath = files.metadata.path;
+
+						fs.readFile(oldpath, function (err, data) {
+							if (err) throw err
+							// Write the file
+							if (files.metadata.size > 0) {
+								const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+								fs.writeFile(newpath, data, function (err) {
 									if (err) throw err
-
-									res.render("layers")
 								})
-							})
+							}
+							// Delete the file
+							fs.unlink(oldpath, function (err) {
+								if (err) throw err
 
-						})
-						.catch((error) => {
-							console.log('Failed to insert data into database. ' + error)
-							res.render('error', {
-								errorCode: 100,
-								errorMessage: 'Não foi possível editar a camada!'
+								res.render("layers")
 							})
 						})
+
+					})
+					.catch((error) => {
+						console.log('Failed to insert data into database. ' + error)
+						res.render('error', {
+							errorCode: 100,
+							errorMessage: 'Não foi possível editar a camada!'
+						})
+					})
 				}
 			})
+		} else {
+			res.redirect('/')
+		}
+	})
+
+/* Rota para reordenamento das camadas */
+app.route('/layers/reorder')
+	.get((req,res) => {
+		if(req.session.user){
+			res.render('reorder')
+		} else {
+			res.redirect('/')
+		}
+	})
+	.post((req,res) => {
+		if(req.session.user){
+
+			console.log('Reordering layers request received')
+
+			// Callback para quando finalizar o forEach de atualização das linhas de Layers
+			function forEachCallback(){
+				conn.query("UPDATE Layers SET id = id - 1000")
+				.then(() => {
+					res.sendStatus(200); 
+					console.log('Layers reordered successfully');
+				});
+			}
+
+			// Contador de linhas atualizadas para a updateId()
+			var rowsUpdated = 0;
+
+			/* Função assíncrona para atualização das linhas, recebe um id antigo, 
+			um novo e o tamanho do array para chamar o callback ao final */
+			async function updateId(new_id,previous_id,array_length){
+
+				await Layers.update({ id: new_id }, {
+					where: {
+					  id: previous_id
+					}
+				})
+
+				rowsUpdated++;
+				if(rowsUpdated === array_length) {
+					forEachCallback();
+				}
+			}
+
+			var obj = JSON.parse(req.body.reordering)
+
+			// Loop forEach para reordenar com incremento de milhar
+			obj.forEach(function(obj, i, array) {
+				console.log('New ID: ',obj[0]+1000,' Previous ID: ',obj[1])
+				updateId(obj[0]+1000,obj[1],array.length)
+			});	
+
 		} else {
 			res.redirect('/')
 		}
