@@ -81,6 +81,11 @@ const Config = connection.define('config', {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false
+    },
+    download_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     }
 })
 
@@ -105,7 +110,8 @@ var dummyData = [{
     geolocation_enabled: true,
     measurement_enabled: true,
     custom_legend_enabled: false,
-    coordinates_enabled: true
+    coordinates_enabled: true,
+    download_enabled: true
 
 }];
 

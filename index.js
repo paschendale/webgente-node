@@ -108,7 +108,8 @@ app.get('/', (req, res) => {
 				geolocation_enabled: results.geolocation_enabled,
 				measurement_enabled: results.measurement_enabled,
 				custom_legend_enabled: results.custom_legend_enabled,
-				coordinates_enabled: results.coordinates_enabled
+				coordinates_enabled: results.coordinates_enabled,
+				download_enabled: (req.session.user) ? results.download_enabled : 0
 
 			})
 		})
@@ -717,7 +718,7 @@ app.route('/config')
 	measurement_enabled
 	custom_legend_enabled
 	coordinates_enabled
-
+	download_enabled
 */
 app.route('/config_tools')
 	.get((req, res) => {
@@ -734,7 +735,8 @@ app.route('/config_tools')
 							geolocation_enabled: results.geolocation_enabled,
 							measurement_enabled: results.measurement_enabled,
 							custom_legend_enabled: results.custom_legend_enabled,
-							coordinates_enabled: results.coordinates_enabled
+							coordinates_enabled: results.coordinates_enabled,
+							download_enabled: results.download_enabled
 						})
 				})
 		}
@@ -755,7 +757,8 @@ app.route('/config_tools')
 					geolocation_enabled: (req.body.geolocation_enabled != null) ? req.body.geolocation_enabled : 0,
 					measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
 					custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
-					coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0
+					coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0,
+					download_enabled: (req.body.download_enabled != null) ? req.body.download_enabled : 0
 				},
 				{
 					where: {

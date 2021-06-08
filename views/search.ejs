@@ -1,6 +1,7 @@
 <div id="search_bar" class="form-group row">
   <p>Selecione uma camada para realizar a pesquisa:</p>
-  <select id="search_list" class="form-control  form-control-sm" onchange="searchableFields();closeTable()" style="outline: none;">
+  <select id="search_list" class="form-control  form-control-sm" onchange="searchableFields();closeTable()"
+    style="outline: none;">
     <option value="-1"> Nada selecionado</option>
   </select>
   <div id="search_fields" class="collapse ">
@@ -18,7 +19,7 @@
   <button class="btn btn-dark btn-custom  btn-sm" onclick="closeTable()"><i class="fas fa-arrow-left"></i></button>
   <button class="btn btn-dark btn-custom  btn-sm" onclick="zoomFeature(-1)"><i class="fas fa-search"></i></button>
 
-  <button class="btn btn-dark dropdown-toggle btn-sm" type="button" id="dropdownMenu2" data-toggle="dropdown"
+  <button class="btn btn-dark dropdown-toggle btn-sm collapse" type="button" id="download_all" data-toggle="dropdown"
     aria-haspopup="true" aria-expanded="false"><i class="fas fa-download"></i>
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
