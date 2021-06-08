@@ -13,14 +13,45 @@
 <br>
 -->
 
-<!-- <div class="container">
-  <div id="txtsize">
-    <blockquote class="blockquote text-center">
-      <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
-      <footer class="blockquote-footer">Alguém famoso na <cite title="Título da fonte">Título da fonte</cite></footer>
-    </blockquote>
+<div class="container">
+  <div class="feed-blog">
+    <center><h3>Últimas novidades do WebGENTE:</h3></center>
+    <hr>
+    <div class="row" id="feed-blog-container"></div>
   </div>
-</div> -->
+</div>
 
+<script>
+
+  var feedURL = 'https://genteufv.com.br/blog/index.php/category/webgente/feed'
+  
+  $.get({
+    url: 'https://api.rss2json.com/v1/api.json?rss_url=' + feedURL + '&api_key=1ncqy9amuykfdf0xd8soe1xdxzyjntvk96dnd5j7',
+    success: (data) => {
+      console.log('https://api.rss2json.com/v1/api.json?rss_url=' + feedURL + '&api_key=1ncqy9amuykfdf0xd8soe1xdxzyjntvk96dnd5j7')
+      console.log(data)
+      for(i=0;i<data.items.length;i++) {
+        if(i==4){
+          break;
+        }
+        $('#feed-blog-container').append(feedCardHTML(data.items[i]))
+      }
+    }
+  });
+
+  function feedCardHTML(entry) {
+
+    if(entry.thumbnail == undefined || entry.thumbnail == ''){
+      entry.thumbnail = './img/Aplicacao_Exemplo2.png'
+    }
+
+    date = new Date(entry.pubDate)
+
+    date = date.getDay() + ' de ' + date.toLocaleString('default', { month: 'long' }) + ' de ' + date.getFullYear()
+
+    return '<div class="col"><div class="card"><img class="card-img-top img-fluid" src="'+entry.thumbnail+'" alt="Card image cap"><div class="card-body"><h5 class="card-title">'+entry.title+'</h5><h6 class="card-subtitle text-muted">'+date+'</h6><hr><p class="card-text">'+entry.description+'</p><a href="'+entry.link+'" target="_blank" class="btn btn-dark">Veja mais</a></div></div></div>'
+  }
+
+</script>
 
 <%- include('partials/admin/footer.ejs') %> 
