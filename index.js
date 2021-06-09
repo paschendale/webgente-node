@@ -1184,7 +1184,7 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 			exceptions: 'application/json'
 		}
 
-		if (isURL(req.params.host) == false) { res.send('Não foi possível completar a requisição') }
+		// if (isURL(req.params.host) == false) { res.send('Não foi possível completar a requisição') }
 
 		// Decodificando a URL do Host caso necessário
 		host = decodeURIComponentSafely(req.params.host)		
