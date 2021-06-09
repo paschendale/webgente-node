@@ -708,9 +708,9 @@ app.route('/layers/delete/:id')
 	})
 
 /* Rota para página 'Sobre' na interface de administração - Rota protegida pela sessão */
-app.get('/about', (req, res) => {
+app.get('/help', (req, res) => {
 	if (req.session.user) {
-		res.render('about')
+		res.render('help')
 	}
 	else {
 		res.redirect('/');

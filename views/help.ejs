@@ -1,0 +1,48 @@
+<%- include('partials/admin/header.ejs') %> 
+
+<div id="help">
+	<div class="feed-videos">
+		<center><h3>Tutoriais de uso da interface de administração</h3></center>
+		<hr>
+		<div class="row" id="feed-help"></div>
+	  </div>
+</div>
+
+<script>
+
+	var feedURL = 'https://www.youtube.com/feeds/videos.xml?playlist_id=PL7IoZ1L8coKOrkrPWSpWAVj9Zy09h3JyK'
+	
+	$.get({
+	  url: 'https://api.rss2json.com/v1/api.json?rss_url=' + feedURL + '&api_key=1ncqy9amuykfdf0xd8soe1xdxzyjntvk96dnd5j7',
+	  success: (data) => {
+		console.log('https://api.rss2json.com/v1/api.json?rss_url=' + feedURL + '&api_key=1ncqy9amuykfdf0xd8soe1xdxzyjntvk96dnd5j7')
+		console.log(data)
+		if (data.items.length == 0) {
+			$('#feed-help').append('<div class="col"><p style="text-align: center;">Não há nenhum tutorial para ser exibido no momento<br>Acesse a <a href="https://webgente.genteufv.com.br" target="_blank">página oficial do WebGENTE</a> para obter mais informações ou visite <a href="https://www.youtube.com/channel/UCMpLuFoU0QRkihq4-LcTdOQ" target="_blank">nosso canal no YouTube.</a></p></div>')
+		}
+		for(i=0;i<data.items.length;i++) {
+		  $('#feed-help').append(feedCardHTML(data.items[i]))
+		  if (i == data.items.length-1){
+			$('#feed-help').append('<hr>Consulte mais vídeo tutoriais em <a href="https://www.youtube.com/channel/UCMpLuFoU0QRkihq4-LcTdOQ" target="_blank">nosso canal no YouTube.</a>')
+		  }
+		}
+	  }
+	});
+  
+	function feedCardHTML(entry) {
+  
+	  if(entry.thumbnail == undefined || entry.thumbnail == ''){
+		entry.thumbnail = './img/Aplicacao_Exemplo2.png'
+	  }
+  
+	  date = new Date(entry.pubDate)
+  
+	  date = date.getDay() + ' de ' + date.toLocaleString('default', { month: 'long' }) + ' de ' + date.getFullYear()
+  
+	  return '<div class="col"><div class="card"><img class="card-img-top img-fluid" src="'+entry.thumbnail+'" alt="Card image cap"><div class="card-body"><h5 class="card-title">'+entry.title+'</h5><h6 class="card-subtitle text-muted">'+date+'</h6><hr><p class="card-text">'+entry.description+'</p><a href="'+entry.link+'" target="_blank" class="btn btn-dark">Veja mais</a></div></div></div>'
+	}
+  
+  </script>
+  
+
+<%- include('partials/admin/footer.ejs') %> 
