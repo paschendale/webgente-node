@@ -860,12 +860,12 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		service: 'WMS',
 		version: '1.1.1',
 		request: 'GetFeatureInfo',
-		layers: decodeURIComponentSafely(req.params.layers),
-		srs: decodeURIComponentSafely(req.params.srs),
-		bbox: decodeURIComponentSafely(req.params.bbox),
-		width: decodeURIComponentSafely(req.params.width),
-		height: decodeURIComponentSafely(req.params.heigth),
-		query_layers: decodeURIComponentSafely(req.params.layers),
+		layers: req.params.layers,
+		srs: req.params.srs,
+		bbox: req.params.bbox,
+		width: req.params.width,
+		height: req.params.heigth,
+		query_layers: req.params.layers,
 		info_format: 'application/json', // Formato de resposta do GetFeatureInfo
 		feature_count: '50', // Puxar até 50 feições
 		x: Math.round(req.params.x),
@@ -923,8 +923,8 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 
 	filter = {
 		part_1: 'INTERSECTS(geom, SRID=4326;Point(',
-		part_2: decodeURIComponentSafely(req.params.lng),
-		part_3: decodeURIComponentSafely(req.params.lat),
+		part_2: req.params.lng,
+		part_3: req.params.lat,
 		part_4: '))'
 	}
 
@@ -932,7 +932,7 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 		service: 'WFS',
 		version: '2.0.0',
 		request: 'GetFeature',
-		typeNames: decodeURIComponentSafely(req.params.layer),
+		typeNames: req.params.layer,
 		outputformat: 'application/json',
 		srsName: 'EPSG:4326',
 		cql_filter: encodeURI(Object.values(filter).join(' '))
@@ -1179,7 +1179,7 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 			service: 'WFS',
 			version: '1.3.0',
 			request: 'describeFeatureType',
-			typeName: decodeURIComponentSafely(req.params.layer),
+			typeName: req.params.layer,
 			outputFormat: 'application/json',
 			exceptions: 'application/json'
 		}
