@@ -1195,8 +1195,8 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 		console.log(host + urlParameters)
 
 		fetch(host + urlParameters, { method: 'GET', headers: headers })
-			.then(res => res.text())
-			.then(data => res.send(data))
+		.then(res => res.text())
+		.then(data => res.send(data))
 	}
 	else {
 		res.redirect('/');
