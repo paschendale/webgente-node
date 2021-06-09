@@ -1194,7 +1194,7 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 		console.log('describeFeatureType requisition sent, querying layers: ' + params.typeName)
 		console.log(host + urlParameters)
 
-		fetch(req.params.host + urlParameters, { method: 'GET', headers: headers })
+		fetch(host + urlParameters, { method: 'GET', headers: headers })
 			.then(res => res.text())
 			.then(data => res.send(data))
 	}
