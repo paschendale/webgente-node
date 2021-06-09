@@ -88,6 +88,22 @@ app.use(function (req, res, next) {
 	next();
 })
 
+/*	Quando empregado em proxys reversos alguns parametros que possuem encoded slashes (/ -> %2F)
+	não funcionam, sendo assim é necessário aplicar um decode antes realizar a requisição.
+	A função nativa decodeURIComponent falha caso a URI não esteja codificada corretamente,
+	sendo assim deve-se utilizar um bloco try ... catch como na função abaixo.
+
+	Utilizar esta função para todos os casos onde estiver bugando requisições via HTTP Proxy
+*/
+function decodeURIComponentSafely(uri) {
+	try {
+		return decodeURIComponent(uri)
+	} catch(e) {
+		console.log('URI Component not decodable: ' + uri)
+		return uri
+	}
+}
+
 /* Rota da página inicial */
 app.get('/', (req, res) => {
 	var buttons = true;
@@ -844,12 +860,12 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		service: 'WMS',
 		version: '1.1.1',
 		request: 'GetFeatureInfo',
-		layers: req.params.layers,
-		srs: req.params.srs,
-		bbox: req.params.bbox,
-		width: req.params.width,
-		height: req.params.heigth,
-		query_layers: req.params.layers,
+		layers: decodeURIComponentSafely(req.params.layers),
+		srs: decodeURIComponentSafely(req.params.srs),
+		bbox: decodeURIComponentSafely(req.params.bbox),
+		width: decodeURIComponentSafely(req.params.width),
+		height: decodeURIComponentSafely(req.params.heigth),
+		query_layers: decodeURIComponentSafely(req.params.layers),
 		info_format: 'application/json', // Formato de resposta do GetFeatureInfo
 		feature_count: '50', // Puxar até 50 feições
 		x: Math.round(req.params.x),
@@ -907,8 +923,8 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 
 	filter = {
 		part_1: 'INTERSECTS(geom, SRID=4326;Point(',
-		part_2: req.params.lng,
-		part_3: req.params.lat,
+		part_2: decodeURIComponentSafely(req.params.lng),
+		part_3: decodeURIComponentSafely(req.params.lat),
 		part_4: '))'
 	}
 
@@ -916,7 +932,7 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 		service: 'WFS',
 		version: '2.0.0',
 		request: 'GetFeature',
-		typeNames: req.params.layer,
+		typeNames: decodeURIComponentSafely(req.params.layer),
 		outputformat: 'application/json',
 		srsName: 'EPSG:4326',
 		cql_filter: encodeURI(Object.values(filter).join(' '))
@@ -1090,19 +1106,22 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 /* Requisições WFS */
 app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 
-	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 	params = {
 		service: 'WFS',
 		version: '1.3.0',
 		request: 'GetFeature',
-		typeName: req.params.layer,
-		outputFormat: req.params.format,
+		typeName: decodeURIComponentSafely(req.params.layer),
+		outputFormat: decodeURIComponentSafely(req.params.format),
 		exceptions: 'application/json',
-		propertyName: req.params.property_name,
+		propertyName: decodeURIComponentSafely(req.params.property_name),
 		SrsName: 'EPSG:4326',
-		cql_filter: req.params.cql_filter
+		cql_filter: decodeURIComponentSafely(req.params.cql_filter)
 	}
-	console.log(req.params.format)
+
+	console.log(params)
+
+	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
+
 	let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
 
 	Config.findOne({
@@ -1160,7 +1179,7 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 			service: 'WFS',
 			version: '1.3.0',
 			request: 'describeFeatureType',
-			typeName: req.params.layer,
+			typeName: decodeURIComponentSafely(req.params.layer),
 			outputFormat: 'application/json',
 			exceptions: 'application/json'
 		}
