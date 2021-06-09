@@ -1186,10 +1186,13 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 
 		if (isURL(req.params.host) == false) { res.send('Não foi possível completar a requisição') }
 
+		// Decodificando a URL do Host caso necessário
+		host = decodeURIComponentSafely(req.params.host)		
+
 		let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
 
 		console.log('describeFeatureType requisition sent, querying layers: ' + params.typeName)
-		console.log(req.params.host + urlParameters)
+		console.log(host + urlParameters)
 
 		fetch(req.params.host + urlParameters, { method: 'GET', headers: headers })
 			.then(res => res.text())
