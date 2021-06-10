@@ -103,7 +103,7 @@ function table_factory() {
             formatter: TableActions,
             title: (download_enabled == 0) ? "Zoom" : "Download/Zoom"
         })
-        
+
         //Adicionando colunas a tabela
         $("#table").bootstrapTable({
             columns: column
@@ -140,6 +140,7 @@ function ajaxRequest(params) {
             resultWFS = response
 
             zoomFeature(-1)
+            console.log(resultWFS)
             properties = response.features.map(e => e.properties);
             params.success(properties)
 
@@ -154,36 +155,30 @@ function TableActions(value, row, index, field) {
     if (download_enabled == 0) {
         return ['<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature(' + index + ')"> <i class="fas fa-search"></i></button>']
     } else {
-        return ['<button class="btn btn-dark btn-custom btn-sm" id="downloadFeature" onclick="exportGeojson(' + index + ')"> <i class="fas fa-download"></i></button>', ' ', '<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature(' + index + ')"> <i class="fas fa-search"></i></button>'].join('');
+        return ['<button class="btn btn-dark btn-custom btn-sm" id="downloadFeature" onclick="downloadFeature(' + index + ',' + index + ')"> <i class="fas fa-download"></i></button>', ' ', '<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature(' + index + ')"> <i class="fas fa-search"></i></button>'].join('');
 
     }
 }
 
 //Utiliza o json obtido na pesquisa para exportar documento geoJson
-function exportGeojson(index) {
+function exportGeojson() {
     var data = ""
-    if (download_enabled != 0) { 
-    if (index == -1) {
+    if (download_enabled != 0) {
         data = JSON.stringify(resultWFS)
-    } else {
-        data = resultWFS
-        data.features = resultWFS.features[index]
-        data = JSON.stringify(data)
+        var blob = new Blob([data]);
+        let link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = (resultWFS.features[0].id.split('.'))[0] + '.geojson'
+        link.click();
     }
-    var blob = new Blob([data]);
-    let link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = 'feicao.geoJson'
-    link.click();
-}
 }
 //Realiza requisição para o Download 
-function downloadFeature(index_format) {
+function downloadFeature(index_format, index) {
     var wfsParams = {
         layer: requestParams.layerSelect.layer,
-        format: encodeURIComponent(index_format),
+        format: (index == -1) ? encodeURIComponent(index_format) : encodeURIComponent('application/json'),
         property_name: requestParams.property_name,
-        cql_filter: encodeURI(requestParams.filter_all)
+        cql_filter: (index == -1) ? encodeURI(requestParams.filter_all) : encodeURI("id=" + resultWFS.features[index].properties.id)
     }
 
     url = '/wfs/' + Object.values(wfsParams).join('/')
@@ -196,21 +191,26 @@ function downloadFeature(index_format) {
         },
         success(data) {
             $("#load").hide();
-        if(data=="none"){  
-            alert("Feições não encontradas!")
-        }else{
-            var blob = new Blob([data]);
-            let link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            if (index_format == 'csv') {
-                link.download = 'feicao.csv';
-            }
-            else if (index_format == 'GML3') {
-                link.download = 'feicao.gml';
-            }
-            link.click();
+            if (data == "none") {
+                alert("Feições não encontradas!")
+            } else {
 
-        }
+                var blob = new Blob([data]);
+
+                let link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                if (index_format == 'csv') {
+                    link.download = (resultWFS.features[0].id.split('.'))[0] + '.csv';
+                }
+                else if (index_format == 'kml') {
+                    link.download = (resultWFS.features[0].id.split('.'))[0] + '.kml';
+                }
+                else if (index_format == index) {
+                    link.download = (resultWFS.features[0].id.split('.'))[0] + '.geojson';
+                }
+                link.click();
+
+            }
         }
     });
 }
