@@ -82,7 +82,9 @@ Lc = L.control.groupedLayers(baseMaps,overlayMaps,optionsControl).addTo(map);
 function addMetadata (metadata) {
     
     if (metadata != "" && metadata != "none" && metadata != undefined) { // "" é o armazenamento de metadados até a 1.0, a partir da 1.1 o armazenamento sem metadados é denotado como 'none'
-        metadata = metadata.split('public')[1]
+        if (metadata.split('/public')[1] != undefined) {
+            metadata = metadata.split('/public')[1]
+        } 
         return ' <a href="' + metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>'
     } else {
         return ''
