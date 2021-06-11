@@ -1,0 +1,130 @@
+<%- include('partials/admin/header.ejs') %>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<div class="container shadow-sm container-form-webgente-admin" >
+    <div class="container">
+        <h3>Reordene a exibição das camadas no WebGENTE</h3>
+        <p>A ordem das camadas define sua sobreposição no mapa, sendo assim, 
+            uma camada mais ao topo na lista será sobreposta por uma camada
+            abaixo na lista ao ser chamada. Você pode reordenar os grupos e as camadas
+            dentro destes. Para alterar o grupo de uma camada utilize a interface
+            de edição da camada.</p>
+        <hr>
+        <div class="col" >
+            <h6>Ordem de chamada das camadas base</h6>
+            <ul id='basemap-list-container' class='list-group groups-list'></ul>
+            <h6>Ordem de chamada das camadas e grupos de sobreposição</h6>
+            <ul id='list-container' class='list-group sortable groups-list'></ul>
+        </div>
+    </div>
+    <hr> 
+    <button id="save-button" class="btn btn-dark" onClick="beforeSubmit()">Salvar</button> &nbsp;<img src="/img/ajax-loader.gif" alt="Carregando" id='loading-img' style="height: 20px; width: 20px; visibility: hidden;">
+</div>
+<script>
+
+    /* Funções auxiliares para a criação/manutenção da lista */
+    function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+    }
+
+    function onlyOverlays(value) {
+        return value.type == 2
+    }
+
+    function onlyNotOverlays(value) {
+        return value.type == 2
+    }
+
+    /* Populando a lista de camadas */
+    $.get({
+        url: '/listlayers',
+        success: (layers) => {
+
+            console.log(layers)
+
+            basemaps = layers.filter(onlyNotOverlays)
+
+            /* Construindo os grupos */
+            var groups = layers.filter(onlyOverlays).map(e => e.group).filter(onlyUnique)
+            
+            /* Adicionando grupo de basemaps no topo da lista sem possibilitar reordenamento do grupo */
+            $('#basemap-list-container').append('<li class="list-group-item draggable-layer ui-state-default group-list-item"><div class="row draggable-group" id="basemaps"><h6 class="list-title">Mapas Base</h6><br><ul id="basemap-list" class="sortable layers-list"></ul></div><li><hr>')
+
+            /* Adicionando os demais grupos */
+            for (i = 0; i < groups.length; i++) {
+                $('#list-container').append('<li class="list-group-item ui-state-default group-list-item"><div class="row draggable-group" id="'+groups[i].split(" ").join('')+'-container"><h6 class="list-title"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span> '+groups[i]+'</h6><br><ul id="'+groups[i].split(" ").join('')+'-list" class="sortable layers-list"></ul></div><li>')
+            }
+
+            /* Atribuindo cada layer em seu respectivo grupo */
+            for (i = 0; i < layers.length; i++) {
+                if (layers[i].type == 1 || layers[i].type == 3) {
+                    $('#basemap-list').append('<li class="list-group-item ui-state-default layer-list-item" data-previous-id="'+layers[i].id+'"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+layers[i].layerName+'</li>')
+                } else {
+                    $('#'+layers[i].group.split(" ").join('')+'-list').append('<li class="list-group-item ui-state-default layer-list-item" data-previous-id="'+layers[i].id+'"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+layers[i].layerName+'</li>')
+                }          
+            }
+
+            /* Ativando comportamento de reordenamento da lista */
+            $( function() {
+                $( ".sortable" ).sortable();
+                $( ".sortable" ).disableSelection();
+            } );
+        }
+    })
+
+    function beforeSubmit() {
+
+        $('#save-button').prop('disabled', true);
+        $('#loading-img').css('visibility', 'visible');
+
+        /* Coletando a nova ordem de camadas dada pelo reordenamento manual */
+        var sortedLayers = $('.layer-list-item').map(function(){
+            return $.trim($(this).text());
+        }).get();
+
+        /* Coletando a ordem de IDs anteriores */
+        var sortedLayersPreviousIDs = $('.layer-list-item').map(function(){
+            return $.trim($(this).data('previous-id'));
+        }).get();
+
+        /* Criando objeto para reordenamento com incremento de milhar */
+        var reordering = []
+        for (i = 0; i < sortedLayers.length; i ++) {
+            reordering.push([i,Number.parseInt(sortedLayersPreviousIDs[i])])
+        }
+
+        console.log(reordering)
+
+        $.post({
+            url: '/layers/reorder',
+            data: {reordering: JSON.stringify(reordering)},  
+            success: () => {
+                window.open('/layers','_self')
+            },
+            error: function(x,e) {
+
+                $('#save-button').prop('disabled', false);
+                $('#loading-img').css('visibility', 'hidden');
+
+                if (x.status==0) {
+                    alert('You are offline!!\n Please Check Your Network.');
+                } else if(x.status==404) {
+                    alert('Requested URL not found.');
+                } else if(x.status==500) {
+                    alert('Internal Server Error.');
+                } else if(e=='parsererror') {
+                    alert('Error.\nParsing JSON Request failed.');
+                } else if(e=='timeout'){
+                    alert('Request Timed Out.');
+                } else {
+                    alert('Unknown Error.\n'+x.responseText);
+                }
+            }
+        })
+    }
+
+</script>
+
+<%- include('partials/admin/footer.ejs') %>

@@ -36,7 +36,7 @@ function searchableFields() {
         $("#search_fields").show();
         var option = layersQuerrys[$('#search_list').prop('selectedIndex') - 1];
         var complete_sub = ""
-      
+
         Object.keys(option.queryFields).map((element) => {
             complete_sub += `<input type="text" class="form-control form-control-sm webgente-search-form" name="` + element + `" id="` + element + `" placeholder="` + option.queryFields[element].fieldAlias + `">`
         })
@@ -73,7 +73,11 @@ function filter_concate() {
 
 //Adicionar elementos a tabela 
 function table_factory() {
+
     $("#buttons_table").show()
+    if (download_enabled != 0)
+        $("#download_all").show()
+
     var option = layersQuerrys[$('#search_list').prop('selectedIndex') - 1];
     requestParams.layerSelect = option
     addLayerByName(requestParams.layerSelect.layer)
@@ -97,8 +101,9 @@ function table_factory() {
         //Coluna para os botões
         column.push({
             formatter: TableActions,
-            title: "Download/Zoom"
+            title: (download_enabled == 0) ? "Zoom" : "Download/Zoom"
         })
+        
         //Adicionando colunas a tabela
         $("#table").bootstrapTable({
             columns: column
@@ -110,6 +115,7 @@ function table_factory() {
         })
 
     })
+
 
 }
 //Requisição da tabela
@@ -132,7 +138,7 @@ function ajaxRequest(params) {
             params.success([])
         } else {
             resultWFS = response
-    
+
             zoomFeature(-1)
             properties = response.features.map(e => e.properties);
             params.success(properties)
@@ -145,11 +151,18 @@ function ajaxRequest(params) {
 
 //Botbões da tabela
 function TableActions(value, row, index, field) {
-    return ['<button class="btn btn-dark btn-custom btn-sm" id="downloadFeature" onclick="exportGeojson(' + index + ')"> <i class="fas fa-download"></i></button>', ' ', '<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature(' + index + ')"> <i class="fas fa-search"></i></button>'].join('');
+    if (download_enabled == 0) {
+        return ['<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature(' + index + ')"> <i class="fas fa-search"></i></button>']
+    } else {
+        return ['<button class="btn btn-dark btn-custom btn-sm" id="downloadFeature" onclick="exportGeojson(' + index + ')"> <i class="fas fa-download"></i></button>', ' ', '<button class="btn btn-dark btn-custom2 btn-sm" id="zoomFeature" onclick="zoomFeature(' + index + ')"> <i class="fas fa-search"></i></button>'].join('');
+
+    }
 }
+
 //Utiliza o json obtido na pesquisa para exportar documento geoJson
 function exportGeojson(index) {
     var data = ""
+    if (download_enabled != 0) { 
     if (index == -1) {
         data = JSON.stringify(resultWFS)
     } else {
@@ -163,6 +176,7 @@ function exportGeojson(index) {
     link.download = 'feicao.geoJson'
     link.click();
 }
+}
 //Realiza requisição para o Download 
 function downloadFeature(index_format) {
     var wfsParams = {
@@ -175,7 +189,6 @@ function downloadFeature(index_format) {
     url = '/wfs/' + Object.values(wfsParams).join('/')
 
 
-
     $.ajax({
         url: url,
         beforeSend: function () {
@@ -183,11 +196,10 @@ function downloadFeature(index_format) {
         },
         success(data) {
             $("#load").hide();
-        
+        if(data=="none"){  
+            alert("Feições não encontradas!")
+        }else{
             var blob = new Blob([data]);
-
-
-
             let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             if (index_format == 'csv') {
@@ -198,6 +210,7 @@ function downloadFeature(index_format) {
             }
             link.click();
 
+        }
         }
     });
 }
@@ -212,15 +225,15 @@ function zoomFeature(index) {
 
 }
 //Remove todas os alterações feitas com a tabela
-function closeTable() { 
-    if ($.isEmptyObject(requestParams) == false){
+function closeTable() {
+    if ($.isEmptyObject(requestParams) == false) {
         removeLayerByName(requestParams.layerSelect.layer)
         $("#table").bootstrapTable('destroy')
         $("#buttons_table").hide()
         searchableFields()
     }
-        focus_style.clearLayers()
-    
+    focus_style.clearLayers()
+
 }
 //Adiciona layer pelo controle de camadas
 function addLayerByName(nameString) {

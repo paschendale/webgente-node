@@ -5,10 +5,10 @@ const bodyParser = require("body-parser");
 const { Op } = require("sequelize");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
-const formidable = require('formidable');
+const fs = require('fs');
 const path = require('path');
 const conn = require("./database/connection.js")
-const fs = require('fs');
+const formidable = require('formidable');
 const Layers = require("./database/models/Layers.js")
 const Users = require("./database/models/User.js")
 const Config = require("./database/models/Config.js")
@@ -88,6 +88,22 @@ app.use(function (req, res, next) {
 	next();
 })
 
+/*	Quando empregado em proxys reversos alguns parametros que possuem encoded slashes (/ -> %2F)
+	não funcionam, sendo assim é necessário aplicar um decode antes realizar a requisição.
+	A função nativa decodeURIComponent falha caso a URI não esteja codificada corretamente,
+	sendo assim deve-se utilizar um bloco try ... catch como na função abaixo.
+
+	Utilizar esta função para todos os casos onde estiver bugando requisições via HTTP Proxy
+*/
+function decodeURIComponentSafely(uri) {
+	try {
+		return decodeURIComponent(uri)
+	} catch(e) {
+		console.log('URI Component not decodable: ' + uri)
+		return uri
+	}
+}
+
 /* Rota da página inicial */
 app.get('/', (req, res) => {
 	var buttons = true;
@@ -108,8 +124,8 @@ app.get('/', (req, res) => {
 				geolocation_enabled: results.geolocation_enabled,
 				measurement_enabled: results.measurement_enabled,
 				custom_legend_enabled: results.custom_legend_enabled,
-				coordinates_enabled: results.coordinates_enabled
-
+				coordinates_enabled: results.coordinates_enabled,
+				download_enabled: results.download_enabled
 			})
 		})
 
@@ -210,7 +226,7 @@ app.route('/user/add')
 					group: req.body.group
 				}
 			).then(console.log('Succesfully inserted data into database!', req.body))
-			.then(res.render("users"))
+				.then(res.render("users"))
 		} else {
 			res.redirect('/')
 		}
@@ -226,29 +242,29 @@ app.route('/layers/edit/:id')
 					id: req.params.id
 				}
 			})
-			.then(layerData => {
-				console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
-				res.render('layer_details.ejs', {
-					edit: true,
-					id: layerData.id,
-					layerName: layerData.layerName,
-					group: layerData.group,
-					layer: layerData.layer,
-					type: layerData.type,
-					host: layerData.host,
-					defaultBaseLayer: layerData.defaultBaseLayer,
-					allowedFields: layerData.allowedFields,
-					fieldAlias: layerData.fieldAlias,
-					queryFields: layerData.queryFields,
-					metadata: layerData.metadata,
-					publicLayer: layerData.publicLayer,
-					attribution: layerData.attribution
+				.then(layerData => {
+					console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
+					res.render('layer_details.ejs', {
+						edit: true,
+						id: layerData.id,
+						layerName: layerData.layerName,
+						group: layerData.group,
+						layer: layerData.layer,
+						type: layerData.type,
+						host: layerData.host,
+						defaultBaseLayer: layerData.defaultBaseLayer,
+						allowedFields: layerData.allowedFields,
+						fieldAlias: layerData.fieldAlias,
+						queryFields: layerData.queryFields,
+						metadata: layerData.metadata,
+						publicLayer: layerData.publicLayer,
+						attribution: layerData.attribution
 
+					})
 				})
-			})
-			.catch(() => {
-				res.redirect('/layers')
-			})
+				.catch(() => {
+					res.redirect('/layers')
+				})
 		} else {
 			res.redirect('/')
 		}
@@ -323,6 +339,61 @@ app.route('/layers/edit/:id')
 					})
 				}
 			})
+		} else {
+			res.redirect('/')
+		}
+	})
+
+/* Rota para reordenamento das camadas */
+app.route('/layers/reorder')
+	.get((req,res) => {
+		if(req.session.user){
+			res.render('reorder')
+		} else {
+			res.redirect('/')
+		}
+	})
+	.post((req,res) => {
+		if(req.session.user){
+
+			console.log('Reordering layers request received')
+
+			// Callback para quando finalizar o forEach de atualização das linhas de Layers
+			function forEachCallback(){
+				conn.query("UPDATE Layers SET id = id - 1000")
+				.then(() => {
+					res.sendStatus(200); 
+					console.log('Layers reordered successfully');
+				});
+			}
+
+			// Contador de linhas atualizadas para a updateId()
+			var rowsUpdated = 0;
+
+			/* Função assíncrona para atualização das linhas, recebe um id antigo, 
+			um novo e o tamanho do array para chamar o callback ao final */
+			async function updateId(new_id,previous_id,array_length){
+
+				await Layers.update({ id: new_id }, {
+					where: {
+					  id: previous_id
+					}
+				})
+
+				rowsUpdated++;
+				if(rowsUpdated === array_length) {
+					forEachCallback();
+				}
+			}
+
+			var obj = JSON.parse(req.body.reordering)
+
+			// Loop forEach para reordenar com incremento de milhar
+			obj.forEach(function(obj, i, array) {
+				console.log('New ID: ',obj[0]+1000,' Previous ID: ',obj[1])
+				updateId(obj[0]+1000,obj[1],array.length)
+			});	
+
 		} else {
 			res.redirect('/')
 		}
@@ -404,7 +475,7 @@ app.route('/users/edit/:id')
 				}
 			})
 			.then(UserData => {
-					res.render('user_details.ejs', {
+				res.render('user_details.ejs', {
 					edit: true,
 					id: UserData.id,
 					userName: UserData.userName,
@@ -518,7 +589,7 @@ app.route('/layers/add')
 	})
 	.post((req, res) => { //TODO: verificar se dados estão ok antes de dar entrada no banco usando o node-sanitize
 		if (req.session.user) {
-      const form = formidable({ keepExtension: false, uploadDir: __dirname + "/public/metadata" })
+			const form = formidable({ keepExtension: false, uploadDir: __dirname + "/public/metadata" })
 
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
@@ -636,9 +707,9 @@ app.route('/layers/delete/:id')
 	})
 
 /* Rota para página 'Sobre' na interface de administração - Rota protegida pela sessão */
-app.get('/about', (req, res) => {
+app.get('/help', (req, res) => {
 	if (req.session.user) {
-		res.render('about')
+		res.render('help')
 	}
 	else {
 		res.redirect('/');
@@ -688,17 +759,91 @@ app.route('/config')
 					}
 				}
 			).then(() => {
-					Layers.update({host: req.body.serverHost},{where: {}})
-				}
+				Layers.update({ host: req.body.serverHost }, { where: {} })
+			}
 			).then(() => {
 				console.log('Dados de configuração atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
-				}
+			}
 			).catch((error) => {
-					console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
-					res.send('Ocorreu algum erro')
+				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
+				res.send('Ocorreu algum erro')
+			}
+			)
+		}
+		else {
+			res.redirect('/');
+		}
+	});
+
+/* Rota para configurações de ferramentas do WebGENTE na interface de administração 
+
+	home_enabled
+	select_enabled
+	information_enabled
+	search_enabled
+	legend_enabled
+	geolocation_enabled
+	measurement_enabled
+	custom_legend_enabled
+	coordinates_enabled
+	download_enabled
+*/
+app.route('/config_tools')
+	.get((req, res) => {
+		if (req.session.user) {
+			Config.findOne({ raw: true })
+				.then(results => {
+					res.render("config_tools",
+						{
+							home_enabled: results.home_enabled,
+							select_enabled: results.select_enabled,
+							information_enabled: results.information_enabled,
+							search_enabled: results.search_enabled,
+							legend_enabled: results.legend_enabled,
+							geolocation_enabled: results.geolocation_enabled,
+							measurement_enabled: results.measurement_enabled,
+							custom_legend_enabled: results.custom_legend_enabled,
+							coordinates_enabled: results.coordinates_enabled,
+							download_enabled: results.download_enabled
+						})
+				})
+		}
+		else {
+			res.redirect('/');
+		}
+	})
+	.post((req, res) => {
+		console.log(req.body)
+		if (req.session.user) {
+			Config.update(
+				{
+					home_enabled: (req.body.home_enabled != null) ? req.body.home_enabled : 0,
+					select_enabled: (req.body.select_enabled != null) ? req.body.select_enabled : 0,
+					information_enabled: (req.body.information_enabled != null) ? req.body.information_enabled : 0,
+					search_enabled: (req.body.search_enabled != null) ? req.body.search_enabled : 0,
+					legend_enabled: (req.body.legend_enabled != null) ? req.body.legend_enabled : 0,
+					geolocation_enabled: (req.body.geolocation_enabled != null) ? req.body.geolocation_enabled : 0,
+					measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
+					custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
+					coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0,
+					download_enabled: (req.body.download_enabled != null) ? req.body.download_enabled : 0
+				},
+				{
+					where: {
+						profile: 'webgente-default'
+					}
 				}
+			).then(() => {
+				console.log('Dados de configuração das ferramentas atualizados com sucesso')
+				setHeaders();
+				res.redirect('/config')
+			}
+			).catch((error) => {
+				console.log('Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
+				res.send('Ocorreu algum erro')
+			}
 			)
 		}
 		else {
@@ -804,44 +949,44 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		raw: true,
 		attributes: ['serverHost']
 	})
-	.then(results => {
-		console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
-		console.log(results.serverHost + urlParameters)
-		fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
-		.then(res => res.text())
-		.then(data => {
+		.then(results => {
+			console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
+			console.log(results.serverHost + urlParameters)
+			fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
+				.then(res => res.text())
+				.then(data => {
 
-			if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
+					if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
 
-				console.log('Usuário logado, getFeatureInfo enviado!')
-				data = JSON.parse(data)
-				res.send(data);
+						console.log('Usuário logado, getFeatureInfo enviado!')
+						data = JSON.parse(data)
+						res.send(data);
 
-			} else {
+					} else {
 
-				console.log('Usuário requisitou getFeatureInfo sem login')
-				console.log(req.session.user)
+						console.log('Usuário requisitou getFeatureInfo sem login')
+						console.log(req.session.user)
 
-				data = JSON.parse(data)
-				//restrição de dados		
-				restrictAttributes(data.features, 'id', 'properties')
-				.then(result => {
+						data = JSON.parse(data)
+						//restrição de dados		
+						restrictAttributes(data.features, 'id', 'properties')
+							.then(result => {
 
-					if (result[0] != undefined) {
-						data.features = result
-						res.send(data)
-					} else { // Envia um array vazio caso a resposta do GFI seja nula
-						data.features = [];
-						res.send(data)
+								if (result[0] != undefined) {
+									data.features = result
+									res.send(data)
+								} else { // Envia um array vazio caso a resposta do GFI seja nula
+									data.features = [];
+									res.send(data)
+								}
+							})
 					}
-				})
-			}
 
+				})
+				.catch(err => {
+					res.send(err);
+				});
 		})
-		.catch(err => {
-			res.send(err);
-		});
-	})
 })
 
 /* Seleção de feições */
@@ -876,20 +1021,31 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 				.then(res => res.text())
 				.then(data => {
 					console.log('WFS requisition sent: ' + url)
-					data = removeProperties(data)
-					res.send(data)
+
+					if (req.session.user) {
+						res.send(data)
+					} else {
+
+						data = JSON.parse(data)
+						//Restrição de atributos para usuários anônimos	
+						restrictAttributes(data.features, 'id', 'properties')
+							.then(result => {
+								if (result[0] != undefined) {
+									data.features = result
+									data = JSON.stringify(data)
+									res.send(data)
+								} else {
+									//Para resultados nulos
+									data.features = [];
+									data = JSON.stringify(data)
+									res.send(data)
+								}
+							})
+
+					}
 				})
 				.catch(error => res.send(error))
 		})
-
-	function removeProperties(data) {
-		data = JSON.parse(data)
-		for (i = 0; i < data.features.length; i++) {
-			data.features[i].properties = []
-		}
-		data = JSON.stringify(data)
-		return data
-	}
 })
 
 /* Recolher campos pesquisáveis no banco de dados */
@@ -907,7 +1063,7 @@ app.get('/listqueryable', (req, res) => {
 		where: whereClausule
 	}).then(results => {
 		//Função para adaptar retorno do banco de dados
-		
+
 		for (var n = 0; n < results.length; n++) {
 			//Objeto com o retorno ordenadado por propriedade:
 			var fields = {
@@ -932,28 +1088,28 @@ app.get('/listqueryable', (req, res) => {
 				'layerName': results[n].layerName,
 				'layer': results[n].layer,
 				'queryFields': properties_order
-			}			
-			
-			//Remove camadas que possuam queryFields vazio 
-		if (!Object.entries(results[n].queryFields).length) {
-				results.splice(n, 1)
-				n-=1
 			}
-			
+
+			//Remove camadas que possuam queryFields vazio 
+			if (!Object.entries(results[n].queryFields).length) {
+				results.splice(n, 1)
+				n -= 1
+			}
+
 		}
 		//Restrição de atributos para usuário restrito
 		if (req.session.user) {
 			res.send(results)
-		}else{
-			
+		} else {
+
 			restrictAttributes(results, 'layer', 'queryFields')
 				.then(result => {
 					res.send(result)
 				})
-			
+
 		}
-	
-		
+
+
 	})
 })
 
@@ -962,12 +1118,12 @@ app.get('/listqueryable', (req, res) => {
 async function restrictAttributes(features, layerKey, fieldKey) {
 
 	var restrictedData = new Array();
-	
+
 	for (feature of features) { // Itera em cada camada
 
 		// Se a camada não possuir conteudo em layerKey ela é um MDT (um raster, possivelmente), sendo assim ela não é restrita
-		if (feature[layerKey] == ''){ 
-						
+		if (feature[layerKey] == '') {
+
 			feature[layerKey] = 'Raster.Values'
 			restrictedData.push(feature)
 			continue;
@@ -991,48 +1147,51 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 				fields = results.fields.split(',')
 				allowedFields = results.allowedFields.split(',')
 			})
-	
+
 			if (allowedFields.indexOf('true') != -1) {
 				for (i = 0; i < fields.length; i++) {
-				
+
 					if (getBool(allowedFields[i])) {
 						restrict[fields[i]] = feature[fieldKey][fields[i]]
 					}
 				}
-			
+
 				feature[fieldKey] = restrict
 				return feature
 			} else {
-				feature= false;
+				feature = false;
 				return feature
 			}
 		}
 		/* TODO: Caso a camada não possua nenhum campo permitido ela não será adicionada  */
-		var getRestrict= await getAllowedFields(feature)
-		if(getRestrict!=false){
-		restrictedData.push(getRestrict)
+		var getRestrict = await getAllowedFields(feature)
+		if (getRestrict != false) {
+			restrictedData.push(getRestrict)
 		}
 
 	}
-	
+
 	return restrictedData
 }
 
 /* Requisições WFS */
 app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 
-	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 	params = {
 		service: 'WFS',
 		version: '1.3.0',
 		request: 'GetFeature',
-		typeName: req.params.layer,
-		outputFormat: req.params.format,
+		typeName: decodeURIComponentSafely(req.params.layer),
+		outputFormat: decodeURIComponentSafely(req.params.format),
 		exceptions: 'application/json',
-		propertyName: req.params.property_name,
+		propertyName: decodeURIComponentSafely(req.params.property_name),
 		SrsName: 'EPSG:4326',
-		cql_filter: req.params.cql_filter
+		cql_filter: decodeURIComponentSafely(req.params.cql_filter)
 	}
+
+	console.log(params)
+
+	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 
 	let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
 
@@ -1046,7 +1205,21 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 				.then(data => {
 					console.log('WFS requisition sent, querying layers: ' + req.params.layer)
 					console.log(result.serverHost + encodeURI(urlWfs))
-					res.send(data)
+					if (req.params.format == 'application/json') {
+						res.send(data)
+					} else {
+						//Verficação para download desabilitados/habilitados
+						Config.findOne({
+							raw: true,
+							attributes: ['download_enabled']
+						}).then(acess => {
+							if (acess == 0) {
+								res.send("none")
+							} else {
+								res.send(data)
+							}
+						})
+					}
 				})
 		})
 })
@@ -1082,16 +1255,19 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 			exceptions: 'application/json'
 		}
 
-		if (isURL(req.params.host) == false) { res.send('Não foi possível completar a requisição') }
+		// if (isURL(req.params.host) == false) { res.send('Não foi possível completar a requisição') }
+
+		// Decodificando a URL do Host caso necessário
+		host = decodeURIComponentSafely(req.params.host)		
 
 		let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
 
 		console.log('describeFeatureType requisition sent, querying layers: ' + params.typeName)
-		console.log(req.params.host + urlParameters)
+		console.log(host + urlParameters)
 
-		fetch(req.params.host + urlParameters, { method: 'GET', headers: headers })
-			.then(res => res.text())
-			.then(data => res.send(data))
+		fetch(host + urlParameters, { method: 'GET', headers: headers })
+		.then(res => res.text())
+		.then(data => res.send(data))
 	}
 	else {
 		res.redirect('/');
@@ -1127,12 +1303,12 @@ app.get('/propertyname/:layer', (req, res) => {
 			layer: req.params.layer,
 			field: properties
 		}
-	
+
 		if (req.session.user) {
 			res.send(layer_properties)
 		} else {
 			restrictAttributes(new Array(layer_properties), 'layer', 'field').then(result => {
-				
+
 				res.send(result[0])
 
 			})
