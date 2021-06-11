@@ -110,7 +110,8 @@ var dummyData = [{
     geolocation_enabled: true,
     measurement_enabled: true,
     custom_legend_enabled: false,
-    coordinates_enabled: true
+    coordinates_enabled: true,
+    download_enabled: true
 
 }];
 

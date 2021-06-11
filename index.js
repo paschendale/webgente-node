@@ -474,18 +474,14 @@ app.route('/users/edit/:id')
 					id: req.params.id
 				}
 			})
-				.then(UserData => {
-					res.render('user_details.ejs', {
-						edit: true,
-						id: UserData.id,
-						userName: UserData.userName,
-						group: UserData.group,
-						email: UserData.email,
-						password: UserData.password
-					})
-				})
-				.catch(() => {
-					res.redirect('/users')
+			.then(UserData => {
+				res.render('user_details.ejs', {
+					edit: true,
+					id: UserData.id,
+					userName: UserData.userName,
+					group: UserData.group,
+					email: UserData.email,
+					password: UserData.password
 				})
 			})
 			.catch(() => {
