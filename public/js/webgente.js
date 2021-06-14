@@ -428,7 +428,7 @@ link para a pagina do epsg.io para este também! */
 
 epsgCode = referenceSystem;
 
-var projectionFromEPSG;
+var projectionFromEPSG = '+proj=longlat +datum=WGS84 +no_defs' ; // Default para inciialização sem erros no console
 
 /* Requisicao para recuperar projeção via código EPSG */
 $.get('https://epsg.io/'+ epsgCode +'.proj4 ',results => {projectionFromEPSG = results;})
