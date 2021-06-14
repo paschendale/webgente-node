@@ -115,7 +115,6 @@ function addLayer (layer){
             layers: layer.layer,
             format: 'image/png',
             transparent: true,
-            attribution: layer.attribution,
             maxZoom: 30
         });
         if (layer.defaultBaseLayer == 1) {
