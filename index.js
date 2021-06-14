@@ -108,34 +108,44 @@ function decodeURIComponentSafely(uri) {
 app.get('/', (req, res) => {
 	var buttons = true;
 	Config.findOne({ raw: true })
-		.then(results => {
-			res.render("index", {
-				buttons: buttons,
-				startupLat: results.startupLat,
-				startupLong: results.startupLong,
-				startupZoom: results.startupZoom,
-				cityName: results.cityName,
-				referenceSystem: results.referenceSystem,
-				home_enabled: results.home_enabled,
-				select_enabled: results.select_enabled,
-				information_enabled: results.information_enabled,
-				search_enabled: results.search_enabled,
-				legend_enabled: results.legend_enabled,
-				geolocation_enabled: results.geolocation_enabled,
-				measurement_enabled: results.measurement_enabled,
-				custom_legend_enabled: results.custom_legend_enabled,
-				coordinates_enabled: results.coordinates_enabled,
-				download_enabled: results.download_enabled
-			})
+	.then(results => {
+		console.log(req.session.user)
+		res.render("index", {
+			buttons: buttons,
+			startupLat: results.startupLat,
+			startupLong: results.startupLong,
+			startupZoom: results.startupZoom,
+			cityName: results.cityName,
+			referenceSystem: results.referenceSystem,
+			home_enabled: results.home_enabled,
+			select_enabled: results.select_enabled,
+			information_enabled: results.information_enabled,
+			search_enabled: results.search_enabled,
+			legend_enabled: results.legend_enabled,
+			geolocation_enabled: results.geolocation_enabled,
+			measurement_enabled: results.measurement_enabled,
+			custom_legend_enabled: results.custom_legend_enabled,
+			coordinates_enabled: results.coordinates_enabled,
+			download_enabled: results.download_enabled,
+			session: (req.session.user != undefined) ? req.session.user.name : '',
+			sessionGroup: (req.session.user != undefined) ? req.session.user.group : ''
 		})
-
+	})
 })
 
 /* Rota da tela de Login */
 app.get('/login', (req, res) => {
 	var buttons = false;
 	var error = '';
-	res.render("login", { buttons: buttons, error: error, cityName: cityName })
+	if (req.session.user) {
+		if (req.session.user.group == 'admin') {
+			res.redirect('/admin')
+		} else {
+			res.redirect('/')
+		}
+	} else {
+		res.render("login", { buttons: buttons, error: error, cityName: cityName })
+	}
 });
 
 /* Autenticação do usuário */
