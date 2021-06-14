@@ -11,8 +11,12 @@
     <input class='btn btn-dark btn-sm' type="submit" id="okSearch" value="Ok" onclick="table_factory()">
 
   </div>
-  <div id="load" class="spinner-border" role="status"></div>
-  <span class="sr-only">Loading...</span>
+
+  <div class=" d-flex align-items-center">
+    <div id="load"></div>
+  </div>
+
+
 </div>
 </div>
 <div id="buttons_table" class="collapse ">
@@ -20,11 +24,11 @@
   <button class="btn btn-dark btn-custom  btn-sm" onclick="zoomFeature(-1)"><i class="fas fa-search"></i></button>
 
   <button class="btn btn-dark dropdown-toggle btn-sm collapse" type="button" id="download_all" data-toggle="dropdown"
-    aria-haspopup="true" aria-expanded="false"><i class="fas fa-download"></i>
+    aria-haspopup="true" aria-expanded="false"><i class="fas fa-download" id="download_img"></i>
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-    <button class="dropdown-item" type="button" onclick="exportGeojson(-1)">GeoJson</button>
-    <button class="dropdown-item" type="button" onclick="downloadFeature('GML3')">GML</button>
+    <button class="dropdown-item" type="button" onclick="downloadFeature('application/json')">GeoJson</button>
+    <button class="dropdown-item" type="button" onclick="downloadFeature('kml')">KML</button>
     <button class="dropdown-item" type="button" onclick="downloadFeature('csv')">CSV</button>
   </div>
 
