@@ -34,4 +34,11 @@
     <!-- CSS do WebGENTE -->
     <link rel="stylesheet" href="/css/webgente.css">
 
+    <script>
+        var darkMode_enabled = '<%= darkMode_enabled%>'
+    </script>
+    <%  if (darkMode_enabled == 1) { %> 
+    <link rel="stylesheet" href="/css/webgente-dark.css">
+    <% } %> 
+
 </head>
