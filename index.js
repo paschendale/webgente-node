@@ -498,7 +498,7 @@ app.route('/users/edit/:id')
 					userName: req.body.userName,
 					group: req.body.group,
 					email: req.body.email,
-					password: req.body.password
+					password: bcrypt.hashSync(req.body.password, 10)
 				},
 				{
 					where: {
