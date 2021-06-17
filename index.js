@@ -125,7 +125,8 @@ app.get('/', (req, res) => {
 				measurement_enabled: results.measurement_enabled,
 				custom_legend_enabled: results.custom_legend_enabled,
 				coordinates_enabled: results.coordinates_enabled,
-				download_enabled: results.download_enabled
+				download_enabled: results.download_enabled,
+				darkMode_enabled: results.darkMode_enabled
 			})
 		})
 
@@ -789,6 +790,8 @@ app.route('/config')
 	custom_legend_enabled
 	coordinates_enabled
 	download_enabled
+	darkMode_enabled
+
 */
 app.route('/config_tools')
 	.get((req, res) => {
@@ -806,7 +809,8 @@ app.route('/config_tools')
 							measurement_enabled: results.measurement_enabled,
 							custom_legend_enabled: results.custom_legend_enabled,
 							coordinates_enabled: results.coordinates_enabled,
-							download_enabled: results.download_enabled
+							download_enabled: results.download_enabled,
+							darkMode_enabled: results.darkMode_enabled
 						})
 				})
 		}
@@ -828,7 +832,8 @@ app.route('/config_tools')
 					measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
 					custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
 					coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0,
-					download_enabled: (req.body.download_enabled != null) ? req.body.download_enabled : 0
+					download_enabled: (req.body.download_enabled != null) ? req.body.download_enabled : 0,
+					darkMode_enabled: (req.body.darkMode_enabled != null) ? req.body.darkMode_enabled : 0
 				},
 				{
 					where: {
@@ -839,11 +844,11 @@ app.route('/config_tools')
 				console.log('Dados de configuração das ferramentas atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
-			}
+				}
 			).catch((error) => {
 				console.log('Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
 				res.send('Ocorreu algum erro')
-			}
+				}
 			)
 		}
 		else {
