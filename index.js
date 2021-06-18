@@ -1184,9 +1184,12 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) 
 		typeName: decodeURIComponentSafely(req.params.layer),
 		outputFormat: decodeURIComponentSafely(req.params.format),
 		exceptions: 'application/json',
-		propertyName: decodeURIComponentSafely(req.params.property_name),
-		cql_filter: decodeURIComponentSafely(req.params.cql_filter)
+		propertyName: decodeURIComponentSafely(req.params.property_name)
+
 	}
+	if (req.params.cql_filter != "none")
+		params.cql_filter = decodeURIComponentSafely(req.params.cql_filter)
+
 	if (req.params.srs_name)
 		params.srsName = req.params.srs_name
 
@@ -1199,8 +1202,21 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) 
 		attributes: ['serverHost']
 	})
 		.then(result => {
-			fetch(result.serverHost + encodeURI(urlWfs), { method: 'GET', headers: headers })
+			fetch(result.serverHost + encodeURI(urlWfs)
+				, { method: 'GET', headers: headers })
 				.then(res => res.text())
+				.then(response => {
+					//Verficação para Json apenas em requisições de dados para exibição
+					if (req.params.srs_name) {
+						try {
+							//Verifica se é retornada string não compatível com json
+							JSON.parse(response)
+							return response
+						} catch (e) {
+							return new Error('error')
+						}
+					}
+				})
 				.then(data => {
 					console.log('WFS requisition sent, querying layers: ' + req.params.layer)
 					console.log(result.serverHost + encodeURI(urlWfs))
@@ -1215,14 +1231,17 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) 
 							raw: true,
 							attributes: ['download_enabled']
 						}).then(acess => {
-							if (acess == 0) {
-								// Retorna none quando a ferramenta está desabilitada
-								res.send("none")
+							if (acess.download_enabled == 0) {
+								// Retorna um codigo de erro "Não autorizado" quando a ferramenta está desabilitada
+								res.sendStatus(401)
 							} else {
 								res.send(data)
 							}
 						})
 					}
+				}).catch(err => {
+					res.sendStatus(404)
+					//Envia um status de erro
 				})
 		})
 })

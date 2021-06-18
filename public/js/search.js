@@ -125,31 +125,43 @@ function table_factory() {
 function ajaxRequest(params) {
 
     var option = layersQuerrys[$('#search_list').prop('selectedIndex') - 1];
-    console.log(L.crs)
     var wfsParams = {
         layer: option.layer,
         format: encodeURIComponent('application/json'),
         property_name: new Array(requestParams.property_name),
-        cql_filter: encodeURI(requestParams.filter_all),
+        cql_filter: (!requestParams.filter_all) ? "none" : encodeURI(requestParams.filter_all),
         srs_name: 'EPSG:4326'
 
     }
     $("#search_fields").hide();
     var url1 = '/wfs/' + Object.values(wfsParams).join('/')
-    $.get(url1).then(function (response) {
-        response = JSON.parse(response)
-        //Condição para resultados vazios   
-        if (response.features.length == 0) {
+    $.get({
+        url: url1,
+        success: (data) => {
+            data = JSON.parse(data)
+
+            if (!data.features) {
+                //Condição para json com erro
+                alert('Requested URL not found.')
+            } else if (data.features.length == 0) {
+                //Condição para resultados vazios  
+                params.success([])
+            } else {
+
+                resultWFS = data
+                zoomFeature(-1)
+                properties = data.features.map(e => e.properties);
+                params.success(properties)
+
+            }
+
+        },
+        error: function (x, e) {
             params.success([])
-        } else {
-            resultWFS = response
-
-            zoomFeature(-1)
-            properties = response.features.map(e => e.properties);
-            params.success(properties)
-
+            alert('Error:.\n' + x.responseText);
         }
     })
+
 
 }
 
@@ -178,9 +190,8 @@ function downloadFeature(index_format) {
     }
 
     url = '/wfs/' + Object.values(wfsParams).join('/')
-
-    $.ajax({
-        url: url,
+    $.get({
+        url: url, // Requisicao WFS para obter os resultados da pesquisa em JSON
         beforeSend: function () {
             //Adicionando spinner aos botões ( alternando ícone de download com spinner)
             if (isNaN(index_format)) {
@@ -203,35 +214,32 @@ function downloadFeature(index_format) {
 
             }
         },
-        success(data) {
+        success: (data) => { // Callback para caso dê tudo certo
             $("#load").hide();
-            //Verficação extra para download desabilitado
-            if (data == "none") {
-                alert("Feições não encontradas!")
-            } else {
-                var blob = new Blob([data]);
-                let link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                //Alteração do nome do resultado
-                link.download = (resultWFS.features[0].id.split('.'))[0]
-                switch (wfsParams.format) {
-                    case 'csv':
-                        link.download += ".cvs"
-                        break
-                    case 'kml':
-                        link.download += ".kml"
-                        break
-                    default:
-                        link.download += ".geojson"
-                        break
-                }
-                link.click();
-
+            var blob = new Blob([data]);
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            //Alteração do nome do resultado
+            link.download = (resultWFS.features[0].id.split('.'))[0]
+            switch (wfsParams.format) {
+                case 'csv':
+                    link.download += ".cvs"
+                    break
+                case 'kml':
+                    link.download += ".kml"
+                    break
+                default:
+                    link.download += ".geojson"
+                    break
             }
+            link.click();
 
+        },
+        error: function (x, e) {
+            alert('Error:.\n' + x.responseText);
         }
-
-    });
+    })
+  
 }
 //Aplica estilo e foca no local selecionado 
 function zoomFeature(index) {
