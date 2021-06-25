@@ -193,7 +193,7 @@ var home = L.easyButton('fas fa-home', function(btn, map){
 },'Voltar o mapa à vista inicial').addTo(map);
 
 // Adiciona o botao de seleção de feições
-var select= false; // Variável que habilita o GetFeatureInfo
+var select= false; // Variável que habilita a seleção de camadas
 var selectButton = L.easyButton({
     states: [{
                 stateName: 'select_disabled',
@@ -455,13 +455,16 @@ function coordinatesOnMouseMove() {
 
 coordinatesOnMouseMove();
 
-function goToCoordinates(){
+function goToCoordinates() {
+    if (isNaN(Number($('#x-coordinate').val())) || isNaN(Number($('#y-coordinate').val()))) {
+        alert("Entrada Inválida!")
+    } else {
+        unprojected = proj4(projectionFromEPSG).inverse([Number($('#x-coordinate').val()), Number($('#y-coordinate').val())]);
 
-    unprojected = proj4(projectionFromEPSG).inverse([Number($('#x-coordinate').val()),Number($('#y-coordinate').val())]);
-    
-    map.panTo([unprojected[1],unprojected[0]],{animate: true});
+        map.panTo([unprojected[1], unprojected[0]], { animate: true });
 
-    coordinatesOnMouseMove();
+        coordinatesOnMouseMove();
+    }
 }
 
 function searchByCoordinates() {

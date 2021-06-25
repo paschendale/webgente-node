@@ -49,7 +49,7 @@ function getFeatureInfo(e) {
         query_layers: activeLayers
     }  
     
-    if (gfi) { // Check se função de Visualizar Informações está habilitada
+    if (gfi && activeLayers.length>0) { // Check se função de Visualizar Informações está habilitada e se há camadas habilitadas
         if (gfiAjax && gfiAjax.readystate != 4){
             gfiAjax.abort()
         }
