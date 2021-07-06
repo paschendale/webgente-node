@@ -36,6 +36,14 @@
     var custom_legend_enabled = '<%= custom_legend_enabled%>'
     var coordinates_enabled = '<%=coordinates_enabled %>'
     var download_enabled =  '<%=download_enabled %>'
+    var panorama_path = '<%=panorama_path%>'    
+    try {
+        var psv_config = JSON.parse(decodeURIComponent('<%=psv_config%>'))
+    } catch(e) {
+        console.log('Alerta: Não foi possível ler psv_config: ')
+        console.log('<%=psv_config%>')
+        console.log(e)
+    }
 
     var referenceSystem = '<%=referenceSystem%>' // EPSG do Sistema de Referência da Ferramenta de Coordenadas
 

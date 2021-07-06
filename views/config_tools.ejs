@@ -62,8 +62,26 @@
                         name="coordinates_enabled">
                     <label class="custom-control-label" for="coordinates_enabled">Ferramenta de coordenadas</label>
                 </div>
-
-                <br>
+                <hr>
+                <h4>Configurações do Visualizador de Imagens 360°</h4>
+                <div class="form-group">
+                    <label for="panorama_path"><strong>Nome do atributo contendo o caminho da imagem a ser exibida no visualizador:</strong></label>
+                    <input type="text" class="form-control" id="panorama_path" name="panorama_path" value='<%=panorama_path%>'>
+                </div>
+                <div class="form-group">
+                    <label for="psv_config_input"><strong>Objeto JSON para configuração do PhotoSphereViewer 
+                        <i data-toggle="tooltip" 
+                        id='psv_config_output_help' 
+                        class="fas fa-question-circle"
+                        title="A configuração do PhotoSphereViewer permite o ajuste de alguns elementos opcionais
+                        do PhotoSphereViewer. Utilize apenas strings envolvidas em aspas duplas.
+                        
+                        - Utilize panoramaRelativePath como true, se os panoramas estiverem hospedados em public/
+                        - Utilize UseXmpData como true se os panoramas não forem recortados nativamente"></i>:
+                    </strong></label>
+                    <textarea type="text" rows="5" class="form-control" id="psv_config_input" name="psv_config_input"></textarea>
+                </div>
+                <br> 
                 <button class="btn btn-dark" type='submit'>Salvar</button>
             </form>
 
@@ -100,9 +118,13 @@
                     if ("<%=download_enabled %>" == 1) {
                         $('#download_enabled').prop('checked', true)
                     }
+                    psv_config = '<%=psv_config%>'
+                    $('#psv_config_input').val(decodeURIComponent(psv_config))
                 }
 
                 fillForm()
+
+                $('#psv_config_output_help').tooltip()
 
             </script>
         </div>

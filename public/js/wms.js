@@ -127,9 +127,11 @@ function attributeFormatter(element,keys) {
         // Formatação de strings
         if(keys.indexOf('path_360_min') != -1) { 
             // Substitui o HTML do Popup (leaflet-popup-content) por um visualizador 360
-            return '<a href =#  dir="'+element+'"  id = "path_360_min" onClick = "open360ViewerMin()">Visualizar panorama 360°</a>'
+            return '<a href =#  dir="'+element+'"  id = "path_360_min" onClick = "open360ViewerMinLegacy()">Visualizar panorama 360°</a>'
         } else if (keys.indexOf('path_360') != -1) {
-            return '<a href =#  dir="'+element+'"  id = "path_360" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
+            return '<a href =#  dir="'+element+'"  id = "path_360" onClick = "open360ViewerLegacy()">Visualizar panorama 360°</a>'
+        } else if (keys.indexOf(panorama_path) != -1) {
+            return '<a href =#  dir="'+element+'"  id = "'+panorama_path+'" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
         } else if (element.includes('http')){ 
             // Se um dos valores contiver a substring 'http' formatar como link
             return '<a target="_blank" href="'+element+'">Link</a>'
@@ -139,9 +141,9 @@ function attributeFormatter(element,keys) {
 
 /* Formata a classe popup-inner-div com um panorama 360 e volta pra tabela de atributos */
 
-function open360Viewer() {
+function open360ViewerLegacy() {
  
-    element = $('#path_360').attr('dir');
+    panorama = $('#path_360').attr('dir');
 
     old_html = $('.leaflet-popup-content').html()
 
@@ -150,22 +152,16 @@ function open360Viewer() {
     $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
 
     var div = document.getElementById('container-psv');
-    var PSV = new PhotoSphereViewer({
-        panorama: element,
+    var PSV = new PhotoSphereViewer.Viewer({
+        panorama: panorama,
         container: div,
-        time_anim: 3000,
-        minFov: 5,
-        loading_img: 'img/loading.gif',
-        navbar: ['autorotate', 'zoom'],
-        navbar_style: {
-            backgroundColor: 'rgba(58, 67, 77, 0.7)'
-        },
+        minFov: 5
     });
 }
 
-function open360ViewerMin() {
+function open360ViewerMinLegacy() {
 
-    element = $('#path_360_min').attr('dir');
+    panorama = $('#path_360_min').attr('dir');
 
     old_html = $('.leaflet-popup-content').html()
 
@@ -174,16 +170,49 @@ function open360ViewerMin() {
     $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
 
     var div = document.getElementById('container-psv');
-    var PSV = new PhotoSphereViewer({
-        panorama: window.location.origin + element,
+    var PSV = new PhotoSphereViewer.Viewer({
+        panorama: window.location.origin + panorama,
         container: div,
-        time_anim: 3000,
-        minFov: 5,
-        loading_img: 'img/loading.gif',
-        navbar: ['autorotate', 'zoom'],
-        navbar_style: {
-            backgroundColor: 'rgba(58, 67, 77, 0.7)'
-        },
+        minFov: 5
+    });
+}
+
+function open360Viewer() {
+
+    panorama = $('#'+panorama_path).attr('dir');
+
+    panorama = (psv_config.panoramaRelativaPath == true && psv_config.panoramaRelativaPath !== undefined)? window.location.origin + panorama : panorama
+
+    old_html = $('.leaflet-popup-content').html()
+
+    html = '<div id="container-psv"></div>'
+
+    $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
+
+    var div = document.getElementById('container-psv');
+    var PSV = new PhotoSphereViewer.Viewer({
+        panorama:  panorama,
+        useXmpData: (psv_config.useXmpData !== undefined)? psv_config.useXmpData : false,
+        container: div,
+        minFov: (psv_config.minFov !== undefined)? psv_config.minFov : 30,
+        loadingImg: (psv_config.loading_img !== undefined)? psv_config.loading_img : null,
+        plugins: [
+            PhotoSphereViewer.SettingsPlugin,
+            [PhotoSphereViewer.ResolutionPlugin, {
+              resolutions: [
+                {
+                  id      : 'normal',
+                  label   : 'Baixa Resolução',
+                  panorama: panorama,
+                },
+                {
+                  id      : 'hd',
+                  label   : 'Alta Resolução',
+                  panorama: panorama.split('.')[0]+'_hd.'+panorama.split('.')[1],
+                },
+              ],
+            }],
+          ]
     });
 }
 

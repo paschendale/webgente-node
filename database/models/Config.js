@@ -86,6 +86,20 @@ const Config = connection.define('config', {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false
+    },
+    panorama_path : {
+        /* Deve-se definir aqui o nome do atributo contendo o caminho do panorama 360 */
+        type: Sequelize.STRING,
+        defaultValue: 'path_360'
+    },
+    psv_config: { 
+        type: Sequelize.TEXT,
+        defaultValue: JSON.stringify(
+            {
+                panoramaRelativePath: true, 
+                useXmpData: false, // Evita carregamento duplo de panoramas, necessário ser setado para True sempre que o panorama for recortado. Eg. Google Photo Sphere
+            }
+        )
     }
 })
 
@@ -111,8 +125,14 @@ var dummyData = [{
     measurement_enabled: true,
     custom_legend_enabled: false,
     coordinates_enabled: true,
-    download_enabled: true
-
+    download_enabled: true,
+    panorama_path: 'path_360',
+    psv_config: JSON.stringify(
+        {
+            panoramaRelativePath: true, 
+            useXmpData: false, // Evita carregamento duplo de panoramas, necessário ser setado para True sempre que o panorama for recortado. Eg. Google Photo Sphere
+        }
+    )
 }];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
