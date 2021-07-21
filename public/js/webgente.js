@@ -457,7 +457,7 @@ coordinatesOnMouseMove();
 
 function goToCoordinates() {
     if (isNaN(Number($('#x-coordinate').val())) || isNaN(Number($('#y-coordinate').val()))) {
-        alert("Entrada Inválida!")
+        alert("Coordenada inválida! Certifique-se de que os valores inseridos são números válidos.")
     } else {
         unprojected = proj4(projectionFromEPSG).inverse([Number($('#x-coordinate').val()), Number($('#y-coordinate').val())]);
 
