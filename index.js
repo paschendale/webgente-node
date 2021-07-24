@@ -1215,6 +1215,9 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) 
 						} catch (e) {
 							return new Error('error')
 						}
+					} else {
+						//Retorno para formatos de download
+						return response
 					}
 				})
 				.then(data => {
@@ -1235,6 +1238,7 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) 
 								// Retorna um codigo de erro "Não autorizado" quando a ferramenta está desabilitada
 								res.sendStatus(401)
 							} else {
+
 								res.send(data)
 							}
 						})

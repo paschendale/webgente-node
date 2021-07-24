@@ -129,7 +129,7 @@ function ajaxRequest(params) {
         layer: option.layer,
         format: encodeURIComponent('application/json'),
         property_name: new Array(requestParams.property_name),
-        cql_filter: (!requestParams.filter_all) ? "none" : encodeURI(requestParams.filter_all),
+        cql_filter: (!requestParams.filter_all) ? "none" : encodeURIComponent(requestParams.filter_all),
         srs_name: 'EPSG:4326'
 
     }
@@ -186,8 +186,9 @@ function downloadFeature(index_format) {
         layer: requestParams.layerSelect.layer,
         format: isNaN(index_format) ? encodeURIComponent(index_format) : encodeURIComponent('application/json'),
         property_name: requestParams.property_name,
-        cql_filter: isNaN(index_format) ? encodeURI(requestParams.filter_all) : encodeURI("id=" + resultWFS.features[index_format].properties.id)
+        cql_filter: isNaN(index_format) ? encodeURIComponent(requestParams.filter_all) : encodeURIComponent("id=" + resultWFS.features[index_format].properties.id)
     }
+
 
     url = '/wfs/' + Object.values(wfsParams).join('/')
     $.get({
@@ -223,7 +224,7 @@ function downloadFeature(index_format) {
             link.download = (resultWFS.features[0].id.split('.'))[0]
             switch (wfsParams.format) {
                 case 'csv':
-                    link.download += ".cvs"
+                    link.download += ".csv"
                     break
                 case 'kml':
                     link.download += ".kml"
@@ -239,7 +240,7 @@ function downloadFeature(index_format) {
             alert('Error:.\n' + x.responseText);
         }
     })
-  
+
 }
 //Aplica estilo e foca no local selecionado 
 function zoomFeature(index) {
