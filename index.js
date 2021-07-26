@@ -15,7 +15,7 @@ const Config = require("./database/models/Config.js")
 const fetch = require('node-fetch');
 const sanitize = require('sanitize')
 const { query, config } = require('./database/connection.js');
-
+const searcher = require('./webgente_modules/geoserver-search-cache/main.js')
 
 /* Cabeçalho de autenticação do usuário com o Geoserver 
 
@@ -1316,8 +1316,9 @@ app.get('/propertyname/:layer', (req, res) => {
 	})
 
 })
-/* Rota da pesquisa*/
-app.route('/search')
+
+/* Rota do sistema de pesquisas do geoserver-search-cache */
+app.route('/search/:keyword')
 	.get((req, res) => {
-		res.render("search")
+		searcher.searchFor(req.params.keyword).then((results) => res.send(results))
 	})
