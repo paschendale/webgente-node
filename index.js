@@ -15,7 +15,7 @@ const Config = require("./database/models/Config.js")
 const fetch = require('node-fetch');
 const sanitize = require('sanitize')
 const { query, config } = require('./database/connection.js');
-const searcher = require('./webgente_modules/geoserver-search-cache/main.js')
+const searcher = require('geoserver-search-cache')
 
 /* Cabeçalho de autenticação do usuário com o Geoserver 
 

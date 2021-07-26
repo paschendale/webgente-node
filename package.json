@@ -29,6 +29,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "formidable": "^1.2.2",
+    "geoserver-search-cache": "^1.0.0",
     "node-fetch": "^2.6.1",
     "sanitize": "^2.1.0",
     "sequelize": "^6.4.0",
