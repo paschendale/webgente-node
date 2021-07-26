@@ -1,0 +1,3 @@
+[submodule "webgente_modules/geoserver-search-cache"]
+	path = webgente_modules/geoserver-search-cache
+	url = https://github.com/paschendale/geoserver-search-cache.git
