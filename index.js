@@ -138,8 +138,8 @@ app.get('/', (req, res) => {
 			coordinates_enabled: results.coordinates_enabled,
 			download_enabled: results.download_enabled,
 			session: (req.session.user != undefined) ? req.session.user.name : '',
-			sessionGroup: (req.session.user != undefined) ? req.session.user.group : ''
-
+			sessionGroup: (req.session.user != undefined) ? req.session.user.group : '',
+			darkMode_enabled: results.darkMode_enabled
 		})
 	})
 })
