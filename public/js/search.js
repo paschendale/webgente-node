@@ -106,7 +106,6 @@ function table_factory() {
             formatter: TableActions,
             title: (download_enabled == 0) ? "Zoom" : "Download/Zoom"
         })
-
         //Adicionando colunas a tabela
         $("#table").bootstrapTable({
             columns: column
@@ -175,7 +174,6 @@ function TableActions(value, row, index, field) {
 
     }
 }
-
 //Realiza requisição para o Download 
 function downloadFeature(index_format) {
     /*A função recebe um parâmetro que pode ser um índice ou um formato    

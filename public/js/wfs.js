@@ -9,7 +9,8 @@ selectedLayers.on('click', function(e){
 
 function getFeature(e) {
 
-    if (select) {
+    var index=activeLayers.length
+    if (select && index>0) { //Impede seleção quando ferramenta está desabilitada e não houver layers ativadas
 
         if (!e.originalEvent.shiftKey) {
             selectedLayers.clearLayers() // Limpa seleção anterior
@@ -17,7 +18,7 @@ function getFeature(e) {
     
         pixelSize = (40075016.686 * Math.abs(Math.cos(map.getCenter().lat / 180 * Math.PI)) / Math.pow(2, map.getZoom()+8))/111120
        
-        var index=activeLayers.length
+        
         params = {	
             layers: activeLayers[index-1],       
             lat: e.latlng.lat-0.5*pixelSize,

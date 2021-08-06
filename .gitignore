@@ -3,7 +3,7 @@ database/webgente.db
 database/webgente.db-journal
 public/img/favicon.ico
 public/img/webgente-fundo-escuro-120x40.png
-public/metadata
+public/metadata/
 port.js
 
 # Logs
@@ -124,3 +124,5 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+package-lock.json
+yarn.lock

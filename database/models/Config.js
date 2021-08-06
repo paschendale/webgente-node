@@ -1,3 +1,9 @@
+const moment = require('moment');
+
+function logTime() {
+    return moment().format('MMMM Do YYYY, h:mm:ss a') + ' | '
+}
+
 const Sequelize = require('sequelize');
 const connection = require('../connection');
 
@@ -86,6 +92,11 @@ const Config = connection.define('config', {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false
+    },
+    darkMode_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     }
 })
 
@@ -111,8 +122,8 @@ var dummyData = [{
     measurement_enabled: true,
     custom_legend_enabled: false,
     coordinates_enabled: true,
-    download_enabled: true
-
+    download_enabled: true,
+    darkMode_enabled: true
 }];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
@@ -124,12 +135,15 @@ Config.sync({
     connection.query('SELECT COUNT() AS count FROM configs') // Verifica se existem dados na base do WebGENTE
     .then(results => {
         if (results[0][0].count == 0) {
-            console.log('Inserindo dados padrão do WebGENTE')
-            Config.bulkCreate(dummyData)
+            console.log(logTime() + 'Inserindo configurações padrão do WebGENTE')
+            Config.bulkCreate(dummyData).then(() => {
+                console.log(logTime() + 'Inserindo configurações padrão do WebGENTE...OK')
+            })
         }
     })
+    .then(() => {console.log(logTime() + 'Model de Configurações sincronizado com sucesso.')})    
     .catch(error => {
-        console.log(error)
+        console.error(logTime(),error)
     });
 });
 

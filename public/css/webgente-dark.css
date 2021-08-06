@@ -1,0 +1,115 @@
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: black;
+        color: white;
+    }
+
+	.leaflet-bar a.leaflet-disabled {
+		background-color: #545b62;
+        color: white;
+		border-bottom: 1px solid #545b62;
+	}
+
+	.leaflet-bar a {
+		background-color: black;
+        color: white;
+		border-bottom: 1px solid #545b62;
+	}
+
+	.leaflet-bar a:hover {
+		background-color: rgb(17, 17, 17);
+        color: white;
+		border-bottom: 1px solid #545b62;
+	}
+
+	.leaflet-bar button, .leaflet-bar button:hover {
+		background-color: black;
+        color: white;
+		border-bottom: 1px solid #545b62;
+	}
+
+	.leaflet-control-layers {
+		background-color: black;
+        color: white;
+		border-bottom: 1px solid #545b62;
+	}
+
+	.webgente-coordinates-container {
+		background-color: rgba(0, 0, 0, 0.42);
+        color: white;
+	}
+
+	.leaflet-container .leaflet-control-attribution {
+		background-color: rgba(0, 0, 0, 0.42);
+        color: white;
+	}
+
+	.leaflet-container a {
+		color: white;
+		font-weight: 600;
+	}
+
+	.leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar {
+		border: 2px solid rgba(0,0,0,0.2);
+	}
+
+	.leaflet-control-scale-line {
+		color: white;
+		border: 2px solid rgba(0, 0, 0, 0);
+		border-right-color: rgb(0, 0, 0);
+		border-bottom-color: rgb(0, 0, 0);
+		border-left-color: rgb(0, 0, 0);
+		background-color: rgba(0, 0, 0, 0.5);
+		background: rgba(0, 0, 0, 0.5);
+		background-color: rgba(0, 0, 0, 0.5);
+	}
+
+	.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+		background-color: black;
+        color: white;
+	}
+
+	.link-table-collapse {
+		color:rgb(255, 255, 255);
+		font-weight: bold;
+	}
+	
+	tr:hover {
+		background-color: #272727;
+	}
+
+	th {
+		background-color: #272727;
+	}
+
+	.webgente-legend-container { 
+		background-color: black;
+        color: white;
+		border-bottom: 1px solid #545b62;
+	} 
+
+	/* .legend-image {
+		background: gray;
+	} */
+
+	.leaflet-draw-toolbar a {
+		color: white !important;
+		background-image: url('https://unpkg.com/leaflet-draw@1.0.2/dist/images/spritesheet.svg');
+		background-repeat: no-repeat;
+	}
+
+	.webgente-search-container {
+		background-color: rgb(43, 43, 43);
+		color: white;
+	}
+
+	.webgente-greeting-container {
+		background-color: rgb(43, 43, 43);
+		color: white;
+	}
+
+	.table {
+		color: white;
+	}
+}

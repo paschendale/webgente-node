@@ -1,3 +1,9 @@
+const moment = require('moment');
+
+function logTime() {
+    return moment().format('MMMM Do YYYY, h:mm:ss a') + ' | '
+}
+
 const express = require('express');
 const port = require('./port')
 const app = new express(); // Inicializando objeto do express para execução do servidor HTTP
@@ -31,12 +37,17 @@ function setHeaders() {
 		raw: true,
 		attributes: ['serverUser', 'serverPassword', 'cityName']
 	}).then(results => {
-		headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
-		console.log(headers.authorization)
-		cityName = results.cityName;
-	})
+		if (results !== undefined && results !== 'null' && results !== null) {
+			headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
+			cityName = results.cityName;
+			console.log(logTime() + 'Credenciais de autenticação com o Geoserver atualizadas.')
+		} else {
+			setTimeout(setHeaders,1000);
+		}
+	}).catch(() => {setTimeout(setHeaders,1000);})
 }
 
+setTimeout(setHeaders,1000000);
 setHeaders();
 
 /* Estrutura de pastas do WebGENTE:
@@ -78,7 +89,7 @@ app.use(bodyParser.json());
 
 /* Inicializando o servidor HTTP */
 app.listen(port, () => {
-	console.log('WebGENTE de ' + cityName + ' started at http://localhost:' + port)
+	console.log(logTime() + 'WebGENTE started at http://localhost:' + port)
 });
 
 /* Habilitando CORS headers para todas as respostas dadas pelo backend */
@@ -98,8 +109,7 @@ app.use(function (req, res, next) {
 function decodeURIComponentSafely(uri) {
 	try {
 		return decodeURIComponent(uri)
-	} catch (e) {
-		console.log('URI Component not decodable: ' + uri)
+	} catch(e) {
 		return uri
 	}
 }
@@ -108,34 +118,45 @@ function decodeURIComponentSafely(uri) {
 app.get('/', (req, res) => {
 	var buttons = true;
 	Config.findOne({ raw: true })
-		.then(results => {
-			res.render("index", {
-				buttons: buttons,
-				startupLat: results.startupLat,
-				startupLong: results.startupLong,
-				startupZoom: results.startupZoom,
-				cityName: results.cityName,
-				referenceSystem: results.referenceSystem,
-				home_enabled: results.home_enabled,
-				select_enabled: results.select_enabled,
-				information_enabled: results.information_enabled,
-				search_enabled: results.search_enabled,
-				legend_enabled: results.legend_enabled,
-				geolocation_enabled: results.geolocation_enabled,
-				measurement_enabled: results.measurement_enabled,
-				custom_legend_enabled: results.custom_legend_enabled,
-				coordinates_enabled: results.coordinates_enabled,
-				download_enabled: results.download_enabled
-			})
+	.then(results => {
+		console.log(req.session.user)
+		res.render("index", {
+			buttons: buttons,
+			startupLat: results.startupLat,
+			startupLong: results.startupLong,
+			startupZoom: results.startupZoom,
+			cityName: results.cityName,
+			referenceSystem: results.referenceSystem,
+			home_enabled: results.home_enabled,
+			select_enabled: results.select_enabled,
+			information_enabled: results.information_enabled,
+			search_enabled: results.search_enabled,
+			legend_enabled: results.legend_enabled,
+			geolocation_enabled: results.geolocation_enabled,
+			measurement_enabled: results.measurement_enabled,
+			custom_legend_enabled: results.custom_legend_enabled,
+			coordinates_enabled: results.coordinates_enabled,
+			download_enabled: results.download_enabled,
+			session: (req.session.user != undefined) ? req.session.user.name : '',
+			sessionGroup: (req.session.user != undefined) ? req.session.user.group : '',
+			darkMode_enabled: results.darkMode_enabled
 		})
-
+	})
 })
 
 /* Rota da tela de Login */
 app.get('/login', (req, res) => {
 	var buttons = false;
 	var error = '';
-	res.render("login", { buttons: buttons, error: error, cityName: cityName })
+	if (req.session.user) {
+		if (req.session.user.group == 'admin') {
+			res.redirect('/admin')
+		} else {
+			res.redirect('/')
+		}
+	} else {
+		res.render("login", { buttons: buttons, error: error, cityName: cityName })
+	}
 });
 
 /* Autenticação do usuário */
@@ -225,8 +246,8 @@ app.route('/user/add')
 					email: req.body.email,
 					group: req.body.group
 				}
-			).then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("users"))
+			).then(console.log(logTime() + 'Succesfully inserted User:  ' + req.body.userName + ' into database.'))
+			.then(res.render("users"))
 		} else {
 			res.redirect('/')
 		}
@@ -242,23 +263,23 @@ app.route('/layers/edit/:id')
 					id: req.params.id
 				}
 			})
-				.then(layerData => {
-					console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
-					res.render('layer_details.ejs', {
-						edit: true,
-						id: layerData.id,
-						layerName: layerData.layerName,
-						group: layerData.group,
-						layer: layerData.layer,
-						type: layerData.type,
-						host: layerData.host,
-						defaultBaseLayer: layerData.defaultBaseLayer,
-						allowedFields: layerData.allowedFields,
-						fieldAlias: layerData.fieldAlias,
-						queryFields: layerData.queryFields,
-						metadata: layerData.metadata,
-						publicLayer: layerData.publicLayer,
-						attribution: layerData.attribution
+			.then(layerData => {
+				console.log(logTime() + 'Dados enviados para edição da layer ' + layerData.layer + ' com id: ' + layerData.id)
+				res.render('layer_details.ejs', {
+					edit: true,
+					id: layerData.id,
+					layerName: layerData.layerName,
+					group: layerData.group,
+					layer: layerData.layer,
+					type: layerData.type,
+					host: layerData.host,
+					defaultBaseLayer: layerData.defaultBaseLayer,
+					allowedFields: layerData.allowedFields,
+					fieldAlias: layerData.fieldAlias,
+					queryFields: layerData.queryFields,
+					metadata: layerData.metadata,
+					publicLayer: layerData.publicLayer,
+					attribution: layerData.attribution
 
 					})
 				})
@@ -276,67 +297,68 @@ app.route('/layers/edit/:id')
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 				if (err) {
-					console.log('Failed to save the file.')
+					console.log(logTime() + 'Failed to save the file.')
+					console.error(logTime() + err)
 					return;
 				} else {
 					Config.findOne({
 						raw: true,
 						attributes: ['serverHost']
 					})
-						.then(results => {
-							var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
-							Layers.update({
-								type: fields.type,
-								layerName: fields.layerName,
-								group: fields.group,
-								host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-								layer: fields.layer,
-								defaultBaseLayer: fields.defaultBaseLayer,
-								fields: fields.fields,
-								allowedFields: fields.allowedFields,
-								queryFields: fields.queryFields,
-								fieldAlias: fields.fieldAlias,
-								fieldType: fields.fieldType,
-								metadata: metadata_path,
-								publicLayer: fields.publicLayer,
-								attribution: fields.attribution
+					.then(results => {
+						var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
+						Layers.update({
+							type: fields.type,
+							layerName: fields.layerName,
+							group: fields.group,
+							host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+							layer: fields.layer,
+							defaultBaseLayer: fields.defaultBaseLayer,
+							fields: fields.fields,
+							allowedFields: fields.allowedFields,
+							queryFields: fields.queryFields,
+							fieldAlias: fields.fieldAlias,
+							fieldType: fields.fieldType,
+							metadata: metadata_path,
+							publicLayer: fields.publicLayer,
+							attribution: fields.attribution
 
-							},
-								{
-									where: {
-										id: req.params.id
-									}
-								})
-						})
-						.then(console.log('Succesfully inserted data into database!', fields))
-						.then(() => {
-							const oldpath = files.metadata.path;
-
-							fs.readFile(oldpath, function (err, data) {
-								if (err) throw err
-								// Write the file
-								if (files.metadata.size > 0) {
-									const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
-									fs.writeFile(newpath, data, function (err) {
-										if (err) throw err
-									})
+						},
+							{
+								where: {
+									id: req.params.id
 								}
-								// Delete the file
-								fs.unlink(oldpath, function (err) {
+							})
+					})
+					.then(console.log(logTime() + 'Succesfully inserted data into database!',fields))
+					.then(() => {
+						const oldpath = files.metadata.path;
+
+						fs.readFile(oldpath, function (err, data) {
+							if (err) throw err
+							// Write the file
+							if (files.metadata.size > 0) {
+								const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+								fs.writeFile(newpath, data, function (err) {
 									if (err) throw err
-
-									res.render("layers")
 								})
-							})
+							}
+							// Delete the file
+							fs.unlink(oldpath, function (err) {
+								if (err) throw err
 
-						})
-						.catch((error) => {
-							console.log('Failed to insert data into database. ' + error)
-							res.render('error', {
-								errorCode: 100,
-								errorMessage: 'Não foi possível editar a camada!'
+								res.render("layers")
 							})
 						})
+
+					})
+					.catch((error) => {
+						console.log(logTime() + 'Failed to insert data into database. ' + error)
+						res.render('error', {
+							errorCode: 100,
+							errorMessage: 'Não foi possível editar a camada!'
+						})
+					})
 				}
 			})
 		} else {
@@ -346,25 +368,25 @@ app.route('/layers/edit/:id')
 
 /* Rota para reordenamento das camadas */
 app.route('/layers/reorder')
-	.get((req, res) => {
-		if (req.session.user) {
+	.get((req,res) => {
+		if(req.session.user){
 			res.render('reorder')
 		} else {
 			res.redirect('/')
 		}
 	})
-	.post((req, res) => {
-		if (req.session.user) {
+	.post((req,res) => {
+		if(req.session.user){
 
-			console.log('Reordering layers request received')
+			console.log(logTime() + 'Reordering layers request received')
 
 			// Callback para quando finalizar o forEach de atualização das linhas de Layers
-			function forEachCallback() {
+			function forEachCallback(){
 				conn.query("UPDATE Layers SET id = id - 1000")
-					.then(() => {
-						res.sendStatus(200);
-						console.log('Layers reordered successfully');
-					});
+				.then(() => {
+					res.sendStatus(200); 
+					console.log(logTime() + 'Layers reordered successfully');
+				});
 			}
 
 			// Contador de linhas atualizadas para a updateId()
@@ -372,16 +394,16 @@ app.route('/layers/reorder')
 
 			/* Função assíncrona para atualização das linhas, recebe um id antigo, 
 			um novo e o tamanho do array para chamar o callback ao final */
-			async function updateId(new_id, previous_id, array_length) {
+			async function updateId(new_id,previous_id,array_length){
 
 				await Layers.update({ id: new_id }, {
 					where: {
-						id: previous_id
+					  id: previous_id
 					}
 				})
 
 				rowsUpdated++;
-				if (rowsUpdated === array_length) {
+				if(rowsUpdated === array_length) {
 					forEachCallback();
 				}
 			}
@@ -389,10 +411,10 @@ app.route('/layers/reorder')
 			var obj = JSON.parse(req.body.reordering)
 
 			// Loop forEach para reordenar com incremento de milhar
-			obj.forEach(function (obj, i, array) {
-				console.log('New ID: ', obj[0] + 1000, ' Previous ID: ', obj[1])
-				updateId(obj[0] + 1000, obj[1], array.length)
-			});
+			obj.forEach(function(obj, i, array) {
+				console.log(logTime() + 'New ID: ',obj[0]+1000,' Previous ID: ',obj[1])
+				updateId(obj[0]+1000,obj[1],array.length)
+			});	
 
 		} else {
 			res.redirect('/')
@@ -435,12 +457,11 @@ app.get('/listusers', (req, res) => {
 			raw: true,
 			attributes: ['id', 'userName', 'email', 'group']
 		})
-			.then(
-				result => {
-					console.log(result);
-					res.send(result)
-				}
-			)
+		.then(
+			result => {
+				res.send(result)
+			}
+		)
 	}
 	else {
 		res.redirect('/');
@@ -474,19 +495,19 @@ app.route('/users/edit/:id')
 					id: req.params.id
 				}
 			})
-				.then(UserData => {
-					res.render('user_details.ejs', {
-						edit: true,
-						id: UserData.id,
-						userName: UserData.userName,
-						group: UserData.group,
-						email: UserData.email,
-						password: UserData.password
-					})
+			.then(UserData => {
+				res.render('user_details.ejs', {
+					edit: true,
+					id: UserData.id,
+					userName: UserData.userName,
+					group: UserData.group,
+					email: UserData.email,
+					password: UserData.password
 				})
-				.catch(() => {
-					res.redirect('/users')
-				})
+			})
+			.catch(() => {
+				res.redirect('/users')
+			})
 		} else {
 			res.redirect('/')
 		}
@@ -498,16 +519,19 @@ app.route('/users/edit/:id')
 					userName: req.body.userName,
 					group: req.body.group,
 					email: req.body.email,
-					password: req.body.password
+					password: bcrypt.hashSync(req.body.password, 10)
 				},
 				{
 					where: {
 						id: req.params.id
 					}
 				}
-			).then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("users"))
-				.catch((error) => { console.log('Failed to update database. ' + error) })
+			).then(console.log(logTime() + 'Succesfully inserted data into database!', req.body))
+			.then(res.render("users"))
+			.catch((error) => { 
+				console.log(logTime() + 'Failed to update database. ' )
+				console.error(logTime(), error)
+		 	})
 		}
 		else {
 			res.redirect('/')
@@ -595,7 +619,7 @@ app.route('/layers/add')
 			form.parse(req, (err, fields, files) => {
 
 				if (err) {
-					console.log('Failed to save the file.')
+					console.log(logTime() + 'Failed to save the file.')
 					return;
 				} else {
 					var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
@@ -622,7 +646,7 @@ app.route('/layers/add')
 
 							})
 						})
-						.then(console.log('Succesfully inserted data into database!', fields))
+						.then(console.log(logTime() + 'Succesfully inserted data into database!', fields))
 						.then(() => {
 							//Upload metadata
 							const oldpath = files.metadata.path;
@@ -644,7 +668,8 @@ app.route('/layers/add')
 
 						})
 						.catch((error) => {
-							console.log('Failed to insert data into database. ' + error)
+							console.log(logTime() + 'Failed to insert data into database. ')
+							console.error(logTime(), error)
 							res.render('error', {
 								errorCode: 100,
 								errorMessage: 'Não foi possível salvar a camada!'
@@ -740,7 +765,6 @@ app.route('/config')
 		}
 	})
 	.post((req, res) => {
-		console.log(req.body)
 		if (req.session.user) {
 			Config.update(
 				{
@@ -762,12 +786,13 @@ app.route('/config')
 				Layers.update({ host: req.body.serverHost }, { where: {} })
 			}
 			).then(() => {
-				console.log('Dados de configuração atualizados com sucesso')
+				console.log(logTime() + 'Dados de configuração atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
 			}
 			).catch((error) => {
-				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
+				console.log(logTime() + 'Não foi possível atualizar as configurações. Motivo: ')
+				console.error(error)
 				res.send('Ocorreu algum erro')
 			}
 			)
@@ -789,6 +814,8 @@ app.route('/config')
 	custom_legend_enabled
 	coordinates_enabled
 	download_enabled
+	darkMode_enabled
+
 */
 app.route('/config_tools')
 	.get((req, res) => {
@@ -806,7 +833,8 @@ app.route('/config_tools')
 							measurement_enabled: results.measurement_enabled,
 							custom_legend_enabled: results.custom_legend_enabled,
 							coordinates_enabled: results.coordinates_enabled,
-							download_enabled: results.download_enabled
+							download_enabled: results.download_enabled,
+							darkMode_enabled: results.darkMode_enabled
 						})
 				})
 		}
@@ -815,7 +843,6 @@ app.route('/config_tools')
 		}
 	})
 	.post((req, res) => {
-		console.log(req.body)
 		if (req.session.user) {
 			Config.update(
 				{
@@ -828,7 +855,8 @@ app.route('/config_tools')
 					measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
 					custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
 					coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0,
-					download_enabled: (req.body.download_enabled != null) ? req.body.download_enabled : 0
+					download_enabled: (req.body.download_enabled != null) ? req.body.download_enabled : 0,
+					darkMode_enabled: (req.body.darkMode_enabled != null) ? req.body.darkMode_enabled : 0
 				},
 				{
 					where: {
@@ -836,93 +864,21 @@ app.route('/config_tools')
 					}
 				}
 			).then(() => {
-				console.log('Dados de configuração das ferramentas atualizados com sucesso')
+				console.log(logTime() + 'Dados de configuração das ferramentas atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
 			}
 			).catch((error) => {
-				console.log('Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
+				console.log(logTime() + 'Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
 				res.send('Ocorreu algum erro')
-			}
-			)
-		}
-		else {
-			res.redirect('/');
-		}
-	});
-
-/* Rota para configurações de ferramentas do WebGENTE na interface de administração 
-
-	home_enabled
-	select_enabled
-	information_enabled
-	search_enabled
-	legend_enabled
-	geolocation_enabled
-	measurement_enabled
-	custom_legend_enabled
-	coordinates_enabled
-
-*/
-app.route('/config_tools')
-	.get((req, res) => {
-		if (req.session.user) {
-			Config.findOne({ raw: true })
-				.then(results => {
-					res.render("config_tools",
-						{
-							home_enabled: results.home_enabled,
-							select_enabled: results.select_enabled,
-							information_enabled: results.information_enabled,
-							search_enabled: results.search_enabled,
-							legend_enabled: results.legend_enabled,
-							geolocation_enabled: results.geolocation_enabled,
-							measurement_enabled: results.measurement_enabled,
-							custom_legend_enabled: results.custom_legend_enabled,
-							coordinates_enabled: results.coordinates_enabled
-						})
-				})
-		}
-		else {
-			res.redirect('/');
-		}
-	})
-	.post((req, res) => {
-		console.log(req.body)
-		if (req.session.user) {
-			Config.update(
-				{
-					home_enabled: (req.body.home_enabled != null) ? req.body.home_enabled : 0,
-					select_enabled: (req.body.select_enabled != null) ? req.body.select_enabled : 0,
-					information_enabled: (req.body.information_enabled != null) ? req.body.information_enabled : 0,
-					search_enabled: (req.body.search_enabled != null) ? req.body.search_enabled : 0,
-					legend_enabled: (req.body.legend_enabled != null) ? req.body.legend_enabled : 0,
-					geolocation_enabled: (req.body.geolocation_enabled != null) ? req.body.geolocation_enabled : 0,
-					measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
-					custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
-					coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0
-				},
-				{
-					where: {
-						profile: 'webgente-default'
-					}
 				}
-			).then(() => {
-				console.log('Dados de configuração das ferramentas atualizados com sucesso')
-				setHeaders();
-				res.redirect('/config')
-			}
-			).catch((error) => {
-				console.log('Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
-				res.send('Ocorreu algum erro')
-			}
 			)
 		}
 		else {
 			res.redirect('/');
 		}
 	});
-
+	
 /* GetFeatureInfo e filtragem de informações */
 
 app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigth/:x/:y/:layers/:query_layers', (req, res) => {
@@ -950,22 +906,21 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		attributes: ['serverHost']
 	})
 		.then(results => {
-			console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
-			console.log(results.serverHost + urlParameters)
+			console.log(logTime() + 'GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
+			console.log(logTime() + results.serverHost + urlParameters)
 			fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
 				.then(res => res.text())
 				.then(data => {
 
 					if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
 
-						console.log('Usuário logado, getFeatureInfo enviado!')
+						console.log(logTime() + 'Usuário ' + req.session.user +' logado, getFeatureInfo enviado!')
 						data = JSON.parse(data)
 						res.send(data);
 
 					} else {
 
-						console.log('Usuário requisitou getFeatureInfo sem login')
-						console.log(req.session.user)
+						console.log(logTime() + 'Usuário requisitou getFeatureInfo sem login')
 
 						data = JSON.parse(data)
 						//restrição de dados		
@@ -1020,7 +975,7 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 			fetch(url, { method: 'GET', headers: headers })
 				.then(res => res.text())
 				.then(data => {
-					console.log('WFS requisition sent: ' + url)
+					console.log(logTime() + 'WFS requisition sent: ' + url)
 
 					if (req.session.user) {
 						res.send(data)
@@ -1177,6 +1132,17 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 /* Requisições WFS */
 app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) => {
 
+	/*
+	Requisição wfs é utilizada para dois tipos de requisição: 
+	1) Dados para visualizar e manipular 
+	2) Arquivo para download
+	Veja bem, a requisição 1 é feita com um Srsname para ela funcionar com o formato certo . 
+	Enquanto a 2 não usa pq tem que retornar a projeção nativa. 
+	Como tem a habilitação de downloads nas configurações e eu preciso fazer esse controle no backend. 
+	Então eu tenho que verificar se estou fazendo requisição do tipo 2 (com Srsname vazio) 
+	para não bloquear as requisições do tipo 1.
+	*/
+
 	params = {
 		service: 'WFS',
 		version: '1.3.0',
@@ -1184,14 +1150,17 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) 
 		typeName: decodeURIComponentSafely(req.params.layer),
 		outputFormat: decodeURIComponentSafely(req.params.format),
 		exceptions: 'application/json',
-		propertyName: decodeURIComponentSafely(req.params.property_name)
-
+		propertyName: decodeURIComponentSafely(req.params.property_name),
+		SrsName: 'EPSG:4326',
+		cql_filter: decodeURIComponentSafely(req.params.cql_filter)
 	}
 	if (req.params.cql_filter != "none")
 		params.cql_filter = decodeURIComponentSafely(req.params.cql_filter)
 
 	if (req.params.srs_name)
 		params.srsName = req.params.srs_name
+
+	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 
 	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 
@@ -1221,8 +1190,8 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) 
 					}
 				})
 				.then(data => {
-					console.log('WFS requisition sent, querying layers: ' + req.params.layer)
-					console.log(result.serverHost + encodeURI(urlWfs))
+					console.log(logTime() + 'WFS requisition sent, querying layers: ' + req.params.layer)
+					console.log(logTime() + result.serverHost + encodeURI(urlWfs))
 					/* Antes de verificar se a ferramenta de download está habilitada é conferido
 					qual o tipo de requisição ( download ou dados para exibição) utilizando o srs 
 					*/
@@ -1284,16 +1253,16 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 		// if (isURL(req.params.host) == false) { res.send('Não foi possível completar a requisição') }
 
 		// Decodificando a URL do Host caso necessário
-		host = decodeURIComponentSafely(req.params.host)
+		host = decodeURIComponentSafely(req.params.host)		
 
 		let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
 
-		console.log('describeFeatureType requisition sent, querying layers: ' + params.typeName)
-		console.log(host + urlParameters)
+		console.log(logTime() + 'describeFeatureType requisition sent, querying layers: ' + params.typeName)
+		console.log(logTime() + host + urlParameters)
 
 		fetch(host + urlParameters, { method: 'GET', headers: headers })
-			.then(res => res.text())
-			.then(data => res.send(data))
+		.then(res => res.text())
+		.then(data => res.send(data))
 	}
 	else {
 		res.redirect('/');
