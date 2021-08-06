@@ -1,3 +1,9 @@
+const moment = require('moment');
+
+function logTime() {
+    return moment().format('MMMM Do YYYY, h:mm:ss a') + ' | '
+}
+
 const express = require('express');
 const port = require('./port')
 const app = new express(); // Inicializando objeto do express para execução do servidor HTTP
@@ -31,12 +37,17 @@ function setHeaders() {
 		raw: true,
 		attributes: ['serverUser', 'serverPassword', 'cityName']
 	}).then(results => {
-		headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
-		console.log(headers.authorization)
-		cityName = results.cityName;
-	})
+		if (results !== undefined && results !== 'null' && results !== null) {
+			headers['authorization'] = 'Basic ' + Buffer.from(results.serverUser + ':' + results.serverPassword).toString('base64')
+			cityName = results.cityName;
+			console.log(logTime() + 'Credenciais de autenticação com o Geoserver atualizadas.')
+		} else {
+			setTimeout(setHeaders,1000);
+		}
+	}).catch(() => {setTimeout(setHeaders,1000);})
 }
 
+setTimeout(setHeaders,1000000);
 setHeaders();
 
 /* Estrutura de pastas do WebGENTE:
@@ -78,7 +89,7 @@ app.use(bodyParser.json());
 
 /* Inicializando o servidor HTTP */
 app.listen(port, () => {
-	console.log('WebGENTE de ' + cityName + ' started at http://localhost:' + port)
+	console.log(logTime() + 'WebGENTE started at http://localhost:' + port)
 });
 
 /* Habilitando CORS headers para todas as respostas dadas pelo backend */
@@ -99,7 +110,6 @@ function decodeURIComponentSafely(uri) {
 	try {
 		return decodeURIComponent(uri)
 	} catch(e) {
-		console.log('URI Component not decodable: ' + uri)
 		return uri
 	}
 }
@@ -225,8 +235,8 @@ app.route('/user/add')
 					email: req.body.email,
 					group: req.body.group
 				}
-			).then(console.log('Succesfully inserted data into database!', req.body))
-				.then(res.render("users"))
+			).then(console.log(logTime() + 'Succesfully inserted User:  ' + req.body.userName + ' into database.'))
+			.then(res.render("users"))
 		} else {
 			res.redirect('/')
 		}
@@ -242,29 +252,29 @@ app.route('/layers/edit/:id')
 					id: req.params.id
 				}
 			})
-				.then(layerData => {
-					console.log('Dados enviados da layer ' + layerData.layer + ' com id: ' + layerData.id)
-					res.render('layer_details.ejs', {
-						edit: true,
-						id: layerData.id,
-						layerName: layerData.layerName,
-						group: layerData.group,
-						layer: layerData.layer,
-						type: layerData.type,
-						host: layerData.host,
-						defaultBaseLayer: layerData.defaultBaseLayer,
-						allowedFields: layerData.allowedFields,
-						fieldAlias: layerData.fieldAlias,
-						queryFields: layerData.queryFields,
-						metadata: layerData.metadata,
-						publicLayer: layerData.publicLayer,
-						attribution: layerData.attribution
+			.then(layerData => {
+				console.log(logTime() + 'Dados enviados para edição da layer ' + layerData.layer + ' com id: ' + layerData.id)
+				res.render('layer_details.ejs', {
+					edit: true,
+					id: layerData.id,
+					layerName: layerData.layerName,
+					group: layerData.group,
+					layer: layerData.layer,
+					type: layerData.type,
+					host: layerData.host,
+					defaultBaseLayer: layerData.defaultBaseLayer,
+					allowedFields: layerData.allowedFields,
+					fieldAlias: layerData.fieldAlias,
+					queryFields: layerData.queryFields,
+					metadata: layerData.metadata,
+					publicLayer: layerData.publicLayer,
+					attribution: layerData.attribution
 
-					})
 				})
-				.catch(() => {
-					res.redirect('/layers')
-				})
+			})
+			.catch(() => {
+				res.redirect('/layers')
+			})
 		} else {
 			res.redirect('/')
 		}
@@ -276,7 +286,8 @@ app.route('/layers/edit/:id')
 			//formidable recebe campos e arquivos
 			form.parse(req, (err, fields, files) => {
 				if (err) {
-					console.log('Failed to save the file.')
+					console.log(logTime() + 'Failed to save the file.')
+					console.error(logTime() + err)
 					return;
 				} else {
 					Config.findOne({
@@ -308,7 +319,7 @@ app.route('/layers/edit/:id')
 								}
 							})
 					})
-					.then(console.log('Succesfully inserted data into database!', fields))
+					.then(console.log(logTime() + 'Succesfully inserted data into database!',fields))
 					.then(() => {
 						const oldpath = files.metadata.path;
 
@@ -331,7 +342,7 @@ app.route('/layers/edit/:id')
 
 					})
 					.catch((error) => {
-						console.log('Failed to insert data into database. ' + error)
+						console.log(logTime() + 'Failed to insert data into database. ' + error)
 						res.render('error', {
 							errorCode: 100,
 							errorMessage: 'Não foi possível editar a camada!'
@@ -356,14 +367,14 @@ app.route('/layers/reorder')
 	.post((req,res) => {
 		if(req.session.user){
 
-			console.log('Reordering layers request received')
+			console.log(logTime() + 'Reordering layers request received')
 
 			// Callback para quando finalizar o forEach de atualização das linhas de Layers
 			function forEachCallback(){
 				conn.query("UPDATE Layers SET id = id - 1000")
 				.then(() => {
 					res.sendStatus(200); 
-					console.log('Layers reordered successfully');
+					console.log(logTime() + 'Layers reordered successfully');
 				});
 			}
 
@@ -390,7 +401,7 @@ app.route('/layers/reorder')
 
 			// Loop forEach para reordenar com incremento de milhar
 			obj.forEach(function(obj, i, array) {
-				console.log('New ID: ',obj[0]+1000,' Previous ID: ',obj[1])
+				console.log(logTime() + 'New ID: ',obj[0]+1000,' Previous ID: ',obj[1])
 				updateId(obj[0]+1000,obj[1],array.length)
 			});	
 
@@ -435,12 +446,11 @@ app.get('/listusers', (req, res) => {
 			raw: true,
 			attributes: ['id', 'userName', 'email', 'group']
 		})
-			.then(
-				result => {
-					console.log(result);
-					res.send(result)
-				}
-			)
+		.then(
+			result => {
+				res.send(result)
+			}
+		)
 	}
 	else {
 		res.redirect('/');
@@ -505,9 +515,12 @@ app.route('/users/edit/:id')
 						id: req.params.id
 					}
 				}
-			).then(console.log('Succesfully inserted data into database!', req.body))
+			).then(console.log(logTime() + 'Succesfully inserted data into database!', req.body))
 			.then(res.render("users"))
-			.catch((error) => { console.log('Failed to update database. ' + error) })
+			.catch((error) => { 
+				console.log(logTime() + 'Failed to update database. ' )
+				console.error(logTime(), error)
+		 	})
 		}
 		else {
 			res.redirect('/')
@@ -595,7 +608,7 @@ app.route('/layers/add')
 			form.parse(req, (err, fields, files) => {
 
 				if (err) {
-					console.log('Failed to save the file.')
+					console.log(logTime() + 'Failed to save the file.')
 					return;
 				} else {
 					var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
@@ -622,7 +635,7 @@ app.route('/layers/add')
 
 							})
 						})
-						.then(console.log('Succesfully inserted data into database!', fields))
+						.then(console.log(logTime() + 'Succesfully inserted data into database!', fields))
 						.then(() => {
 							//Upload metadata
 							const oldpath = files.metadata.path;
@@ -644,7 +657,8 @@ app.route('/layers/add')
 
 						})
 						.catch((error) => {
-							console.log('Failed to insert data into database. ' + error)
+							console.log(logTime() + 'Failed to insert data into database. ')
+							console.error(logTime(), error)
 							res.render('error', {
 								errorCode: 100,
 								errorMessage: 'Não foi possível salvar a camada!'
@@ -740,7 +754,6 @@ app.route('/config')
 		}
 	})
 	.post((req, res) => {
-		console.log(req.body)
 		if (req.session.user) {
 			Config.update(
 				{
@@ -762,12 +775,13 @@ app.route('/config')
 				Layers.update({ host: req.body.serverHost }, { where: {} })
 			}
 			).then(() => {
-				console.log('Dados de configuração atualizados com sucesso')
+				console.log(logTime() + 'Dados de configuração atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
 			}
 			).catch((error) => {
-				console.log('Não foi possível atualizar as configurações. Motivo: ' + error)
+				console.log(logTime() + 'Não foi possível atualizar as configurações. Motivo: ')
+				console.error(error)
 				res.send('Ocorreu algum erro')
 			}
 			)
@@ -815,7 +829,6 @@ app.route('/config_tools')
 		}
 	})
 	.post((req, res) => {
-		console.log(req.body)
 		if (req.session.user) {
 			Config.update(
 				{
@@ -836,12 +849,12 @@ app.route('/config_tools')
 					}
 				}
 			).then(() => {
-				console.log('Dados de configuração das ferramentas atualizados com sucesso')
+				console.log(logTime() + 'Dados de configuração das ferramentas atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
 			}
 			).catch((error) => {
-				console.log('Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
+				console.log(logTime() + 'Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
 				res.send('Ocorreu algum erro')
 			}
 			)
@@ -888,7 +901,6 @@ app.route('/config_tools')
 	}
 })
 .post((req, res) => {
-	console.log(req.body)
 	if (req.session.user) {
 		Config.update(
 			{
@@ -908,12 +920,12 @@ app.route('/config_tools')
 				}
 			}
 		).then(() => {
-			console.log('Dados de configuração das ferramentas atualizados com sucesso')
+			console.log(logTime() + 'Dados de configuração das ferramentas atualizados com sucesso')
 			setHeaders();
 			res.redirect('/config')
 			}
 		).catch((error) => {
-				console.log('Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
+				console.log(logTime() + 'Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
 				res.send('Ocorreu algum erro')
 			}
 		)
@@ -950,22 +962,21 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 		attributes: ['serverHost']
 	})
 		.then(results => {
-			console.log('GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
-			console.log(results.serverHost + urlParameters)
+			console.log(logTime() + 'GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
+			console.log(logTime() + results.serverHost + urlParameters)
 			fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
 				.then(res => res.text())
 				.then(data => {
 
 					if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
 
-						console.log('Usuário logado, getFeatureInfo enviado!')
+						console.log(logTime() + 'Usuário ' + req.session.user +' logado, getFeatureInfo enviado!')
 						data = JSON.parse(data)
 						res.send(data);
 
 					} else {
 
-						console.log('Usuário requisitou getFeatureInfo sem login')
-						console.log(req.session.user)
+						console.log(logTime() + 'Usuário requisitou getFeatureInfo sem login')
 
 						data = JSON.parse(data)
 						//restrição de dados		
@@ -1020,7 +1031,7 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 			fetch(url, { method: 'GET', headers: headers })
 				.then(res => res.text())
 				.then(data => {
-					console.log('WFS requisition sent: ' + url)
+					console.log(logTime() + 'WFS requisition sent: ' + url)
 
 					if (req.session.user) {
 						res.send(data)
@@ -1189,8 +1200,6 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 		cql_filter: decodeURIComponentSafely(req.params.cql_filter)
 	}
 
-	console.log(params)
-
 	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 
 	let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
@@ -1203,8 +1212,8 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 			fetch(result.serverHost + encodeURI(urlWfs), { method: 'GET', headers: headers })
 				.then(res => res.text())
 				.then(data => {
-					console.log('WFS requisition sent, querying layers: ' + req.params.layer)
-					console.log(result.serverHost + encodeURI(urlWfs))
+					console.log(logTime() + 'WFS requisition sent, querying layers: ' + req.params.layer)
+					console.log(logTime() + result.serverHost + encodeURI(urlWfs))
 					if (req.params.format == 'application/json') {
 						res.send(data)
 					} else {
@@ -1262,8 +1271,8 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 
 		let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
 
-		console.log('describeFeatureType requisition sent, querying layers: ' + params.typeName)
-		console.log(host + urlParameters)
+		console.log(logTime() + 'describeFeatureType requisition sent, querying layers: ' + params.typeName)
+		console.log(logTime() + host + urlParameters)
 
 		fetch(host + urlParameters, { method: 'GET', headers: headers })
 		.then(res => res.text())
