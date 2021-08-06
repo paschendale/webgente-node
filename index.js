@@ -281,11 +281,11 @@ app.route('/layers/edit/:id')
 					publicLayer: layerData.publicLayer,
 					attribution: layerData.attribution
 
+					})
 				})
-			})
-			.catch(() => {
-				res.redirect('/layers')
-			})
+				.catch(() => {
+					res.redirect('/layers')
+				})
 		} else {
 			res.redirect('/')
 		}
@@ -867,7 +867,7 @@ app.route('/config_tools')
 				console.log(logTime() + 'Dados de configuração das ferramentas atualizados com sucesso')
 				setHeaders();
 				res.redirect('/config')
-				}
+			}
 			).catch((error) => {
 				console.log(logTime() + 'Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
 				res.send('Ocorreu algum erro')
@@ -878,78 +878,7 @@ app.route('/config_tools')
 			res.redirect('/');
 		}
 	});
-
-/* Rota para configurações de ferramentas do WebGENTE na interface de administração 
-
-	home_enabled
-    select_enabled
-    information_enabled
-    search_enabled
-    legend_enabled
-    geolocation_enabled
-    measurement_enabled
-    custom_legend_enabled
-    coordinates_enabled
-
-*/
-app.route('/config_tools')
-.get((req, res) => {
-	if (req.session.user) {
-		Config.findOne({ raw: true })
-		.then(results => {
-			res.render("config_tools",
-				{
-					home_enabled: results.home_enabled,
-					select_enabled: results.select_enabled,
-					information_enabled: results.information_enabled,
-					search_enabled: results.search_enabled,
-					legend_enabled: results.legend_enabled,
-					geolocation_enabled: results.geolocation_enabled,
-					measurement_enabled: results.measurement_enabled,
-					custom_legend_enabled: results.custom_legend_enabled,
-					coordinates_enabled: results.coordinates_enabled
-				})
-		})
-	}
-	else {
-		res.redirect('/');
-	}
-})
-.post((req, res) => {
-	if (req.session.user) {
-		Config.update(
-			{
-				home_enabled: (req.body.home_enabled != null) ? req.body.home_enabled : 0,
-				select_enabled: (req.body.select_enabled != null) ? req.body.select_enabled : 0,
-				information_enabled: (req.body.information_enabled != null) ? req.body.information_enabled : 0,
-				search_enabled: (req.body.search_enabled != null) ? req.body.search_enabled : 0,
-				legend_enabled: (req.body.legend_enabled != null) ? req.body.legend_enabled : 0,
-				geolocation_enabled: (req.body.geolocation_enabled != null) ? req.body.geolocation_enabled : 0,
-				measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
-				custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
-				coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0
-			},
-			{
-				where: {
-					profile: 'webgente-default'
-				}
-			}
-		).then(() => {
-			console.log(logTime() + 'Dados de configuração das ferramentas atualizados com sucesso')
-			setHeaders();
-			res.redirect('/config')
-			}
-		).catch((error) => {
-				console.log(logTime() + 'Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
-				res.send('Ocorreu algum erro')
-			}
-		)
-	}
-	else {
-		res.redirect('/');
-	}
-});
-
+	
 /* GetFeatureInfo e filtragem de informações */
 
 app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigth/:x/:y/:layers/:query_layers', (req, res) => {
@@ -1201,7 +1130,18 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 }
 
 /* Requisições WFS */
-app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
+app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) => {
+
+	/*
+	Requisição wfs é utilizada para dois tipos de requisição: 
+	1) Dados para visualizar e manipular 
+	2) Arquivo para download
+	Veja bem, a requisição 1 é feita com um Srsname para ela funcionar com o formato certo . 
+	Enquanto a 2 não usa pq tem que retornar a projeção nativa. 
+	Como tem a habilitação de downloads nas configurações e eu preciso fazer esse controle no backend. 
+	Então eu tenho que verificar se estou fazendo requisição do tipo 2 (com Srsname vazio) 
+	para não bloquear as requisições do tipo 1.
+	*/
 
 	params = {
 		service: 'WFS',
@@ -1214,6 +1154,13 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 		SrsName: 'EPSG:4326',
 		cql_filter: decodeURIComponentSafely(req.params.cql_filter)
 	}
+	if (req.params.cql_filter != "none")
+		params.cql_filter = decodeURIComponentSafely(req.params.cql_filter)
+
+	if (req.params.srs_name)
+		params.srsName = req.params.srs_name
+
+	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 
 	// TODO: Implementar verificação se resultado apresenta todas as restrições necessárias ao seu token
 
@@ -1224,12 +1171,31 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 		attributes: ['serverHost']
 	})
 		.then(result => {
-			fetch(result.serverHost + encodeURI(urlWfs), { method: 'GET', headers: headers })
+			fetch(result.serverHost + encodeURI(urlWfs)
+				, { method: 'GET', headers: headers })
 				.then(res => res.text())
+				.then(response => {
+					//Verficação para Json apenas em requisições de dados para exibição
+					if (req.params.srs_name) {
+						try {
+							//Verifica se é retornada string não compatível com json
+							JSON.parse(response)
+							return response
+						} catch (e) {
+							return new Error('error')
+						}
+					} else {
+						//Retorno para formatos de download
+						return response
+					}
+				})
 				.then(data => {
 					console.log(logTime() + 'WFS requisition sent, querying layers: ' + req.params.layer)
 					console.log(logTime() + result.serverHost + encodeURI(urlWfs))
-					if (req.params.format == 'application/json') {
+					/* Antes de verificar se a ferramenta de download está habilitada é conferido
+					qual o tipo de requisição ( download ou dados para exibição) utilizando o srs 
+					*/
+					if (req.params.srs_name) {
 						res.send(data)
 					} else {
 						//Verficação para download desabilitados/habilitados
@@ -1237,13 +1203,18 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter', (req, res) => {
 							raw: true,
 							attributes: ['download_enabled']
 						}).then(acess => {
-							if (acess == 0) {
-								res.send("none")
+							if (acess.download_enabled == 0) {
+								// Retorna um codigo de erro "Não autorizado" quando a ferramenta está desabilitada
+								res.sendStatus(401)
 							} else {
+
 								res.send(data)
 							}
 						})
 					}
+				}).catch(err => {
+					res.sendStatus(404)
+					//Envia um status de erro
 				})
 		})
 })
