@@ -92,6 +92,11 @@ const Config = connection.define('config', {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false
+    },
+    darkMode_enabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     }
 })
 
@@ -117,8 +122,8 @@ var dummyData = [{
     measurement_enabled: true,
     custom_legend_enabled: false,
     coordinates_enabled: true,
-    download_enabled: true
-
+    download_enabled: true,
+    darkMode_enabled: true
 }];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
