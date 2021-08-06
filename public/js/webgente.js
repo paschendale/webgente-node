@@ -118,7 +118,9 @@ Lc = L.control.groupedLayers(baseMaps,overlayMaps,optionsControl).addTo(map);
 function addMetadata (metadata) {
     
     if (metadata != "" && metadata != "none" && metadata != undefined) { // "" é o armazenamento de metadados até a 1.0, a partir da 1.1 o armazenamento sem metadados é denotado como 'none'
-        metadata = metadata.split('public')[1]
+        if (metadata.split('/public')[1] != undefined) {
+            metadata = metadata.split('/public')[1]
+        } 
         return ' <a href="' + metadata + '" target="_blank" style="outline: none;"><i class="fas fa-info-circle"></i></a>'
     } else {
         return ''
@@ -149,7 +151,6 @@ function addLayer (layer){
             layers: layer.layer,
             format: 'image/png',
             transparent: true,
-            attribution: layer.attribution,
             maxZoom: 30
         });
         if (layer.defaultBaseLayer == 1) {
@@ -228,7 +229,7 @@ var home = L.easyButton('fas fa-home', function(btn, map){
 },'Voltar o mapa à vista inicial').addTo(map);
 
 // Adiciona o botao de seleção de feições
-var select= false; // Variável que habilita o GetFeatureInfo
+var select= false; // Variável que habilita a seleção de camadas
 var selectButton = L.easyButton({
     states: [{
                 stateName: 'select_disabled',
@@ -462,7 +463,7 @@ link para a pagina do epsg.io para este também! */
 
 epsgCode = referenceSystem;
 
-var projectionFromEPSG;
+var projectionFromEPSG = '+proj=longlat +datum=WGS84 +no_defs' ; // Default para inciialização sem erros no console
 
 /* Requisicao para recuperar projeção via código EPSG */
 $.get('https://epsg.io/'+ epsgCode +'.proj4 ',results => {projectionFromEPSG = results;})
@@ -490,13 +491,16 @@ function coordinatesOnMouseMove() {
 
 coordinatesOnMouseMove();
 
-function goToCoordinates(){
+function goToCoordinates() {
+    if (isNaN(Number($('#x-coordinate').val())) || isNaN(Number($('#y-coordinate').val()))) {
+        alert("Coordenada inválida! Certifique-se de que os valores inseridos são números válidos.")
+    } else {
+        unprojected = proj4(projectionFromEPSG).inverse([Number($('#x-coordinate').val()), Number($('#y-coordinate').val())]);
 
-    unprojected = proj4(projectionFromEPSG).inverse([Number($('#x-coordinate').val()),Number($('#y-coordinate').val())]);
-    
-    map.panTo([unprojected[1],unprojected[0]],{animate: true});
+        map.panTo([unprojected[1], unprojected[0]], { animate: true });
 
-    coordinatesOnMouseMove();
+        coordinatesOnMouseMove();
+    }
 }
 
 function searchByCoordinates() {

@@ -49,7 +49,7 @@ function getFeatureInfo(e) {
         query_layers: activeLayers
     }  
     
-    if (gfi) { // Check se função de Visualizar Informações está habilitada
+    if (gfi && activeLayers.length>0) { // Check se função de Visualizar Informações está habilitada e se há camadas habilitadas
         if (gfiAjax && gfiAjax.readystate != 4){
             gfiAjax.abort()
         }
@@ -125,10 +125,10 @@ function attributeFormatter(element,keys) {
 
     if (typeof(element) == 'string') { 
         // Formatação de strings
-        if(keys.indexOf('path_360_min') > -1) { 
+        if(keys.indexOf('path_360_min') != -1) { 
             // Substitui o HTML do Popup (leaflet-popup-content) por um visualizador 360
-            return '<a href =#  dir="'+element+'"  id = "path_360" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
-        } else if (keys.indexOf('path_360') > -1) {
+            return '<a href =#  dir="'+element+'"  id = "path_360_min" onClick = "open360ViewerMin()">Visualizar panorama 360°</a>'
+        } else if (keys.indexOf('path_360') != -1) {
             return '<a href =#  dir="'+element+'"  id = "path_360" onClick = "open360Viewer()">Visualizar panorama 360°</a>'
         } else if (element.includes('http')){ 
             // Se um dos valores contiver a substring 'http' formatar como link
@@ -143,46 +143,48 @@ function open360Viewer() {
  
     element = $('#path_360').attr('dir');
 
-    if(element.includes('http')) {
-        old_html = $('.leaflet-popup-content').html()
+    old_html = $('.leaflet-popup-content').html()
 
-        html = '<div id="container-psv"></div>'
-    
-        $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
+    html = '<div id="container-psv"></div>'
 
-        var div = document.getElementById('container-psv');
-        var PSV = new PhotoSphereViewer({
-            panorama: element,
-            container: div,
-            time_anim: 3000,
-            minFov: 5,
-            loading_img: 'img/loading.gif',
-            navbar: ['autorotate', 'zoom'],
-            navbar_style: {
-                backgroundColor: 'rgba(58, 67, 77, 0.7)'
-            },
-        });
-    } else {
+    $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
 
-        old_html = $('.leaflet-popup-content').html()
+    var div = document.getElementById('container-psv');
+    var PSV = new PhotoSphereViewer({
+        panorama: element,
+        container: div,
+        time_anim: 3000,
+        minFov: 5,
+        loading_img: 'img/loading.gif',
+        navbar: ['autorotate', 'zoom'],
+        navbar_style: {
+            backgroundColor: 'rgba(58, 67, 77, 0.7)'
+        },
+    });
+}
 
-        html = '<div id="container-psv"></div>'
-    
-        $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
-    
-        var div = document.getElementById('container-psv');
-        var PSV = new PhotoSphereViewer({
-            panorama: window.location.origin + element,
-            container: div,
-            time_anim: 3000,
-            minFov: 5,
-            loading_img: 'img/loading.gif',
-            navbar: ['autorotate', 'zoom'],
-            navbar_style: {
-                backgroundColor: 'rgba(58, 67, 77, 0.7)'
-            },
-        });
-    }
+function open360ViewerMin() {
+
+    element = $('#path_360_min').attr('dir');
+
+    old_html = $('.leaflet-popup-content').html()
+
+    html = '<div id="container-psv"></div>'
+
+    $('.leaflet-popup-content').html(html) // Inserir aqui o HTML do Visualizador
+
+    var div = document.getElementById('container-psv');
+    var PSV = new PhotoSphereViewer({
+        panorama: window.location.origin + element,
+        container: div,
+        time_anim: 3000,
+        minFov: 5,
+        loading_img: 'img/loading.gif',
+        navbar: ['autorotate', 'zoom'],
+        navbar_style: {
+            backgroundColor: 'rgba(58, 67, 77, 0.7)'
+        },
+    });
 }
 
 /* Função para obter a legenda do Geoserver */
@@ -198,7 +200,6 @@ function getLegendGraphics(layer) {
     } 
 
     url = layer._url + Object.entries(params).map(e => e.join('=')).join('&');
-    console.log(url)
 
     $.ajax({
         url: url,
