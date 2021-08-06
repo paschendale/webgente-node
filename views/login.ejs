@@ -21,17 +21,17 @@
 
     <!--Login com Gmail-->
     <!--Alterar o content abaixo conforme a credencial do Google Developer API-->
-    <meta name="google-signin-client_id" content='333295678672-v010o5iseq8kos37qh6ld8uua1bs3594.apps.googleusercontent.com'>
+    <!-- <meta name="google-signin-client_id" content='333295678672-v010o5iseq8kos37qh6ld8uua1bs3594.apps.googleusercontent.com'>
 
-    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script> -->
     <script>
-		function onSuccess(googleUser) {
-			const profile = googleUser.getBasicProfile();
+		// function onSuccess(googleUser) {
+		// 	const profile = googleUser.getBasicProfile();
 
-			console.log('Logged in as: ' + profile.getName());
-		  	console.log('Name: ' + profile.getName());
-		  	console.log('Image URL: ' + profile.getImageUrl());
-		  	console.log('Email: ' + profile.getEmail()); 
+		// 	console.log('Logged in as: ' + profile.getName());
+		//   	console.log('Name: ' + profile.getName());
+		//   	console.log('Image URL: ' + profile.getImageUrl());
+		//   	console.log('Email: ' + profile.getEmail()); 
 
 		  	/*$.ajax({
 			 	type: "POST",
@@ -54,21 +54,21 @@
 			  		console.log("ERROR");
 			  	}
 			});*/
-		}
+		// }
 		function onFailure(error) {
 			console.log(error);
 		}
-		function renderButton() {
-			gapi.signin2.render('login-gmail', {
-				'scope': 'profile email',
-				'width': 240,
-				'height': 50,
-				'longtitle': true,
-				'theme': 'dark',
-				'onsuccess': onSuccess,
-				'onfailure': onFailure
-			});
-		}
+		// function renderButton() {
+		// 	gapi.signin2.render('login-gmail', {
+		// 		'scope': 'profile email',
+		// 		'width': 240,
+		// 		'height': 50,
+		// 		'longtitle': true,
+		// 		'theme': 'dark',
+		// 		'onsuccess': onSuccess,
+		// 		'onfailure': onFailure
+		// 	});
+		// }
 	</script>
 
 </head>
@@ -78,8 +78,11 @@
   
     <div class="container">
         <form method="POST" action="/authenticate" style="margin-top: 2%;">
-            <center><div id="errorMessage"><%= error %></div></center>
+            
             <center><img src="/img/decor-dois.png" width="20%" style="margin-bottom: 30px;" id="imgsize"></center>
+            <br>
+            <center><div id="errorMessage"><%= error %></div></center>
+            <br>
              <div class = row>
                 <div class="col-xl-4 col-sm-2" id="left">
                 </div>
@@ -93,7 +96,7 @@
                     </div>
                     <button type="submit" class="btn btn-secondary btn-lg btn-block" id="botao" name="botao">Enviar</button>
 
-                    <hr>
+                    <!-- <hr>
                     <center><p>ou</p></center>
 
                     <center><div id="login-gmail"></div></center>
@@ -103,7 +106,7 @@
                     <center><div>
                       <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#exampleModalCenter">Esqueceu sua senha ?</button>
                       <button type="button" class="btn btn-outline-secondary btn-sm" onclick="recuperarSenhaLogado()">Trocar senha</button>
-                    </div></center>
+                    </div></center> -->
 
                     <!-- Modal -->
                       <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -116,7 +119,7 @@
                               </button>
                             </div>
                             <div class="modal-body">
-                              <p>Solicite uma nova senha ao Admin do sistema, por favor.</p>
+                              <p>Solicite uma nova senha ao Administrador do sistema, por favor.</p>
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
