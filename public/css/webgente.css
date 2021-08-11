@@ -326,11 +326,13 @@ th {
 	overflow-y: auto;
 	overflow-x: auto;
 	padding: 1%;
-	
-
 }
 
 .webgente-search-fts-list{
 	border: 1px solid #343a40 !important;
 	border-radius: 0 !important;
+}
+
+.webgente-search-fts-result {
+	padding-top: 20px;
 }

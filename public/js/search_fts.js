@@ -182,3 +182,20 @@ function all_check(e) {
         $(":checkbox").prop("checked", false)
     }
 }
+
+// Pressionar Enter no formulário ativa a pesquisa com o conteudo do formulario
+$(document).ready(function(){
+    $('#search_content').keypress(function(e){
+        if(e.keyCode==13)
+        $('#search-button').click();
+    });
+});
+
+// Desabilita zoom no scroll do mouse quando cursor estiver dentro da div de pesquisa
+$('#search-fts').mouseenter(() => {
+    map.scrollWheelZoom.disable();
+})
+
+$('#search-fts').mouseleave(() => {
+    map.scrollWheelZoom.enable();
+})
