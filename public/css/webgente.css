@@ -314,3 +314,23 @@ th {
 	}
 }
 
+.webgente-search-fts-container{
+	pointer-events: visibleFill;
+	width: auto;
+	height: auto;
+	background-color: #FFFFFF;
+	margin-top: 12px;
+	margin-left: 60px;	
+	max-height: 70vh; 
+	max-width: 50vh;
+	overflow-y: auto;
+	overflow-x: auto;
+	padding: 1%;
+	
+
+}
+
+.webgente-search-fts-list{
+	border: 1px solid #343a40 !important;
+	border-radius: 0 !important;
+}

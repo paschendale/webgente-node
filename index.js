@@ -98,7 +98,7 @@ app.use(function (req, res, next) {
 function decodeURIComponentSafely(uri) {
 	try {
 		return decodeURIComponent(uri)
-	} catch(e) {
+	} catch (e) {
 		console.log('URI Component not decodable: ' + uri)
 		return uri
 	}
@@ -283,60 +283,60 @@ app.route('/layers/edit/:id')
 						raw: true,
 						attributes: ['serverHost']
 					})
-					.then(results => {
-						var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
-						Layers.update({
-							type: fields.type,
-							layerName: fields.layerName,
-							group: fields.group,
-							host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-							layer: fields.layer,
-							defaultBaseLayer: fields.defaultBaseLayer,
-							fields: fields.fields,
-							allowedFields: fields.allowedFields,
-							queryFields: fields.queryFields,
-							fieldAlias: fields.fieldAlias,
-							fieldType: fields.fieldType,
-							metadata: metadata_path,
-							publicLayer: fields.publicLayer,
-							attribution: fields.attribution
+						.then(results => {
+							var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
+							Layers.update({
+								type: fields.type,
+								layerName: fields.layerName,
+								group: fields.group,
+								host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+								layer: fields.layer,
+								defaultBaseLayer: fields.defaultBaseLayer,
+								fields: fields.fields,
+								allowedFields: fields.allowedFields,
+								queryFields: fields.queryFields,
+								fieldAlias: fields.fieldAlias,
+								fieldType: fields.fieldType,
+								metadata: metadata_path,
+								publicLayer: fields.publicLayer,
+								attribution: fields.attribution
 
-						},
-							{
-								where: {
-									id: req.params.id
-								}
-							})
-					})
-					.then(console.log('Succesfully inserted data into database!', fields))
-					.then(() => {
-						const oldpath = files.metadata.path;
-
-						fs.readFile(oldpath, function (err, data) {
-							if (err) throw err
-							// Write the file
-							if (files.metadata.size > 0) {
-								const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
-								fs.writeFile(newpath, data, function (err) {
-									if (err) throw err
+							},
+								{
+									where: {
+										id: req.params.id
+									}
 								})
-							}
-							// Delete the file
-							fs.unlink(oldpath, function (err) {
-								if (err) throw err
+						})
+						.then(console.log('Succesfully inserted data into database!', fields))
+						.then(() => {
+							const oldpath = files.metadata.path;
 
-								res.render("layers")
+							fs.readFile(oldpath, function (err, data) {
+								if (err) throw err
+								// Write the file
+								if (files.metadata.size > 0) {
+									const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+									fs.writeFile(newpath, data, function (err) {
+										if (err) throw err
+									})
+								}
+								// Delete the file
+								fs.unlink(oldpath, function (err) {
+									if (err) throw err
+
+									res.render("layers")
+								})
+							})
+
+						})
+						.catch((error) => {
+							console.log('Failed to insert data into database. ' + error)
+							res.render('error', {
+								errorCode: 100,
+								errorMessage: 'Não foi possível editar a camada!'
 							})
 						})
-
-					})
-					.catch((error) => {
-						console.log('Failed to insert data into database. ' + error)
-						res.render('error', {
-							errorCode: 100,
-							errorMessage: 'Não foi possível editar a camada!'
-						})
-					})
 				}
 			})
 		} else {
@@ -346,25 +346,25 @@ app.route('/layers/edit/:id')
 
 /* Rota para reordenamento das camadas */
 app.route('/layers/reorder')
-	.get((req,res) => {
-		if(req.session.user){
+	.get((req, res) => {
+		if (req.session.user) {
 			res.render('reorder')
 		} else {
 			res.redirect('/')
 		}
 	})
-	.post((req,res) => {
-		if(req.session.user){
+	.post((req, res) => {
+		if (req.session.user) {
 
 			console.log('Reordering layers request received')
 
 			// Callback para quando finalizar o forEach de atualização das linhas de Layers
-			function forEachCallback(){
+			function forEachCallback() {
 				conn.query("UPDATE Layers SET id = id - 1000")
-				.then(() => {
-					res.sendStatus(200); 
-					console.log('Layers reordered successfully');
-				});
+					.then(() => {
+						res.sendStatus(200);
+						console.log('Layers reordered successfully');
+					});
 			}
 
 			// Contador de linhas atualizadas para a updateId()
@@ -372,16 +372,16 @@ app.route('/layers/reorder')
 
 			/* Função assíncrona para atualização das linhas, recebe um id antigo, 
 			um novo e o tamanho do array para chamar o callback ao final */
-			async function updateId(new_id,previous_id,array_length){
+			async function updateId(new_id, previous_id, array_length) {
 
 				await Layers.update({ id: new_id }, {
 					where: {
-					  id: previous_id
+						id: previous_id
 					}
 				})
 
 				rowsUpdated++;
-				if(rowsUpdated === array_length) {
+				if (rowsUpdated === array_length) {
 					forEachCallback();
 				}
 			}
@@ -389,10 +389,10 @@ app.route('/layers/reorder')
 			var obj = JSON.parse(req.body.reordering)
 
 			// Loop forEach para reordenar com incremento de milhar
-			obj.forEach(function(obj, i, array) {
-				console.log('New ID: ',obj[0]+1000,' Previous ID: ',obj[1])
-				updateId(obj[0]+1000,obj[1],array.length)
-			});	
+			obj.forEach(function (obj, i, array) {
+				console.log('New ID: ', obj[0] + 1000, ' Previous ID: ', obj[1])
+				updateId(obj[0] + 1000, obj[1], array.length)
+			});
 
 		} else {
 			res.redirect('/')
@@ -474,19 +474,19 @@ app.route('/users/edit/:id')
 					id: req.params.id
 				}
 			})
-			.then(UserData => {
-				res.render('user_details.ejs', {
-					edit: true,
-					id: UserData.id,
-					userName: UserData.userName,
-					group: UserData.group,
-					email: UserData.email,
-					password: UserData.password
+				.then(UserData => {
+					res.render('user_details.ejs', {
+						edit: true,
+						id: UserData.id,
+						userName: UserData.userName,
+						group: UserData.group,
+						email: UserData.email,
+						password: UserData.password
+					})
 				})
-			})
-			.catch(() => {
-				res.redirect('/users')
-			})
+				.catch(() => {
+					res.redirect('/users')
+				})
 		} else {
 			res.redirect('/')
 		}
@@ -506,8 +506,8 @@ app.route('/users/edit/:id')
 					}
 				}
 			).then(console.log('Succesfully inserted data into database!', req.body))
-			.then(res.render("users"))
-			.catch((error) => { console.log('Failed to update database. ' + error) })
+				.then(res.render("users"))
+				.catch((error) => { console.log('Failed to update database. ' + error) })
 		}
 		else {
 			res.redirect('/')
@@ -854,74 +854,74 @@ app.route('/config_tools')
 /* Rota para configurações de ferramentas do WebGENTE na interface de administração 
 
 	home_enabled
-    select_enabled
-    information_enabled
-    search_enabled
-    legend_enabled
-    geolocation_enabled
-    measurement_enabled
-    custom_legend_enabled
-    coordinates_enabled
+	select_enabled
+	information_enabled
+	search_enabled
+	legend_enabled
+	geolocation_enabled
+	measurement_enabled
+	custom_legend_enabled
+	coordinates_enabled
 
 */
 app.route('/config_tools')
-.get((req, res) => {
-	if (req.session.user) {
-		Config.findOne({ raw: true })
-		.then(results => {
-			res.render("config_tools",
-				{
-					home_enabled: results.home_enabled,
-					select_enabled: results.select_enabled,
-					information_enabled: results.information_enabled,
-					search_enabled: results.search_enabled,
-					legend_enabled: results.legend_enabled,
-					geolocation_enabled: results.geolocation_enabled,
-					measurement_enabled: results.measurement_enabled,
-					custom_legend_enabled: results.custom_legend_enabled,
-					coordinates_enabled: results.coordinates_enabled
+	.get((req, res) => {
+		if (req.session.user) {
+			Config.findOne({ raw: true })
+				.then(results => {
+					res.render("config_tools",
+						{
+							home_enabled: results.home_enabled,
+							select_enabled: results.select_enabled,
+							information_enabled: results.information_enabled,
+							search_enabled: results.search_enabled,
+							legend_enabled: results.legend_enabled,
+							geolocation_enabled: results.geolocation_enabled,
+							measurement_enabled: results.measurement_enabled,
+							custom_legend_enabled: results.custom_legend_enabled,
+							coordinates_enabled: results.coordinates_enabled
+						})
 				})
-		})
-	}
-	else {
-		res.redirect('/');
-	}
-})
-.post((req, res) => {
-	console.log(req.body)
-	if (req.session.user) {
-		Config.update(
-			{
-				home_enabled: (req.body.home_enabled != null) ? req.body.home_enabled : 0,
-				select_enabled: (req.body.select_enabled != null) ? req.body.select_enabled : 0,
-				information_enabled: (req.body.information_enabled != null) ? req.body.information_enabled : 0,
-				search_enabled: (req.body.search_enabled != null) ? req.body.search_enabled : 0,
-				legend_enabled: (req.body.legend_enabled != null) ? req.body.legend_enabled : 0,
-				geolocation_enabled: (req.body.geolocation_enabled != null) ? req.body.geolocation_enabled : 0,
-				measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
-				custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
-				coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0
-			},
-			{
-				where: {
-					profile: 'webgente-default'
+		}
+		else {
+			res.redirect('/');
+		}
+	})
+	.post((req, res) => {
+		console.log(req.body)
+		if (req.session.user) {
+			Config.update(
+				{
+					home_enabled: (req.body.home_enabled != null) ? req.body.home_enabled : 0,
+					select_enabled: (req.body.select_enabled != null) ? req.body.select_enabled : 0,
+					information_enabled: (req.body.information_enabled != null) ? req.body.information_enabled : 0,
+					search_enabled: (req.body.search_enabled != null) ? req.body.search_enabled : 0,
+					legend_enabled: (req.body.legend_enabled != null) ? req.body.legend_enabled : 0,
+					geolocation_enabled: (req.body.geolocation_enabled != null) ? req.body.geolocation_enabled : 0,
+					measurement_enabled: (req.body.measurement_enabled != null) ? req.body.measurement_enabled : 0,
+					custom_legend_enabled: (req.body.custom_legend_enabled != null) ? req.body.custom_legend_enabled : 0,
+					coordinates_enabled: (req.body.coordinates_enabled != null) ? req.body.coordinates_enabled : 0
+				},
+				{
+					where: {
+						profile: 'webgente-default'
+					}
 				}
+			).then(() => {
+				console.log('Dados de configuração das ferramentas atualizados com sucesso')
+				setHeaders();
+				res.redirect('/config')
 			}
-		).then(() => {
-			console.log('Dados de configuração das ferramentas atualizados com sucesso')
-			setHeaders();
-			res.redirect('/config')
-			}
-		).catch((error) => {
+			).catch((error) => {
 				console.log('Não foi possível atualizar as configurações das ferramentas. Motivo: ' + error)
 				res.send('Ocorreu algum erro')
 			}
-		)
-	}
-	else {
-		res.redirect('/');
-	}
-});
+			)
+		}
+		else {
+			res.redirect('/');
+		}
+	});
 
 /* GetFeatureInfo e filtragem de informações */
 
@@ -1258,7 +1258,7 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 		// if (isURL(req.params.host) == false) { res.send('Não foi possível completar a requisição') }
 
 		// Decodificando a URL do Host caso necessário
-		host = decodeURIComponentSafely(req.params.host)		
+		host = decodeURIComponentSafely(req.params.host)
 
 		let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
 
@@ -1266,8 +1266,8 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 		console.log(host + urlParameters)
 
 		fetch(host + urlParameters, { method: 'GET', headers: headers })
-		.then(res => res.text())
-		.then(data => res.send(data))
+			.then(res => res.text())
+			.then(data => res.send(data))
 	}
 	else {
 		res.redirect('/');
@@ -1320,5 +1320,28 @@ app.get('/propertyname/:layer', (req, res) => {
 /* Rota do sistema de pesquisas do geoserver-search-cache */
 app.route('/search/:keyword')
 	.get((req, res) => {
-		searcher.searchFor(req.params.keyword).then((results) => res.send(results))
+		searcher.searchFor(req.params.keyword).then((results) => {
+			//converter string em objeto 
+			results.map(e => {
+				e.original_row = JSON.parse(e.original_row)
+			})
+
+			//Remove propriedades restritas 
+			if (req.session.user) {
+				res.send(results)
+			} else {
+				restrictAttributes(results, 'table_name', 'original_row').then(result => {
+					var data = new Array()
+					result.map(e => {
+						//Não adiciona objetos com propriedades pesquisadas que foram excluídas anteriormente
+						if (e.original_row[e.column_name]) {
+							data.push(e)
+						}
+					})
+					res.send(data)
+				})
+
+			}
+		}
+		)
 	})
