@@ -1120,7 +1120,6 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 	var restrictedData = new Array();
 
 	for (feature of features) { // Itera em cada camada
-
 		// Se a camada não possuir conteudo em layerKey ela é um MDT (um raster, possivelmente), sendo assim ela não é restrita
 		if (feature[layerKey] == '') {
 
@@ -1324,8 +1323,9 @@ app.route('/search/:keyword')
 			//converter string em objeto 
 			results.map(e => {
 				e.original_row = JSON.parse(e.original_row)
+				e.geometry= JSON.parse(e.geometry)
 			})
-
+		
 			//Remove propriedades restritas 
 			if (req.session.user) {
 				res.send(results)
@@ -1343,5 +1343,5 @@ app.route('/search/:keyword')
 
 			}
 		}
-		)
+		).catch(error => res.send(error))
 	})

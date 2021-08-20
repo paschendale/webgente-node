@@ -11,20 +11,7 @@
                 </span>
             <%} %> -->
             </div>
-            <div id="search-fts" class="container col-3 col-sm-4 col-lg-4 leaflet-top leaflet-left webgente-search-fts-container">
-                <div class="container input-group input-group-sm mb-3 p-0 webgente-search-fts-list">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">WebGENTE</span>
-                    </div>
-                    <input type="text" class="form-control border-0 rounded-0" id="search_content" placeholder="Search">
-                    <div class="input-group-append">
-                        <button id='search-button' class="btn btn-custom  btn-sm border-0 rounded-0" onclick="search_main()">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="fts_result" class="overflow-auto webgente-search-fts-results"></div>
-            </div>
+            <%- include('search_fts.ejs') %>
             <div id="search"
                 class="container col-3 col-sm-4 col-lg-4 leaflet-top leaflet-left webgente-search-container"></div>
             <div id='webgente-legend-container' data-state='enabled'

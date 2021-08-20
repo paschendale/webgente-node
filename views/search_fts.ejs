@@ -1,0 +1,50 @@
+<div id="search-fts" class="container col-3 col-sm-4 col-lg-4 leaflet-top leaflet-left webgente-search-fts-container">
+    <div class="container input-group input-group-sm mb-3 p-0 webgente-search-fts-result">
+        <div class="input-group-prepend">
+            <span class="input-group-text">WebGENTE</span>
+        </div>
+        <input type="text" class="form-control border-0 rounded-0" id="search_content" placeholder="Search">
+        <div class="input-group-append">
+            <button id='search-button' class="btn btn-light  btn-sm border-0 rounded-0" onclick="search_main()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+    <div class="webgente-search-fts-result p-3  collapse" id="menu_search_fts">
+
+        <div class="row">
+            <div class="col-3 col-sm-3">
+                <button class="btn btn-dark btn-custom  btn-sm" id="toggle_disp"><i
+                        class="fas fa-arrow-left"></i></button>
+            </div>
+            <div class="col-3 col-sm-3">
+                <button class="btn btn-dark dropdown-toggle btn-sm" type="button" id="download_all"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-download"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <button class="dropdown-item" type="button"
+                        onclick="download_marked('application/json')">GeoJson</button>
+                    <button class="dropdown-item" type="button" onclick="download_marked('xml')">XML</button>
+                    <button class="dropdown-item" type="button" onclick="download_marked('csv')">CSV</button>
+                </div>
+            </div>
+            <div class="col-2 col-sm-2">
+                <button class="btn btn-dark btn-custom  btn-sm" id="open_select"><i class="fas fa-table"></i></button>
+            </div>
+            <div class="col-2 col-sm-2">
+                <button class="btn btn-dark btn-custom  btn-sm" onclick="zoom_marked(-1)"><i class="fas fa-search">
+                    </i></button>
+            </div>
+            <div class="col-2 col-sm-2 ">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="all" id="list_all">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div id="fts_result">
+        
+    </div>
+    </div>

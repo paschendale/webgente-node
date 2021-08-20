@@ -1,9 +1,12 @@
-//tabela paraa alternar html
+
+//tabela para alternar html
 var table_html = new Array()
 //Resultado
 var elements_order = new Object()
 //Opções selecionadas
 var selector = new Object()
+
+var zoom_focus= L.geoJSON().addTo(map);
 
 //Função inicial que recebe resultado da requisição
 function search_main() {
@@ -14,7 +17,16 @@ function search_main() {
 
     $.ajax({
         url: "/search/" + $("#search_content").val(),
+        beforeSend: function () {
+            $("#fts_result").html(`<div class="webgente-search-fts-result p-3"> 
+            <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+            </div>
+          </div>
+          <div>`)
+        },
         success: function (response) {
+       
             //Quando a requisição obteve resultados
             if (response.length > 0) {
                 response.map(e => {
@@ -29,68 +41,47 @@ function search_main() {
                 result_request(elements_order)
             } else {
                 //Quando a requisição não obteve resultados
-                $("#fts_result").html(`<p> Nenhum resultado encontrado!</p>`)
+              
+               if (!$("#menu_search_fts").is( ":hidden" ))
+                    $("#menu_search_fts").hide()
+
+                $("#fts_result").html( `<div class="webgente-search-fts-result p-3">
+                <p> Nenhum resultado encontrado!</p>
+                </div>`)
             }
+        },
+        error: function(qXHR, textStatus, errorThrown){
+           alert(textStatus+" "+qXHR.status+': '+ errorThrown)
+
         }
     })
 }
 //Html da lista de elementos inicial 
 function result_request(data) {
-    var html_menu = `<div class="list-group ">`
+    var html_menu = ` <ul class="list-group list-group-flush webgente-search-fts-result webgente-search-fts-list ">`
     var layers = Object.keys(data)
 
     layers.map((element) => {
-        html_menu += ` <li class="list-group-item webgente-search-fts-list ">
-         <p><strong>`+ element + `</strong></p>
-         <p>`+ data[element][0].column_name + `:` + data[element][0].attribute + `</p>`
+        html_menu += ` <li class="list-group-item border border-bottom-0">
+         <p  class="card-text"><strong>`+ element + `</strong></p>
+         <p  class="card-text">`+ data[element][0].column_name + `:` + data[element][0].attribute + `</p>`
         //Verifica se o resultado referente a uma layer possui 1, 2 ou mais de 2 elementos    
         if (data[element].length > 2) {
-            html_menu += `<p>` + data[element][1].column_name + `:` + data[element][1].attribute + `</p>
-          <a href="#" onclick="toggle_disp(`+ (table_html.length + 1) + `)"> + ver mais ` + (data[element].length - 2) + ` resultados</a>`
+            html_menu += `<p  class="card-text">` + data[element][1].column_name + `:` + data[element][1].attribute + `</p>
+          <button class="btn btn-link btn-sm " type="button" onclick="select_layer(`+ (table_html.length+1 ) + ` )"> + ver mais ` + (data[element].length - 2) + ` resultados</button>`
             //iniciando tabela secundária de cada layer
-            table_html[table_html.length + 1] = ` 
-            <ul class="list-group ">
-            <li class="list-group-item webgente-search-fts-list">
-                <div class="row">
-                    <div class="col-4 col-sm-4">
-                        <button class="btn btn-dark btn-custom  btn-sm" id="test" onclick="toggle_disp(0)"><i
-                                class="fas fa-arrow-left"></i></button>
-                    </div>
-                    <div class="col-4 col-sm-4">
-                        <button class="btn btn-dark dropdown-toggle btn-sm" type="button" id="download_all"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
-                                class="fas fa-download"></i>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                            <button class="dropdown-item" type="button"
-                                onclick="download_marked('application/json')">GeoJson</button>
-                            <button class="dropdown-item" type="button" onclick="download_marked('XML')">XML</button>
-                            <button class="dropdown-item" type="button" onclick="download_marked('csv')">CSV</button>
-                        </div>
-                    </div>
-                    <div class="col-2 col-sm-2">
-                        <button class="btn btn-dark btn-custom  btn-sm" onclick="zoom_marked(-1)"><i
-                                class="fas fa-search"> </i></button>
-                    </div>
-                    <div class="col-2 col-sm-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="list_all"
-                                onclick="all_check(this)">
-
-                        </div>
-                    </div>
-
-            </li>
-        </ul>`+ factory_list(data[element])
-
-        } else if (data.element.length == 2) {
-            html_menu += `<p>` + data[element][1].column_name + `:` + data[element][1].attribute + `</p>`
+        } else if (data[element].length == 2) {
+            html_menu += `<p>` + data[element][1].column_name + `:` + data[element][1].attribute + `</p>
+            <a href="#" class="card-link" onclick="select_layer(`+ (table_html.length+1) + ` )"> + ver mais detalhes</a>`
         }
         html_menu += `</li>`
 
+        table_html[table_html.length + 1] = factory_list(data[element])
+
+
     })
-    html_menu += `</div>`
-    table_html[0] = html_menu
+
+    table_html[0] = html_menu+"</ul>"
 
     $("#fts_result").html(table_html[0])
 
@@ -100,37 +91,57 @@ function result_request(data) {
 //Html da lista de elementos
 function factory_list(result_group) {
     var index = 0
-    var element_html = ``
-    for (element_group of result_group) {
-        var properties = Object.keys(element_group.original_row)
-        element_html += `<li class="list-group-item webgente-search-fts-list">
+    var element_html = `<ul class="list-group list-group-flush webgente-search-fts-result webgente-search-fts-list" >`
+    result_group.map(element_group => {
+        element_html += ` 
+        <li class="list-group-item border border-bottom-0 ">
                         <div class="row">
-                          <div class="col-10 col-sm-10">
-                            <p><strong>`+ element_group.column_name + `:` + element_group.attribute + `</strong></p>`
+                          <div class="col-8 col-sm-10">
+                            <p class="card-text"><strong>`+ element_group.column_name + `:` + element_group.attribute + `</strong></p>`
 
-        //Condições para html com 1 propriedade, 2 propriedades ou 3 propriedades (2 propriedade + link para exibir as demais )
-        if (properties.length > 0) {
-            element_html += `<p>` + properties[0] + `:` + element_group.original_row[properties[0]] + `</p> `
-            if (properties.length == 2) {
-                element_html += `<p>` + properties[1] + `:` + element_group.original_row[properties[1]] + `</p>`
-            } else if (properties.length > 2) {
-                element_html += `<p>` + properties[1] + `:` + element_group.original_row[properties[1]] + `</p>
-            <a href="#" > + ver mais `+ (properties.length - 2) + ` resultados</a>`
-            }
+        //Condições para html com 1 propriedade, 2 propriedades ou 3 propriedades (2 propriedade + link para exibir as demais 
+        var properties = Object.keys(element_group.original_row)
+        properties.splice(properties.indexOf(element_group.column_name), 1)
+        for (var count = 0; count < properties.length; count++) {
+        
+                if (count == 2 && properties.length > 2) {
+                    element_html += `<div id="control_link`+index+`"  class="collapse" name="control_link" >
+                <p class="card-text">` + properties[count] + `:` + element_group.original_row[properties[count]] + `</p>`
+                } else {
+                    element_html += `<p class="card-text">` + properties[count] + `:` + element_group.original_row[properties[count]] + `</p> `
+                }
+
+            
         }
+        element_html += (properties.length > 2) ? `</div> <button class="btn btn-link btn-sm " type="button" ata-toggle="collapse" name="control_link" value="control_link`+index+`")"> + ver mais</button>
+        `: ``
+
         element_html += `</div>
-        <div class="col-2 col-sm-2">
+        <div class="col-4 col-sm-2">
             <button class="btn btn-custom  btn-sm" onclick="download_marked(`+ index + `)" > <i class="fas fa-download" id="download_e` + index + `"></i> </button>
             <button class="btn btn-custom  btn-sm " onclick="zoom_marked(`+ index + `)" ><i class="fas fa-search"></i></button>
-             <div class="form-check">
-                 <input class="form-check-input" type="checkbox" value="`+ index + `" name="select_group"">
+             <div class="form-check pl-4">
+                 <input class="form-check-input" type="checkbox" value="`+ index + `" name="select_group">
              </div>
         </div>
     </div>
 </li>`
 
         index++
-    }
+    })
+    element_html+= `</ul><script>
+    $(":button[name=control_link]").click(function(){
+        var id_collapse="#"+ $(this).prop('value') 
+        if($(id_collapse).is( ":hidden" )){
+            $(this).text("- Ocultar")
+            $(id_collapse).show()
+        }else{
+            $(this).text("+ Ver mais")
+            $(id_collapse).hide()
+
+        }
+    })
+     </script>`
     return element_html
 
 }
@@ -151,43 +162,42 @@ function download_marked(index_format) {
 
 //Zoom das feições 
 function zoom_marked(index) {
+    if(Object.keys(zoom_focus._layers).length==0)
+        zoom_focus.clearLayers()
+    var data = new Array()
     if (index == -1) {
         //Zoom para feições marcadas
         $('input:checkbox[name=select_group]:checked').each(function () {
-            console.log(selector[$(this).val()])
+            data.push(selector[$(this).val()].geometry)
 
         })
     } else {
         //Zoom para única feição
-        console.log(selector[index])
+        data.push(selector[index].geometry)
+    }
+    if(data.length==0){
+        alert("Nenhuma feição foi selecionada")
+    }else{
+    zoom_focus.addData(data)
+    map.fitBounds(zoom_focus.getBounds())
     }
 }
 //Tablea com todas as informações 
-function table_properties(index) {
-    console.log(selector[index])
-}
-
-//alterna telas
-function toggle_disp(count) {
-    var table = Object.keys(elements_order)
-    selector = elements_order[table[count - 1]]
+function select_layer(count) {
+    $("#menu_search_fts").show()
+    selector = elements_order[Object.keys(elements_order)[count-1]]
     $("#fts_result").html(table_html[count])
+    if(Object.keys(zoom_focus._layers).length==0)
+        zoom_focus.clearLayers()
 }
 
-//Seleção de todos os elemetos 
-function all_check(e) {
-    if (e.checked) {
-        $(":checkbox").prop("checked", true)
-    } else {
-        $(":checkbox").prop("checked", false)
-    }
-}
+
 
 // Pressionar Enter no formulário ativa a pesquisa com o conteudo do formulario
-$(document).ready(function(){
-    $('#search_content').keypress(function(e){
-        if(e.keyCode==13)
-        $('#search-button').click();
+$(document).ready(function () {
+    $('#search_content').keypress(function (e) {
+        if (e.keyCode == 13)
+            $('#search-button').click();
     });
 });
 
@@ -198,4 +208,31 @@ $('#search-fts').mouseenter(() => {
 
 $('#search-fts').mouseleave(() => {
     map.scrollWheelZoom.enable();
+})
+//Marca/Desmarca todos os checkbox
+$("#list_all").change(function () {
+    if (this.checked) {
+        $(":checkbox").prop("checked", true)
+    } else {
+        $(":checkbox").prop("checked", false)
+    }
+})
+
+
+//Alternar tela 
+$("#toggle_disp").click(function(){
+    $("#menu_search_fts").hide()
+    $("#fts_result").empty()
+    $("#fts_result").html(table_html[0])
+    if(Object.keys(zoom_focus._layers).length==0)
+        zoom_focus.clearLayers()
+})
+
+
+//Abrir tabela de atributos
+$("open_select").click(function(){
+    $('input:checkbox[name=select_group]:checked').each(function () {
+        console.log(selector[$(this).val()])
+
+    })
 })
