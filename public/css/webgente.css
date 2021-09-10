@@ -339,3 +339,34 @@ th {
 	
 	
 }
+/* Estilo da div da tabela e barra de navegação
+dos elementos selecionados */
+.webgente-search-fts-table-div{
+	background-color: rgb(255, 255, 255);
+	pointer-events: visibleFill;
+	margin-top: 100px;
+	height: 70vh; 
+	width: 50vh;
+	
+	
+	
+}
+/* Controla o tamanho da div do 
+tabela de elementos selecionados */
+.webgente-search-fts-height-resize{
+	height: 50vh; 
+	overflow-y: auto;
+	margin-top: 5%;
+
+}
+/* Div da barra de navegação da tabela colapsada */
+.webgente-search-fts-table-bar-div{
+	pointer-events: visibleFill;
+	margin-left: 350px;
+	margin-bottom: 3px;
+	height: 5vh;
+	width: 30vh;
+	background-color: rgba(255, 255, 255, 0.5);
+	
+
+}

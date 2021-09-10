@@ -5,16 +5,27 @@ var table_html = new Array()
 var elements_order = new Object()
 //Opções selecionadas
 var selector = new Object()
-
-var zoom_focus= L.geoJSON().addTo(map);
+//Alternar mais de uma tabela de 
+var table_select = new Array()
+//Inicializando geojson
+var zoom_focus = L.geoJSON().addTo(map);
 
 //Função inicial que recebe resultado da requisição
 function search_main() {
-    //inicializando variaveis globais sempre que iniciada
+    if (selector.length > 0)
+        removeLayerByName("ufv:" + selector[0].table_name)
+    //inicializando variaveis globais sempre
     table_html = new Array()
     elements_order = new Object()
     selector = new Object()
-
+    //Fechando tabelas 
+    if (!$("#menu_search_fts").is(":hidden"))
+        $("#menu_search_fts").hide()
+    if (!$("table_bar").is(":hidden"))
+        $("#table_bar").hide()
+    if (!$("#table_div").is(":hidden"))
+        $("#table_div").hide()
+    $("#table_div_bar").html(" ")
     $.ajax({
         url: "/search/" + $("#search_content").val(),
         beforeSend: function () {
@@ -26,7 +37,6 @@ function search_main() {
           <div>`)
         },
         success: function (response) {
-       
             //Quando a requisição obteve resultados
             if (response.length > 0) {
                 response.map(e => {
@@ -41,18 +51,16 @@ function search_main() {
                 result_request(elements_order)
             } else {
                 //Quando a requisição não obteve resultados
-              
-               if (!$("#menu_search_fts").is( ":hidden" ))
-                    $("#menu_search_fts").hide()
 
-                $("#fts_result").html( `<div class="webgente-search-fts-result p-3">
+                $("#fts_result").html(`<div class="webgente-search-fts-result p-3">
                 <p> Nenhum resultado encontrado!</p>
                 </div>`)
             }
         },
-        error: function(qXHR, textStatus, errorThrown){
-           alert(textStatus+" "+qXHR.status+': '+ errorThrown)
-
+        error: function (qXHR, textStatus, errorThrown) {
+            alert(textStatus + " " + qXHR.status + ': ' + errorThrown)
+            $("#fts_result").hide()
+            $("#fts_result").html(``)
         }
     })
 }
@@ -68,11 +76,11 @@ function result_request(data) {
         //Verifica se o resultado referente a uma layer possui 1, 2 ou mais de 2 elementos    
         if (data[element].length > 2) {
             html_menu += `<p  class="card-text">` + data[element][1].column_name + `:` + data[element][1].attribute + `</p>
-          <button class="btn btn-link btn-sm " type="button" onclick="select_layer(`+ (table_html.length+1 ) + ` )"> + ver mais ` + (data[element].length - 2) + ` resultados</button>`
+          <button class="btn btn-link btn-sm " type="button" onclick="select_layer(`+ (table_html.length + 1) + ` )"> + ver mais ` + (data[element].length - 2) + ` resultados</button>`
             //iniciando tabela secundária de cada layer
         } else if (data[element].length == 2) {
             html_menu += `<p>` + data[element][1].column_name + `:` + data[element][1].attribute + `</p>
-            <a href="#" class="card-link" onclick="select_layer(`+ (table_html.length+1) + ` )"> + ver mais detalhes</a>`
+            <a href="#" class="card-link" onclick="select_layer(`+ (table_html.length + 1) + ` )"> + ver mais detalhes</a>`
         }
         html_menu += `</li>`
 
@@ -81,7 +89,7 @@ function result_request(data) {
 
     })
 
-    table_html[0] = html_menu+"</ul>"
+    table_html[0] = html_menu + "</ul>"
 
     $("#fts_result").html(table_html[0])
 
@@ -103,17 +111,17 @@ function factory_list(result_group) {
         var properties = Object.keys(element_group.original_row)
         properties.splice(properties.indexOf(element_group.column_name), 1)
         for (var count = 0; count < properties.length; count++) {
-        
-                if (count == 2 && properties.length > 2) {
-                    element_html += `<div id="control_link`+index+`"  class="collapse" name="control_link" >
-                <p class="card-text">` + properties[count] + `:` + element_group.original_row[properties[count]] + `</p>`
-                } else {
-                    element_html += `<p class="card-text">` + properties[count] + `:` + element_group.original_row[properties[count]] + `</p> `
-                }
 
-            
+            if (count == 2 && properties.length > 2) {
+                element_html += `<div id="control_link` + index + `"  class="collapse" name="control_link" >
+                <p class="card-text">` + properties[count] + `:` + element_group.original_row[properties[count]] + `</p>`
+            } else {
+                element_html += `<p class="card-text">` + properties[count] + `:` + element_group.original_row[properties[count]] + `</p> `
+            }
+
+
         }
-        element_html += (properties.length > 2) ? `</div> <button class="btn btn-link btn-sm " type="button" ata-toggle="collapse" name="control_link" value="control_link`+index+`")"> + ver mais</button>
+        element_html += (properties.length > 2) ? `</div> <button class="btn btn-link btn-sm " type="button" ata-toggle="collapse" name="control_link" value="control_link` + index + `")"> + ver mais</button>
         `: ``
 
         element_html += `</div>
@@ -129,7 +137,8 @@ function factory_list(result_group) {
 
         index++
     })
-    element_html+= `</ul><script>
+    element_html += `</ul>
+    <script>
     $(":button[name=control_link]").click(function(){
         var id_collapse="#"+ $(this).prop('value') 
         if($(id_collapse).is( ":hidden" )){
@@ -149,7 +158,6 @@ function factory_list(result_group) {
 function download_marked(index_format) {
     if (isNaN(index_format)) {
         //Download para feições marcadas no checkbox
-        console.log(index_format)
         $('input:checkbox[name=select_group]:checked').each(function () {
             console.log(selector[$(this).val()])
 
@@ -162,7 +170,8 @@ function download_marked(index_format) {
 
 //Zoom das feições 
 function zoom_marked(index) {
-    if(Object.keys(zoom_focus._layers).length==0)
+
+    if (Object.keys(zoom_focus._layers).length > 0)
         zoom_focus.clearLayers()
     var data = new Array()
     if (index == -1) {
@@ -175,24 +184,105 @@ function zoom_marked(index) {
         //Zoom para única feição
         data.push(selector[index].geometry)
     }
-    if(data.length==0){
+    if (data.length == 0) {
         alert("Nenhuma feição foi selecionada")
-    }else{
-    zoom_focus.addData(data)
-    map.fitBounds(zoom_focus.getBounds())
+    } else {
+        zoom_focus.addData(data)
+        map.fitBounds(zoom_focus.getBounds())
     }
 }
-//Tablea com todas as informações 
+
+//Adiciona layer pelo controle de camadas
+function addLayerByName(nameString) {
+    Lc._layers.find(x => x.layer.options.layers === nameString).layer.addTo(map)
+    return null
+}
+
+//Remove layer pelo controle de camadas
+function removeLayerByName(nameString) {
+    Lc._layers.find(x => x.layer.options.layers === nameString).layer.remove()
+    return null
+}
+
+
+//
 function select_layer(count) {
     $("#menu_search_fts").show()
-    selector = elements_order[Object.keys(elements_order)[count-1]]
+    selector = elements_order[Object.keys(elements_order)[count - 1]]
+    //Remover "ufv"
+    addLayerByName("ufv:" + selector[0].table_name)
     $("#fts_result").html(table_html[count])
-    if(Object.keys(zoom_focus._layers).length==0)
+    if (Object.keys(zoom_focus._layers).length> 0)
         zoom_focus.clearLayers()
 }
 
+function factory_table(index) {
+    //Cria colunas
+    var column = new Array({ checkbox: true })
+    Object.keys(table_select[index][0].original_row).map(e => {
+        column.push({ 'field': e, 'title': e })
+    })
+    //Gera as linhas
+    var lines = new Array()
+    table_select[index].map(e => {
+        lines.push(e.original_row)
+    })
+    //Ativa o bootstrap table
+    $("#table_fts").bootstrapTable({
+
+         buttons: {
+             btnAdd: {
+                 text: 'Zoom na feição',
+                 icon: 'fa-search',
+                 event: function () {
+                     geom = new Array()
+                     $('input:checkbox[name=btSelectItem]:checked').each(function () {
+                         geom.push(selector[$(this).data('index')].geometry)
+                     })
+                     if (geom.length > 0) {
+                         if (Object.keys(zoom_focus._layers).length > 0)
+                             zoom_focus.clearLayers()
+                     zoom_focus.addData(geom)
+                     map.fitBounds(zoom_focus.getBounds())
+                     } else {
+                         alert("Nenhuma feição selecionada!")
+                     }
+                 },
+                 attributes: {
+                     title: 'Zoom'
+                 }
+             }
+         },
+        columns: column,
+        data: lines
+
+    })
+}
 
 
+//Alterna e deleta barra de navegação da tabela de atributos
+function switch_window(e) {
+    if ($(e).parent().is('a')) {
+        if ($("#table_div_bar li").length == 1) {
+            $("#table_div").hide()
+        }
+        $(e).closest("li").remove()
+        table_select.splice($(e).closest("li").index(), 1)
+    } else if ($(e).closest("li").index() > -1) {
+        $("#table_fts").bootstrapTable('destroy')
+        $("ul.nav li a").removeClass('active')
+        factory_table($(e).closest("li").index())
+        $(e).addClass("active")
+
+    }
+
+
+}
+//Colapsa a barra de navegação e exibe a tabela de atributos selecionada
+function open_table(){
+    $("#table_div").show()
+    $("#table_bar").hide()
+}
 // Pressionar Enter no formulário ativa a pesquisa com o conteudo do formulario
 $(document).ready(function () {
     $('#search_content').keypress(function (e) {
@@ -205,34 +295,120 @@ $(document).ready(function () {
 $('#search-fts').mouseenter(() => {
     map.scrollWheelZoom.disable();
 })
-
+// Habilita zoom no scroll do mouse quando cursor sair da div de pesquisa
 $('#search-fts').mouseleave(() => {
     map.scrollWheelZoom.enable();
 })
 //Marca/Desmarca todos os checkbox
 $("#list_all").change(function () {
     if (this.checked) {
-        $(":checkbox").prop("checked", true)
+        $("input:checkbox[name=select_group]").prop("checked", true)
     } else {
-        $(":checkbox").prop("checked", false)
+        $("input:checkbox[name=select_group]").prop("checked", false)
     }
 })
 
 
 //Alternar tela 
-$("#toggle_disp").click(function(){
+$("#toggle_disp").click(function () {
+    //Remover esse ufv: 
+    removeLayerByName("ufv:" + selector[0].table_name)
     $("#menu_search_fts").hide()
     $("#fts_result").empty()
     $("#fts_result").html(table_html[0])
-    if(Object.keys(zoom_focus._layers).length==0)
+    if (Object.keys(zoom_focus._layers).length == 0)
         zoom_focus.clearLayers()
 })
 
+//Abre a tabela e adiciona os elementos selecionados
+$("#open_select").click(function () {
+    var data = new Array()
 
-//Abrir tabela de atributos
-$("open_select").click(function(){
     $('input:checkbox[name=select_group]:checked').each(function () {
-        console.log(selector[$(this).val()])
-
+        data.push(selector[$(this).val()])
     })
+    if (data.length == 0) {
+        alert("Nenhum opção feição foi selecionada!")
+    } else {
+        $("#table_div").show()
+        if ($("#table_fts tr").length > 0) {
+            $("#table_fts").bootstrapTable('destroy')
+            $("ul.nav li a").removeClass('active')
+        }
+        $("#table_div_bar").append(` <li class="nav-item  "> 
+        <a class="nav-link active" onclick="switch_window(this)"   href="#">`+ data.length + ` selecionados  
+        <i class="fa fa-times" onclick="switch_window(this)" ></i> 
+        </a> 
+      </li>
+       `)
+
+        table_select.push(data)
+        factory_table(table_select.length - 1)
+
+    }
 })
+
+$(function () {
+    //Função de arrastar 
+    $("#table_div").draggable({
+        start: function () {
+            //Desabilita arrastar mapa
+            map.dragging.disable()
+        },
+        stop: function () {
+            //Habilita arrastar mapa
+            map.dragging.enable()
+        }
+    })
+    $("#table_div").resizable({
+        autoHide: true, //Alças ocultas quando o cursor não passsar por elas 
+        handles: "all", //Todas as alças podem ser utilizadas
+        resize: function () {
+            $(".webgente-search-fts-height-resize").height(($("#table_div").height()) -($("#table_div_bar").height()+50))
+            $("#table_fts").bootstrapTable('resetView')
+        },
+
+        start: function () {
+
+            //Desabilita arrastar mapa
+            map.dragging.disable()
+        },
+        stop: function () {
+            //Habilita arrastar mapa
+            map.dragging.enable()
+
+        }
+    })
+
+});
+
+//Desativa o scrol do mapa quando mouse estiver na div 
+$("#table_div").mouseenter(() => {
+    map.scrollWheelZoom.disable();
+})
+//Ativa o scrol do mapa quando mouse fora div 
+$("#table_div").mouseenter(() => {
+    map.scrollWheelZoom.disable();
+})
+
+
+ //Fecha a tabela de atributos selecionados e exclui esses atributos
+ $("i[name=close_div]").click(function () {
+        $("#table_div").hide()
+        $("#table_fts").bootstrapTable('destroy')
+        table_select = new Array()
+        $("#table_div_bar").html("")
+    })
+
+//Minimiza a tabela de atrbutos selecionados e exibe a barra de navegação refente a tabela
+$("#min_table").click(function () {
+    $("#table_div").hide()
+    $("#table_bar").html(` <li class="nav-item webgente-search-fts-table-bar-div ">
+    <a class="nav-link" onclick="open_table()">
+    `+selector[0].table_name+`
+    </a>
+    </li>`)
+    $("#table_bar").show()
+})
+
+
