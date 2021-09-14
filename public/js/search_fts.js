@@ -205,14 +205,14 @@ function removeLayerByName(nameString) {
 }
 
 
-//
+//Quando o resultado de uma layer é selecionado 
 function select_layer(count) {
     $("#menu_search_fts").show()
     selector = elements_order[Object.keys(elements_order)[count - 1]]
     //Remover "ufv"
     addLayerByName("ufv:" + selector[0].table_name)
     $("#fts_result").html(table_html[count])
-    if (Object.keys(zoom_focus._layers).length> 0)
+    if (Object.keys(zoom_focus._layers).length > 0)
         zoom_focus.clearLayers()
 }
 
@@ -230,29 +230,29 @@ function factory_table(index) {
     //Ativa o bootstrap table
     $("#table_fts").bootstrapTable({
 
-         buttons: {
-             btnAdd: {
-                 text: 'Zoom na feição',
-                 icon: 'fa-search',
-                 event: function () {
-                     geom = new Array()
-                     $('input:checkbox[name=btSelectItem]:checked').each(function () {
-                         geom.push(selector[$(this).data('index')].geometry)
-                     })
-                     if (geom.length > 0) {
-                         if (Object.keys(zoom_focus._layers).length > 0)
-                             zoom_focus.clearLayers()
-                     zoom_focus.addData(geom)
-                     map.fitBounds(zoom_focus.getBounds())
-                     } else {
-                         alert("Nenhuma feição selecionada!")
-                     }
-                 },
-                 attributes: {
-                     title: 'Zoom'
-                 }
-             }
-         },
+        buttons: {
+            btnAdd: {
+                text: 'Zoom na feição',
+                icon: 'fa-search',
+                event: function () {
+                    geom = new Array()
+                    $('input:checkbox[name=btSelectItem]:checked').each(function () {
+                        geom.push(selector[$(this).data('index')].geometry)
+                    })
+                    if (geom.length > 0) {
+                        if (Object.keys(zoom_focus._layers).length > 0)
+                            zoom_focus.clearLayers()
+                        zoom_focus.addData(geom)
+                        map.fitBounds(zoom_focus.getBounds())
+                    } else {
+                        alert("Nenhuma feição selecionada!")
+                    }
+                },
+                attributes: {
+                    title: 'Zoom'
+                }
+            }
+        },
         columns: column,
         data: lines
 
@@ -260,29 +260,8 @@ function factory_table(index) {
 }
 
 
-//Alterna e deleta barra de navegação da tabela de atributos
-function switch_window(e) {
-    if ($(e).parent().is('a')) {
-        if ($("#table_div_bar li").length == 1) {
-            $("#table_div").hide()
-        }
-        $(e).closest("li").remove()
-        table_select.splice($(e).closest("li").index(), 1)
-    } else if ($(e).closest("li").index() > -1) {
-        $("#table_fts").bootstrapTable('destroy')
-        $("ul.nav li a").removeClass('active')
-        factory_table($(e).closest("li").index())
-        $(e).addClass("active")
-
-    }
 
 
-}
-//Colapsa a barra de navegação e exibe a tabela de atributos selecionada
-function open_table(){
-    $("#table_div").show()
-    $("#table_bar").hide()
-}
 // Pressionar Enter no formulário ativa a pesquisa com o conteudo do formulario
 $(document).ready(function () {
     $('#search_content').keypress(function (e) {
@@ -336,8 +315,8 @@ $("#open_select").click(function () {
             $("ul.nav li a").removeClass('active')
         }
         $("#table_div_bar").append(` <li class="nav-item  "> 
-        <a class="nav-link active" onclick="switch_window(this)"   href="#">`+ data.length + ` selecionados  
-        <i class="fa fa-times" onclick="switch_window(this)" ></i> 
+        <a class="nav-link active"   href="#">`+ data.length + ` selecionados  
+        <i class="fa fa-times" ></i> 
         </a> 
       </li>
        `)
@@ -364,7 +343,7 @@ $(function () {
         autoHide: true, //Alças ocultas quando o cursor não passsar por elas 
         handles: "all", //Todas as alças podem ser utilizadas
         resize: function () {
-            $(".webgente-search-fts-height-resize").height(($("#table_div").height()) -($("#table_div_bar").height()+50))
+            $(".webgente-search-fts-height-resize").height(($("#table_div").height()) - ($("#table_div_bar").height() + 50))
             $("#table_fts").bootstrapTable('resetView')
         },
 
@@ -392,23 +371,69 @@ $("#table_div").mouseenter(() => {
 })
 
 
- //Fecha a tabela de atributos selecionados e exclui esses atributos
- $("i[name=close_div]").click(function () {
-        $("#table_div").hide()
-        $("#table_fts").bootstrapTable('destroy')
-        table_select = new Array()
-        $("#table_div_bar").html("")
-    })
+//Fecha a tabela de atributos selecionados e exclui esses atributos
+$("i[name=close_div]").click(function () {
+    $("#table_div").hide()
+    $("#table_fts").bootstrapTable('destroy')
+    table_select = new Array()
+    $("#table_div_bar").html("")
+})
 
 //Minimiza a tabela de atrbutos selecionados e exibe a barra de navegação refente a tabela
 $("#min_table").click(function () {
     $("#table_div").hide()
     $("#table_bar").html(` <li class="nav-item webgente-search-fts-table-bar-div ">
-    <a class="nav-link" onclick="open_table()">
-    `+selector[0].table_name+`
+    <a class="nav-link" >
+    `+ selector[0].table_name + `
+    <i class="fa fa-times" ></i> 
     </a>
     </li>`)
     $("#table_bar").show()
 })
 
+//Descolapsar tabela ou fechar tabela 
+$("#table_bar").click(function(e){
+    if ($(e.target).is("i")) {
+        //Fecha tabela
+        $("#table_div").hide()
+        $("#table_fts").bootstrapTable('destroy')
+        $("#table_bar").hide()
+        table_select = new Array()
+        $("#table_div_bar").html("")
+    }else{
+        //Abre tabela
+        $("#table_div").show()
+        $("#table_bar").hide()
+    }
+})
+
+//Alterna e deleta barra de navegação da tabela de atributos
+$("#table_div_bar").click(function (e) {
+    if ($(e.target).is("i")) {
+        //Botão fechar
+        if ($("#table_div_bar li").length == 1) {
+            $("#table_div").hide()
+
+        } else if ($(e.target).closest("a").hasClass("active")) {
+            if ($(e.target).closest("li").index() == table_select.length -1) {
+                $("#table_div_bar li:eq(" + ($(e.target).closest("li").index() - 1) + ")").children('a').tab('show')
+                $("#table_fts").bootstrapTable('destroy')
+                factory_table($(e.target).closest("li").index() - 1)
+            } else {
+                $("#table_div_bar li:eq(" + ($(e.target).closest("li").index() + 1) + ")").children('a').tab('show')
+                $("#table_fts").bootstrapTable('destroy')
+                factory_table($(e.target).closest("li").index() + 1)
+            }
+
+        }
+        table_select.splice($(e.target).closest("li").index(), 1)
+        $(e.target).closest("li").remove()
+    } else if ($(e.target).is("a")) {
+        //Botão alternar
+        $(e.target).tab('show')
+        $("#table_fts").bootstrapTable('destroy')
+        factory_table($(e.target).closest("li").index())
+    }
+
+})
 
