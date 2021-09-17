@@ -346,9 +346,8 @@ dos elementos selecionados */
 	pointer-events: visibleFill;
 	margin-top: 100px;
 	height: 70vh; 
-	width: 50vh;
-	
-	
+	width: 60vh;
+	min-width: 35vh;
 	
 }
 /* Controla o tamanho da div do 

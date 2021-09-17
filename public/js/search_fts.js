@@ -188,7 +188,9 @@ function zoom_marked(index) {
         alert("Nenhuma feição foi selecionada")
     } else {
         zoom_focus.addData(data)
-        map.fitBounds(zoom_focus.getBounds())
+        map.fitBounds(zoom_focus.getBounds(),{
+            maxZoom: 20
+        })
     }
 }
 
@@ -243,7 +245,9 @@ function factory_table(index) {
                         if (Object.keys(zoom_focus._layers).length > 0)
                             zoom_focus.clearLayers()
                         zoom_focus.addData(geom)
-                        map.fitBounds(zoom_focus.getBounds())
+                        map.fitBounds(zoom_focus.getBounds(),{
+                            maxZoom: 20
+                        })
                     } else {
                         alert("Nenhuma feição selecionada!")
                     }
@@ -259,8 +263,37 @@ function factory_table(index) {
     })
 }
 
+//Impede que o usuário adicione propriedades conjuntos de propriedades iguais  
+function verify_array(data, index) {
+    verify = true
+    if (data.length == table_select[index].length) {
+        for (var n = 0; n < data.length; n++) {
+            if (data[n].original_id != table_select[index][n].original_id) {
+                verify = false
+            }
+        }
+    } else {
+        verify = false
+    }
+    index_equal = (verify) ? index : -1
 
+    if (index == table_select.length - 1 || verify == true) {
+        return index_equal
+    } else {
 
+        return verify_array(data, index + 1)
+    }
+
+}
+//Marca/Desmarca todos os checkbox
+$("#fts_result").click(function () {
+    if ($("input[type=checkbox][name=select_group]:checked").length == selector.length) {
+        $("#list_all").prop("checked", true)
+    } else {
+
+        $("#list_all").prop("checked", false)
+    }
+})
 
 // Pressionar Enter no formulário ativa a pesquisa com o conteudo do formulario
 $(document).ready(function () {
@@ -268,6 +301,7 @@ $(document).ready(function () {
         if (e.keyCode == 13)
             $('#search-button').click();
     });
+
 });
 
 // Desabilita zoom no scroll do mouse quando cursor estiver dentro da div de pesquisa
@@ -287,9 +321,10 @@ $("#list_all").change(function () {
     }
 })
 
-
 //Alternar tela 
 $("#toggle_disp").click(function () {
+
+    $("#list_all").prop("checked", false)
     //Remover esse ufv: 
     removeLayerByName("ufv:" + selector[0].table_name)
     $("#menu_search_fts").hide()
@@ -301,11 +336,12 @@ $("#toggle_disp").click(function () {
 
 //Abre a tabela e adiciona os elementos selecionados
 $("#open_select").click(function () {
-    var data = new Array()
 
+    var data = new Array()
     $('input:checkbox[name=select_group]:checked').each(function () {
         data.push(selector[$(this).val()])
     })
+    //Verifica houve elementos selecionados
     if (data.length == 0) {
         alert("Nenhum opção feição foi selecionada!")
     } else {
@@ -314,15 +350,26 @@ $("#open_select").click(function () {
             $("#table_fts").bootstrapTable('destroy')
             $("ul.nav li a").removeClass('active')
         }
-        $("#table_div_bar").append(` <li class="nav-item  "> 
+        // Verifica se o conjunto de elementos selecionados é igual aos exibidos na tabela 
+        index_equal = (table_select.length == 0) ? -1 : verify_array(data, 0)
+        if (index_equal == -1) {
+            $("#table_div_bar").append(` <li class="nav-item  "> 
         <a class="nav-link active"   href="#">`+ data.length + ` selecionados  
         <i class="fa fa-times" ></i> 
         </a> 
       </li>
        `)
+            table_select.push(data)
+            factory_table(table_select.length - 1)
+            //Redimensiona a tabela verticalmente
+            $(".webgente-search-fts-height-resize").height(($("#table_div").height()) - ($("#table_div_bar").height() + 50))
+            $("#table_fts").bootstrapTable('resetView')
+        } else {
+            
+            $("#table_div_bar li:eq(" + index_equal + ")").children('a').tab('show')
+            factory_table(index_equal)
+        }
 
-        table_select.push(data)
-        factory_table(table_select.length - 1)
 
     }
 })
@@ -359,6 +406,7 @@ $(function () {
         }
     })
 
+
 });
 
 //Desativa o scrol do mapa quando mouse estiver na div 
@@ -392,7 +440,7 @@ $("#min_table").click(function () {
 })
 
 //Descolapsar tabela ou fechar tabela 
-$("#table_bar").click(function(e){
+$("#table_bar").click(function (e) {
     if ($(e.target).is("i")) {
         //Fecha tabela
         $("#table_div").hide()
@@ -400,7 +448,7 @@ $("#table_bar").click(function(e){
         $("#table_bar").hide()
         table_select = new Array()
         $("#table_div_bar").html("")
-    }else{
+    } else {
         //Abre tabela
         $("#table_div").show()
         $("#table_bar").hide()
@@ -415,7 +463,7 @@ $("#table_div_bar").click(function (e) {
             $("#table_div").hide()
 
         } else if ($(e.target).closest("a").hasClass("active")) {
-            if ($(e.target).closest("li").index() == table_select.length -1) {
+            if ($(e.target).closest("li").index() == table_select.length - 1) {
                 $("#table_div_bar li:eq(" + ($(e.target).closest("li").index() - 1) + ")").children('a').tab('show')
                 $("#table_fts").bootstrapTable('destroy')
                 factory_table($(e.target).closest("li").index() - 1)
@@ -436,4 +484,3 @@ $("#table_div_bar").click(function (e) {
     }
 
 })
-
