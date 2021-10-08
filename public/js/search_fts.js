@@ -12,80 +12,95 @@ var zoom_focus = L.geoJSON().addTo(map);
 
 //Função inicial que recebe resultado da requisição
 function search_main() {
-    if (selector.length > 0)
-        removeLayerByName("ufv:" + selector[0].table_name)
-    //inicializando variaveis globais sempre
-    table_html = new Array()
-    elements_order = new Object()
-    selector = new Object()
-    //Fechando tabelas 
-    if (!$("#menu_search_fts").is(":hidden"))
-        $("#menu_search_fts").hide()
-    if (!$("table_bar").is(":hidden"))
-        $("#table_bar").hide()
-    if (!$("#table_div").is(":hidden"))
-        $("#table_div").hide()
-    $("#table_div_bar").html(" ")
-    $.ajax({
-        url: "/search/" + $("#search_content").val(),
-        beforeSend: function () {
-            $("#fts_result").html(`<div class="webgente-search-fts-result p-3"> 
+    if ($("[name=group_search]").is(":hidden")) {
+        $("[name=group_search]").show('slow')
+    } else {
+        if (selector.length > 0)
+            removeLayerByName("ufv:" + selector[0].table_name)
+        //inicializando variaveis globais sempre
+        table_html = new Array()
+        elements_order = new Object()
+        selector = new Object()
+        //Fechando tabelas 
+        if (!$("#menu_search_fts").is(":hidden"))
+            $("#menu_search_fts").hide()
+        if (!$("table_bar").is(":hidden"))
+            $("#table_bar").hide()
+        if (!$("#table_div").is(":hidden"))
+            $("#table_div").hide()
+        if ($("#fts_result").is(":hidden"))
+            $("#fts_result").show()
+        $("#table_div_bar").html(" ")
+        $.ajax({
+            url: "/search/" + $("#search_content").val(),
+            beforeSend: function () {
+                $("#fts_result").html(`<div class="webgente-search-fts-result p-3"> 
             <div class="d-flex justify-content-center">
             <div class="spinner-border" role="status">
             </div>
           </div>
           <div>`)
-        },
-        success: function (response) {
-            //Quando a requisição obteve resultados
-            if (response.length > 0) {
-                response.map(e => {
-                    //Reordena o objeto para chaves com table_nome (nome da camada) e um array dos resultados 
-                    if (elements_order[e.table_name]) {
-                        elements_order[e.table_name].push(e)
-                    } else {
-                        elements_order[e.table_name] = new Array(e)
-                    }
-                })
-                //Envia resultado para gerar tabela 
-                result_request(elements_order)
-            } else {
-                //Quando a requisição não obteve resultados
+            },
+            success: function (response) {
+                //Quando a requisição obteve resultados
+                if (response.length > 0) {
+                    response.map(e => {
+                        //Reordena o objeto para chaves com table_nome (nome da camada) e um array dos resultados 
+                        if (elements_order[e.table_name]) {
+                            elements_order[e.table_name].push(e)
+                        } else {
+                            elements_order[e.table_name] = new Array(e)
+                        }
+                    })
+                    //Envia resultado para gerar tabela 
+                    result_request(elements_order)
+                } else {
+                    //Quando a requisição não obteve resultados
 
-                $("#fts_result").html(`<div class="webgente-search-fts-result p-3">
+                    $("#fts_result").html(`<div class="webgente-search-fts-result p-3">
+                <div class="float-right">
+                    <i value="close_result" class="fa fa-times"></i>
+                 </div>
                 <p> Nenhum resultado encontrado!</p>
                 </div>`)
+                }
+            },
+            error: function (qXHR, textStatus, errorThrown) {
+                alert(textStatus + " " + qXHR.status + ': ' + errorThrown)
+                $("#fts_result").hide()
+                $("#fts_result").html(``)
             }
-        },
-        error: function (qXHR, textStatus, errorThrown) {
-            alert(textStatus + " " + qXHR.status + ': ' + errorThrown)
-            $("#fts_result").hide()
-            $("#fts_result").html(``)
-        }
-    })
+        })
+    }
 }
 //Html da lista de elementos inicial 
 function result_request(data) {
-    var html_menu = ` <ul class="list-group list-group-flush webgente-search-fts-result webgente-search-fts-list ">`
+    index = 1
+    var html_menu = ` <ul class="list-group list-group-flush webgente-search-fts-result webgente-search-fts-list ">
+    <div class="text-right pr-1">
+    <i value="close" class="fa fa-times"></i>
+</div>`
     var layers = Object.keys(data)
 
     layers.map((element) => {
-        html_menu += ` <li class="list-group-item border border-bottom-0">
+        html_menu += ` <li class="list-group-item border border-top-0">
          <p  class="card-text"><strong>`+ element + `</strong></p>
          <p  class="card-text">`+ data[element][0].column_name + `:` + data[element][0].attribute + `</p>`
         //Verifica se o resultado referente a uma layer possui 1, 2 ou mais de 2 elementos    
         if (data[element].length > 2) {
             html_menu += `<p  class="card-text">` + data[element][1].column_name + `:` + data[element][1].attribute + `</p>
-          <button class="btn btn-link btn-sm " type="button" onclick="select_layer(`+ (table_html.length + 1) + ` )"> + ver mais ` + (data[element].length - 2) + ` resultados</button>`
+          <button class="btn btn-link btn-sm " type="button"> + ver mais ` + (data[element].length - 2) + ` resultados</button>`
             //iniciando tabela secundária de cada layer
         } else if (data[element].length == 2) {
             html_menu += `<p>` + data[element][1].column_name + `:` + data[element][1].attribute + `</p>
-            <a href="#" class="card-link" onclick="select_layer(`+ (table_html.length + 1) + ` )"> + ver mais detalhes</a>`
+            <a href="#" class="card-link" > + ver mais detalhes</a>`
+        }else{
+            html_menu +=`<a href="#" class="card-link" > + ver mais detalhes</a>`
         }
         html_menu += `</li>`
 
-        table_html[table_html.length + 1] = factory_list(data[element])
-
+        table_html[index] = factory_list(data[element])
+        index++
 
     })
 
@@ -188,7 +203,7 @@ function zoom_marked(index) {
         alert("Nenhuma feição foi selecionada")
     } else {
         zoom_focus.addData(data)
-        map.fitBounds(zoom_focus.getBounds(),{
+        map.fitBounds(zoom_focus.getBounds(), {
             maxZoom: 20
         })
     }
@@ -245,7 +260,7 @@ function factory_table(index) {
                         if (Object.keys(zoom_focus._layers).length > 0)
                             zoom_focus.clearLayers()
                         zoom_focus.addData(geom)
-                        map.fitBounds(zoom_focus.getBounds(),{
+                        map.fitBounds(zoom_focus.getBounds(), {
                             maxZoom: 20
                         })
                     } else {
@@ -286,7 +301,16 @@ function verify_array(data, index) {
 
 }
 //Marca/Desmarca todos os checkbox
-$("#fts_result").click(function () {
+$("#fts_result").click(function (e) {
+    if ($("#menu_search_fts").is(":hidden")) {
+
+        if ($(e.target).closest("li").index() == -1) {
+            close_result()
+        } else {
+            select_layer($(e.target).closest("li").index())
+        }
+    }
+
     if ($("input[type=checkbox][name=select_group]:checked").length == selector.length) {
         $("#list_all").prop("checked", true)
     } else {
@@ -301,8 +325,21 @@ $(document).ready(function () {
         if (e.keyCode == 13)
             $('#search-button').click();
     });
+    $(this).keyup(function (e) {
+        if (e.key == 'Escape') {
+            if ($("#fts_result").is(":hidden")) {
+                $("[name=group_search]").hide(500);
+            } else {
+                close_result()
+            }
+        }
+
+    });
+
+
 
 });
+
 
 // Desabilita zoom no scroll do mouse quando cursor estiver dentro da div de pesquisa
 $('#search-fts').mouseenter(() => {
@@ -362,10 +399,12 @@ $("#open_select").click(function () {
             table_select.push(data)
             factory_table(table_select.length - 1)
             //Redimensiona a tabela verticalmente
+
+            console.log($("#table_div").width())
             $(".webgente-search-fts-height-resize").height(($("#table_div").height()) - ($("#table_div_bar").height() + 50))
             $("#table_fts").bootstrapTable('resetView')
         } else {
-            
+
             $("#table_div_bar li:eq(" + index_equal + ")").children('a').tab('show')
             factory_table(index_equal)
         }
@@ -373,7 +412,9 @@ $("#open_select").click(function () {
 
     }
 })
+function width_nav() {
 
+}
 $(function () {
     //Função de arrastar 
     $("#table_div").draggable({
@@ -412,12 +453,24 @@ $(function () {
 //Desativa o scrol do mapa quando mouse estiver na div 
 $("#table_div").mouseenter(() => {
     map.scrollWheelZoom.disable();
+    //Desabilita arrastar mapa
+    map.dragging.disable()
 })
 //Ativa o scrol do mapa quando mouse fora div 
 $("#table_div").mouseenter(() => {
     map.scrollWheelZoom.disable();
+    //Habilita arrastar mapa
+    map.dragging.enable()
 })
 
+//Desabilita arrastar mapa quando mouse estiver na div 
+$("#fts_result").mouseover(() => {
+    map.dragging.disable()
+})
+//Habilita arrastar mapa quando mouse estiver fora da div 
+$("#fts_result").mouseleave(() => {
+    map.dragging.enable()
+})
 
 //Fecha a tabela de atributos selecionados e exclui esses atributos
 $("i[name=close_div]").click(function () {
@@ -484,3 +537,13 @@ $("#table_div_bar").click(function (e) {
     }
 
 })
+//Fecha a tabela de resultados obtidos 
+function close_result() {
+    if (!$("#menu_search_fts").is(":hidden"))
+        $("#menu_search_fts").hide()
+    if (!$("#fts_result").is(":hidden"))
+        $('#fts_result').hide()
+    if (selector.length > 0)
+        removeLayerByName("ufv:" + selector[0].table_name)
+
+}

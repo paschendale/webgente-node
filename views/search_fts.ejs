@@ -1,18 +1,22 @@
 <div id="search-fts" class="container col-3 col-sm-4 col-lg-4 leaflet-top leaflet-left webgente-search-fts-container">
     <div class="container input-group input-group-sm mb-3 p-0 webgente-search-fts-result">
         <div class="input-group-prepend">
-            <span class="input-group-text">WebGENTE</span>
+            <span class="input-group-text" name="group_search" >Search</span>
         </div>
-        <input type="text" class="form-control border-0 rounded-0" id="search_content" placeholder="Search">
+        <input type="text" class="form-control border-0 rounded-0 " name="group_search" id="search_content" placeholder="Search">
         <div class="input-group-append">
             <button id='search-button' class="btn btn-light  btn-sm border-0 rounded-0" onclick="search_main()">
                 <i class="fas fa-search"></i>
             </button>
         </div>
     </div>
-    <div class="webgente-search-fts-result p-3  collapse" id="menu_search_fts">
-
-        <div class="row">
+  
+    <div class="webgente-search-fts-result  collapse" id="menu_search_fts">
+        <div class="text-right pr-1">
+            <i onclick="close_result()" class="fa fa-times"></i>
+        </div>
+        
+        <div class="row px-1 pb-3 ">
             <div class="col-3 col-sm-3">
                 <button class="btn btn-dark btn-custom  btn-sm" id="toggle_disp"><i
                         class="fas fa-arrow-left"></i></button>
@@ -44,24 +48,20 @@
 
         </div>
     </div>
+    
     <div id="fts_result">
-
+        
     </div>
 </div>
 
 <div id="table_div"
     class=" ui-widget-content container leaflet-top leaflet-right leaflet-left webgente-search-fts-table-div collapse ">
-    <div class="row">
-        <div class="col-10 col-lg-10 col-sm-10">
-            <ul id="table_div_bar" class="nav nav-tabs">
-            </ul>
-        </div>
-        <div class="col-2 col-lg-2 col-sm-2 ">
-            <i name="close_div" class="fa fa-times"></i>
-            <i id="min_table" class="fas fa-minus"></i>
-        </div>
+    <div class="float-right">
+        <i id="min_table" class="fas fa-minus"></i>
+        <i name="close_div" class="fa fa-times"></i>
     </div>
-
+    <ul id="table_div_bar" class="nav nav-tabs">
+    </ul>
     <div class="webgente-search-fts-height-resize">
         <table id="table_fts"></table>
     </div>

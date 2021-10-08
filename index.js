@@ -38,6 +38,12 @@ function setHeaders() {
 }
 
 setHeaders();
+var timer = {
+	update: false,
+	interval: 0
+};
+//inicializando o update na primeira vez que o webgis é acionado
+control_timer(timer)
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -1323,9 +1329,9 @@ app.route('/search/:keyword')
 			//converter string em objeto 
 			results.map(e => {
 				e.original_row = JSON.parse(e.original_row)
-				e.geometry= JSON.parse(e.geometry)
+				e.geometry = JSON.parse(e.geometry)
 			})
-		
+
 			//Remove propriedades restritas 
 			if (req.session.user) {
 				res.send(results)
@@ -1345,3 +1351,94 @@ app.route('/search/:keyword')
 		}
 		).catch(error => res.send(error))
 	})
+
+app.route('/config_cache').get((req, res) => {
+	//Rederiza a página de configuração da cacahe e envia o tempo de ultima atualização realizada
+	res.render('config_cache', { time: timer.log })
+}).post((req, res) => {
+	//Recebe o tempo e converte para segundos
+	timer.log = req.body.appt
+	hms = (req.body.appt).split(":")
+	//Verifica se o usuário deseja interromper a atualização
+	if (hms.length == 1) {
+		timer.update = false
+	} else {
+
+		mili_seconds = parseInt(hms[0]) * 3600000 + parseInt(hms[1]) * 60000
+		timer.update = true
+		timer.interval = mili_seconds
+		//Envia novo intervalo 
+		control_timer(timer)
+	}
+	res.redirect("/config")
+
+})
+
+//Função "post" da atualização
+async function updateSearch() {
+	t0 = new Date().getTime()
+	var tables = [
+		"ufv:CAD_Lote",
+		"ufv:CAD_Edificacao",
+		"ufv:CAD_Geocodificacao",
+		"ufv:CAD_Secao_Logradouro"
+	];
+	var columns = [
+		[
+			"inscricao_lote"
+		],
+		[
+			"inscricao"
+		],
+		[
+			"inscricao",
+			"inscricao_anterior",
+			"proprietario_",
+			"cpf"
+		],
+		[
+			"tipo",
+			"nome_logradouro",
+			"codigo",
+			"secao_e",
+			"secao_d"
+		]
+	];
+	var host = "https://maps.genteufv.com.br/geoserver/ufv/wms?";
+	var cleanCache = true || false;
+
+	var headers = { 'authorization': "Basic d2ViZ2VudGU6d2ViZ2VudGU=" };
+
+	if (cleanCache) {
+		await searcher.clearCache()
+			.then(
+				() => searcher.cacheTheseTables(tables, columns, host, headers)
+					.then((results) => {
+
+					})
+					.catch(e => console.log("Erro"))
+			)
+	}
+	else {
+		await searcher.cacheTheseTables(tables, columns, host, headers)
+			.then((results) => {
+
+			})
+			.catch(e => console.log("Erro"))
+	}
+}
+
+//Função recusiva do cronometro 
+function control_timer(timer) {
+
+	setTimeout(() => {
+		updateSearch()
+		if (timer.update) {
+			return control_timer(timer)
+		} else {
+			return console.log("Geoserver-search-cache update stop")
+		}
+	}, timer.interval)
+
+}
+

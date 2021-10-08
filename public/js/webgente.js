@@ -535,7 +535,9 @@ $('body').on('click', function () {
     if ($("[id*='tooltip']") != undefined) $("[id*='tooltip']").tooltip('hide')
 })
 
-
+$('body').one('click', function () {
+    $("[name=group_search]").hide( 500 );
+})
 
 
 
