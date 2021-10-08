@@ -1,3 +1,9 @@
+const moment = require('moment');
+
+function logTime() {
+    return moment().format('MMMM Do YYYY, h:mm:ss a') + ' | '
+}
+
 const Sequelize = require('sequelize');
 const connection = require('../connection');
 
@@ -37,7 +43,7 @@ Users.sync({
     connection.query('SELECT COUNT() AS count FROM Users') // Verifica se existem dados na base do WebGENTE
     .then(results => {
         if (results[0][0].count == 0) {
-            console.log('Inserindo usuário de administração padrão do WebGENTE')
+            console.log(logTime() + 'Inserindo Usuários padrão do WebGENTE')
             Users.bulkCreate([{
                 userName: 'admin' ,
                 password: '$2b$10$gQRnUm5mIPzDR9iPfqmgTe4QyBE1Ogi7p51FbbzCxX5xls/Sjo4FS', // Hash para 1234, senha padrão do admin
@@ -55,9 +61,13 @@ Users.sync({
                 group: 'users',
                 createdAt: new Date(),
                 updatedAt: new Date()
-            }])
+            }]).then(() => {
+                console.log(logTime() + 'Inserindo Usuários padrão do WebGENTE...OK')
+            })
         }
-    });
+    })
+    .then(() => {console.log(logTime() + 'Model de Usuários sincronizado com sucesso.')})
+    .catch(error => (console.error(error)));
 })
 
 module.exports = Users;

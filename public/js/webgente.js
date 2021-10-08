@@ -10,9 +10,46 @@ var login = L.easyButton('fas fa-user-lock',
     () => {
         window.location = '/login'
     },
-    'Acesso às interfaces restritas')
-    .addTo(map);
+    'Acesso às interfaces restritas');
 
+/* Adicionando botão de logout e indicador de que o usuário está logado */
+if (session != undefined && session != '') {
+    var logout = L.easyButton({
+        id: 'logout-button',
+        position: 'topleft',
+        states: [
+            {
+                stateName: 'logged-in',
+                onClick: () => {
+                    window.location = '/logout'
+                },
+                title: 'Sair da interface restrita',
+                icon: 'fas fa-sign-out-alt'
+            }
+        ]
+    })
+
+    if (sessionGroup == 'admin') {
+        var loginBar = [
+            login, logout
+        ]
+    } else {
+        var loginBar = [
+            logout
+        ]
+    }   
+
+    $('#user-div').html('Bem vindo, <b>' + session + '</b>!').css('visibility', 'visible');
+    $('#search-fts').css('margin-top','55px')
+} else {
+    var loginBar = [
+        login
+    ]
+}
+
+
+
+L.easyBar(loginBar).addTo(map)
 L.control.zoom().addTo(map);
 
 /* Adicionando escala gráfica ao mapa */

@@ -1,3 +1,9 @@
+const moment = require('moment');
+
+function logTime() {
+    return moment().format('MMMM Do YYYY, h:mm:ss a') + ' | '
+}
+
 const Sequelize = require('sequelize');
 const connection = require('../connection');
 const { sequelize } = require('./User');
@@ -160,10 +166,15 @@ Layers.sync({force: false}).then(() => {
     connection.query('SELECT COUNT() AS count FROM Layers') // Verifica se existem dados na base do WebGENTE
     .then(results => {
         if (results[0][0].count == 0) {
-            console.log('Inserindo dados padrão do WebGENTE')
-            Layers.bulkCreate(dummyData)
+            console.log(logTime() + 'Inserindo Camadas padrão do WebGENTE')
+            Layers.bulkCreate(dummyData).then(() => {
+                console.log(logTime() + 'Inserindo Camadas padrão do WebGENTE...OK')
+            })
         }
-    });
+    })    
+    .then(() => {console.log(logTime() + 'Model de Camadas sincronizado com sucesso.')})
+    .catch(error => (console.error(error)));
+    ;
 });
 
 module.exports = Layers;
