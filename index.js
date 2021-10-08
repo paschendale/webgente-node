@@ -21,7 +21,7 @@ const Config = require("./database/models/Config.js")
 const fetch = require('node-fetch');
 const sanitize = require('sanitize')
 const { query, config } = require('./database/connection.js');
-
+const searcher = require('geoserver-search-cache')
 
 /* Cabeçalho de autenticação do usuário com o Geoserver 
 
@@ -49,6 +49,12 @@ function setHeaders() {
 
 setTimeout(setHeaders,1000000);
 setHeaders();
+var timer = {
+	update: false,
+	interval: 0
+};
+//inicializando o update na primeira vez que o webgis é acionado
+control_timer(timer)
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -341,24 +347,23 @@ app.route('/layers/edit/:id')
 								const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
 								fs.writeFile(newpath, data, function (err) {
 									if (err) throw err
+									})
+								}
+								// Delete the file
+								fs.unlink(oldpath, function (err) {
+									if (err) throw err
+
+									res.render("layers")
 								})
-							}
-							// Delete the file
-							fs.unlink(oldpath, function (err) {
-								if (err) throw err
-
-								res.render("layers")
 							})
-						})
-
 					})
 					.catch((error) => {
 						console.log(logTime() + 'Failed to insert data into database. ' + error)
 						res.render('error', {
 							errorCode: 100,
 							errorMessage: 'Não foi possível editar a camada!'
+							})
 						})
-					})
 				}
 			})
 		} else {
@@ -368,20 +373,20 @@ app.route('/layers/edit/:id')
 
 /* Rota para reordenamento das camadas */
 app.route('/layers/reorder')
-	.get((req,res) => {
-		if(req.session.user){
+	.get((req, res) => {
+		if (req.session.user) {
 			res.render('reorder')
 		} else {
 			res.redirect('/')
 		}
 	})
-	.post((req,res) => {
-		if(req.session.user){
+	.post((req, res) => {
+		if (req.session.user) {
 
 			console.log(logTime() + 'Reordering layers request received')
 
 			// Callback para quando finalizar o forEach de atualização das linhas de Layers
-			function forEachCallback(){
+			function forEachCallback() {
 				conn.query("UPDATE Layers SET id = id - 1000")
 				.then(() => {
 					res.sendStatus(200); 
@@ -394,16 +399,16 @@ app.route('/layers/reorder')
 
 			/* Função assíncrona para atualização das linhas, recebe um id antigo, 
 			um novo e o tamanho do array para chamar o callback ao final */
-			async function updateId(new_id,previous_id,array_length){
+			async function updateId(new_id, previous_id, array_length) {
 
 				await Layers.update({ id: new_id }, {
 					where: {
-					  id: previous_id
+						id: previous_id
 					}
 				})
 
 				rowsUpdated++;
-				if(rowsUpdated === array_length) {
+				if (rowsUpdated === array_length) {
 					forEachCallback();
 				}
 			}
@@ -415,7 +420,6 @@ app.route('/layers/reorder')
 				console.log(logTime() + 'New ID: ',obj[0]+1000,' Previous ID: ',obj[1])
 				updateId(obj[0]+1000,obj[1],array.length)
 			});	
-
 		} else {
 			res.redirect('/')
 		}
@@ -495,19 +499,19 @@ app.route('/users/edit/:id')
 					id: req.params.id
 				}
 			})
-			.then(UserData => {
-				res.render('user_details.ejs', {
-					edit: true,
-					id: UserData.id,
-					userName: UserData.userName,
-					group: UserData.group,
-					email: UserData.email,
-					password: UserData.password
+				.then(UserData => {
+					res.render('user_details.ejs', {
+						edit: true,
+						id: UserData.id,
+						userName: UserData.userName,
+						group: UserData.group,
+						email: UserData.email,
+						password: UserData.password
+					})
 				})
-			})
-			.catch(() => {
-				res.redirect('/users')
-			})
+				.catch(() => {
+					res.redirect('/users')
+				})
 		} else {
 			res.redirect('/')
 		}
@@ -878,7 +882,7 @@ app.route('/config_tools')
 			res.redirect('/');
 		}
 	});
-	
+
 /* GetFeatureInfo e filtragem de informações */
 
 app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigth/:x/:y/:layers/:query_layers', (req, res) => {
@@ -1075,7 +1079,6 @@ async function restrictAttributes(features, layerKey, fieldKey) {
 	var restrictedData = new Array();
 
 	for (feature of features) { // Itera em cada camada
-
 		// Se a camada não possuir conteudo em layerKey ela é um MDT (um raster, possivelmente), sendo assim ela não é restrita
 		if (feature[layerKey] == '') {
 
@@ -1253,7 +1256,7 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 		// if (isURL(req.params.host) == false) { res.send('Não foi possível completar a requisição') }
 
 		// Decodificando a URL do Host caso necessário
-		host = decodeURIComponentSafely(req.params.host)		
+		host = decodeURIComponentSafely(req.params.host)
 
 		let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
 
@@ -1261,8 +1264,8 @@ app.get('/describeLayer/:layer/:host', (req, res) => {
 		console.log(logTime() + host + urlParameters)
 
 		fetch(host + urlParameters, { method: 'GET', headers: headers })
-		.then(res => res.text())
-		.then(data => res.send(data))
+			.then(res => res.text())
+			.then(data => res.send(data))
 	}
 	else {
 		res.redirect('/');
@@ -1311,8 +1314,124 @@ app.get('/propertyname/:layer', (req, res) => {
 	})
 
 })
-/* Rota da pesquisa*/
-app.route('/search')
+
+/* Rota do sistema de pesquisas do geoserver-search-cache */
+app.route('/search/:keyword')
 	.get((req, res) => {
-		res.render("search")
+		searcher.searchFor(req.params.keyword).then((results) => {
+			//converter string em objeto 
+			results.map(e => {
+				e.original_row = JSON.parse(e.original_row)
+				e.geometry = JSON.parse(e.geometry)
+			})
+
+			//Remove propriedades restritas 
+			if (req.session.user) {
+				res.send(results)
+			} else {
+				restrictAttributes(results, 'table_name', 'original_row').then(result => {
+					var data = new Array()
+					result.map(e => {
+						//Não adiciona objetos com propriedades pesquisadas que foram excluídas anteriormente
+						if (e.original_row[e.column_name]) {
+							data.push(e)
+						}
+					})
+					res.send(data)
+				})
+
+			}
+		}
+		).catch(error => res.send(error))
 	})
+
+app.route('/config_cache').get((req, res) => {
+	//Rederiza a página de configuração da cacahe e envia o tempo de ultima atualização realizada
+	res.render('config_cache', { time: timer.log })
+}).post((req, res) => {
+	//Recebe o tempo e converte para segundos
+	timer.log = req.body.appt
+	hms = (req.body.appt).split(":")
+	//Verifica se o usuário deseja interromper a atualização
+	if (hms.length == 1) {
+		timer.update = false
+	} else {
+
+		mili_seconds = parseInt(hms[0]) * 3600000 + parseInt(hms[1]) * 60000
+		timer.update = true
+		timer.interval = mili_seconds
+		//Envia novo intervalo 
+		control_timer(timer)
+	}
+	res.redirect("/config")
+
+})
+
+//Função "post" da atualização
+async function updateSearch() {
+	t0 = new Date().getTime()
+	var tables = [
+		"ufv:CAD_Lote",
+		"ufv:CAD_Edificacao",
+		"ufv:CAD_Geocodificacao",
+		"ufv:CAD_Secao_Logradouro"
+	];
+	var columns = [
+		[
+			"inscricao_lote"
+		],
+		[
+			"inscricao"
+		],
+		[
+			"inscricao",
+			"inscricao_anterior",
+			"proprietario_",
+			"cpf"
+		],
+		[
+			"tipo",
+			"nome_logradouro",
+			"codigo",
+			"secao_e",
+			"secao_d"
+		]
+	];
+	var host = "https://maps.genteufv.com.br/geoserver/ufv/wms?";
+	var cleanCache = true || false;
+
+	var headers = { 'authorization': "Basic d2ViZ2VudGU6d2ViZ2VudGU=" };
+
+	if (cleanCache) {
+		await searcher.clearCache()
+			.then(
+				() => searcher.cacheTheseTables(tables, columns, host, headers)
+					.then((results) => {
+
+					})
+					.catch(e => console.log("Erro"))
+			)
+	}
+	else {
+		await searcher.cacheTheseTables(tables, columns, host, headers)
+			.then((results) => {
+
+			})
+			.catch(e => console.log("Erro"))
+	}
+}
+
+//Função recusiva do cronometro 
+function control_timer(timer) {
+
+	setTimeout(() => {
+		updateSearch()
+		if (timer.update) {
+			return control_timer(timer)
+		} else {
+			return console.log("Geoserver-search-cache update stop")
+		}
+	}, timer.interval)
+
+}
+

@@ -1,0 +1,63 @@
+<%- include('partials/admin/header.ejs') %>
+  <div id='config'>
+    <div class="container shadow-sm container-form-webgente-admin">
+      <h3>Configurações de atualização</h3>
+      <hr>
+      <form action="/config_cache" method="POST">
+        <div class="form-group">
+          <label>Hitórico de atualizações: </label>
+          <input type="text" class="form-control" id="log" placeholder="Paciência, estou sendo desenvolvido ainda!"
+            readonly>
+        </div>
+        <div id="start_upd" class="form-group" collapse>
+          <label>Nenhum intervalo configurado para atualização!</label>
+          <label>Deseja configura intervalo de atualizações?</label>
+          <button type="button" class="btn btn-success" onclick="start_update()">Sim</button>
+        </div>
+        <div class="form-group" collapse>
+          <label for="appt">Intervalo de atualização: </label>
+          <input type="time" id="appt" name="appt" min="00:15">
+          <span class="form-text text-muted collapse">
+            Valor mínimo permitido: 15 minutos
+          </span>
+        </div>
+        <div id="stop_upd" class="form-group" collapse>
+          <label>Deseja interromper atualizações?</label>
+          <button type="button" class="btn btn-success" onclick="stop_update()">Sim</button>
+        </div>
+        <button class="btn btn-dark" type='submit'>Salvar</button>
+      </form>
+    </div>
+  </div>
+  <script>
+
+    if (("<%=time %>").length ==0) {
+      stop_update()
+
+    } else {
+      $("#appt").val("<%=time %>")
+      start_update()
+    }
+    $("#appt").on("input", function () {
+      if ($("#appt").val() < $("#appt").attr("min")) {
+        $("#appt").val("00:15")
+        $("#appt").next("span").show("slow")
+      } else {
+        $("#appt").next("span").hide()
+      }
+    })
+    function stop_update() {
+      console.log()
+      $("#appt").val("")
+      $("#appt").closest("div").hide()
+      $("#start_upd").show()
+      $("#stop_upd").hide()
+
+    }
+    function start_update() {
+      $("#appt").closest("div").show()
+      $("#stop_upd").show()
+      $("#start_upd").hide()
+    }
+  </script>
+  <%- include('partials/admin/footer.ejs') %>
