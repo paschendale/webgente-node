@@ -53,8 +53,6 @@ var timer = {
 	update: false,
 	interval: 0
 };
-//inicializando o update na primeira vez que o webgis é acionado
-control_timer(timer)
 
 /* Estrutura de pastas do WebGENTE:
 
@@ -1348,13 +1346,21 @@ app.route('/search/:keyword')
 app.route('/config_cache').get((req, res) => {
 	//Rederiza a página de configuração da cacahe e envia o tempo de ultima atualização realizada
 	res.render('config_cache', { time: timer.log })
-}).post((req, res) => {
+})
+.post((req, res) => {
+
 	//Recebe o tempo e converte para segundos
 	timer.log = req.body.appt
 	hms = (req.body.appt).split(":")
+
 	//Verifica se o usuário deseja interromper a atualização
 	if (hms.length == 1) {
+
 		timer.update = false
+
+		console.log(logTime() + 'Atualização da base de pesquisa cacheada desativada.')
+
+
 	} else {
 
 		mili_seconds = parseInt(hms[0]) * 3600000 + parseInt(hms[1]) * 60000
@@ -1362,6 +1368,8 @@ app.route('/config_cache').get((req, res) => {
 		timer.interval = mili_seconds
 		//Envia novo intervalo 
 		control_timer(timer)
+
+		console.log(logTime() + 'Atualização da base de pesquisa cacheada configurada para ser executada a cada ' + hms[0] + ' horas e ' + hms[1] + ' minutos.')
 	}
 	res.redirect("/config")
 
@@ -1369,13 +1377,16 @@ app.route('/config_cache').get((req, res) => {
 
 //Função "post" da atualização
 async function updateSearch() {
+
 	t0 = new Date().getTime()
+
 	var tables = [
 		"ufv:CAD_Lote",
 		"ufv:CAD_Edificacao",
 		"ufv:CAD_Geocodificacao",
 		"ufv:CAD_Secao_Logradouro"
 	];
+
 	var columns = [
 		[
 			"inscricao_lote"
@@ -1397,7 +1408,9 @@ async function updateSearch() {
 			"secao_d"
 		]
 	];
+
 	var host = "https://maps.genteufv.com.br/geoserver/ufv/wms?";
+
 	var cleanCache = true || false;
 
 	var headers = { 'authorization': "Basic d2ViZ2VudGU6d2ViZ2VudGU=" };
@@ -1434,4 +1447,3 @@ function control_timer(timer) {
 	}, timer.interval)
 
 }
-
