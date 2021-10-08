@@ -40,6 +40,7 @@ if (session != undefined && session != '') {
     }   
 
     $('#user-div').html('Bem vindo, <b>' + session + '</b>!').css('visibility', 'visible');
+    $('#search-fts').css('margin-top','55px')
 } else {
     var loginBar = [
         login

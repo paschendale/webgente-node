@@ -228,15 +228,13 @@ th {
 	}
 }
 
-
-
 .webgente-search-fts-container{
 	pointer-events: visibleFill;
 	width: auto;
 	height: auto;
-	
 	margin-left: 60px;	
-	padding: 1%;
+	margin-top: 10px;
+	transition: margin 300ms;
 }
 
 .webgente-search-fts-list{

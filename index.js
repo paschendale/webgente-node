@@ -125,7 +125,7 @@ app.get('/', (req, res) => {
 	var buttons = true;
 	Config.findOne({ raw: true })
 	.then(results => {
-		console.log(req.session.user)
+		
 		res.render("index", {
 			buttons: buttons,
 			startupLat: results.startupLat,
