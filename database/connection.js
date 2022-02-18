@@ -1,4 +1,5 @@
 const moment = require('moment');
+const stdio = require('stdio')
 
 function logTime() {
     return moment().format('MMMM Do YYYY, h:mm:ss a') + ' | '
@@ -6,9 +7,15 @@ function logTime() {
 
 const { Sequelize } = require('sequelize')
 
+var args = stdio.getopt({
+  'database': {key: 'd', args: 1, description: 'Database relative path', default: './database/webgente.db'}
+});
+
+console.log(logTime() + 'Base de dados localizada em: ' + args.database)
+
 const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: './database/webgente.db',
+    storage: args.database || './database/webgente.db',
     logging: false
 });
 

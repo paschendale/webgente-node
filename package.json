@@ -4,7 +4,8 @@
   "description": "WebGENTE - Um WebGIS para Cadastro",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,7 @@
     "node-fetch": "^2.6.1",
     "sanitize": "^2.1.0",
     "sequelize": "^6.4.0",
-    "sqlite3": "^5.0.1"
+    "sqlite3": "^5.0.1",
+    "stdio": "^2.1.1"
   }
 }
