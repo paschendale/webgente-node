@@ -161,7 +161,9 @@ var dummyData = [{
 }];
 
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
-Layers.sync({force: false}).then(() => {
+Layers.sync({
+    force: false
+}).then(() => {
     /* Insere dados padrão do WebGENTE */
     connection.query('SELECT COUNT() AS count FROM Layers') // Verifica se existem dados na base do WebGENTE
     .then(results => {

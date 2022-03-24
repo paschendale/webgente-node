@@ -129,7 +129,7 @@ var dummyData = [{
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
 Config.sync({
     force: false,
-    alter: true
+    alter: false
 }).then(() => {
     /* Insere dados padrão do WebGENTE */
     connection.query('SELECT COUNT() AS count FROM configs') // Verifica se existem dados na base do WebGENTE

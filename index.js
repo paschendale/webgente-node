@@ -21,7 +21,8 @@ const Config = require("./database/models/Config.js")
 const fetch = require('node-fetch');
 const sanitize = require('sanitize')
 const { query, config } = require('./database/connection.js');
-const searcher = require('geoserver-search-cache')
+const searcher = require('geoserver-search-cache');
+const { time } = require('console');
 
 /* Cabeçalho de autenticação do usuário com o Geoserver 
 
@@ -49,6 +50,7 @@ function setHeaders() {
 
 setTimeout(setHeaders,1000000);
 setHeaders();
+
 var timer = {
 	update: false,
 	interval: 0
@@ -116,6 +118,19 @@ function decodeURIComponentSafely(uri) {
 	} catch(e) {
 		return uri
 	}
+}
+
+function getServerHost() {
+	return new Promise((resolve,reject) => {
+		Config.findOne({
+			raw: true,
+			attributes: ['serverHost']
+		})
+		.then((result) => {
+			resolve(result)
+		})
+		.catch(e => reject(e))
+	})
 }
 
 /* Rota da página inicial */
@@ -305,10 +320,7 @@ app.route('/layers/edit/:id')
 					console.error(logTime() + err)
 					return;
 				} else {
-					Config.findOne({
-						raw: true,
-						attributes: ['serverHost']
-					})
+					getServerHost()
 					.then(results => {
 						var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
 						Layers.update({
@@ -602,13 +614,10 @@ app.route('/layers')
 app.route('/layers/add')
 	.get((req, res) => {
 		if (req.session.user) {
-			Config.findOne({
-				raw: true,
-				attributes: ['serverHost']
+			getServerHost()
+			.then(results => {
+				res.render("layer_details.ejs", { edit: false, host: results.serverHost })
 			})
-				.then(results => {
-					res.render("layer_details.ejs", { edit: false, host: results.serverHost })
-				})
 		} else {
 			res.redirect('/')
 		}
@@ -625,58 +634,55 @@ app.route('/layers/add')
 					return;
 				} else {
 					var metadata_path = (files.metadata.size > 0) ? "/public/metadata/" + files.metadata.name : "none";
-					Config.findOne({
-						raw: true,
-						attributes: ['serverHost']
+					getServerHost()
+					.then(results => {
+						Layers.create({
+							type: fields.type,
+							layerName: fields.layerName,
+							group: fields.group,
+							host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
+							layer: fields.layer,
+							defaultBaseLayer: fields.defaultBaseLayer,
+							fields: fields.fields,
+							allowedFields: fields.allowedFields,
+							queryFields: fields.queryFields,
+							fieldAlias: fields.fieldAlias,
+							fieldType: fields.fieldType,
+							metadata: metadata_path,
+							publicLayer: fields.publicLayer,
+							attribution: fields.attribution
+
+						})
 					})
-						.then(results => {
-							Layers.create({
-								type: fields.type,
-								layerName: fields.layerName,
-								group: fields.group,
-								host: results.serverHost, // A entrada de host é ignorada e atualizada com aquele em Config
-								layer: fields.layer,
-								defaultBaseLayer: fields.defaultBaseLayer,
-								fields: fields.fields,
-								allowedFields: fields.allowedFields,
-								queryFields: fields.queryFields,
-								fieldAlias: fields.fieldAlias,
-								fieldType: fields.fieldType,
-								metadata: metadata_path,
-								publicLayer: fields.publicLayer,
-								attribution: fields.attribution
-
-							})
-						})
-						.then(console.log(logTime() + 'Succesfully inserted data into database!', fields))
-						.then(() => {
-							//Upload metadata
-							const oldpath = files.metadata.path;
-							fs.readFile(oldpath, function (err, data) {
-								if (err) throw err
-								// Write the file
-								if (files.metadata.size > 0) {
-									const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
-									fs.writeFile(newpath, data, function (err) {
-										if (err) throw err
-									})
-								}
-								// Delete the file
-								fs.unlink(oldpath, function (err) {
+					.then(console.log(logTime() + 'Succesfully inserted data into database!', fields))
+					.then(() => {
+						//Upload metadata
+						const oldpath = files.metadata.path;
+						fs.readFile(oldpath, function (err, data) {
+							if (err) throw err
+							// Write the file
+							if (files.metadata.size > 0) {
+								const newpath = path.join(__dirname, '/public/metadata', files.metadata.name);
+								fs.writeFile(newpath, data, function (err) {
 									if (err) throw err
-									res.render("layers")
 								})
+							}
+							// Delete the file
+							fs.unlink(oldpath, function (err) {
+								if (err) throw err
+								res.render("layers")
 							})
+						})
 
+					})
+					.catch((error) => {
+						console.log(logTime() + 'Failed to insert data into database. ')
+						console.error(logTime(), error)
+						res.render('error', {
+							errorCode: 100,
+							errorMessage: 'Não foi possível salvar a camada!'
 						})
-						.catch((error) => {
-							console.log(logTime() + 'Failed to insert data into database. ')
-							console.error(logTime(), error)
-							res.render('error', {
-								errorCode: 100,
-								errorMessage: 'Não foi possível salvar a camada!'
-							})
-						})
+					})
 				}
 			})
 		} else {
@@ -748,19 +754,19 @@ app.route('/config')
 	.get((req, res) => {
 		if (req.session.user) {
 			Config.findOne({ raw: true })
-				.then(results => {
-					res.render("config",
-						{
-							serverUser: results.serverUser,
-							serverPassword: results.serverPassword,
-							serverHost: results.serverHost,
-							startupLat: results.startupLat,
-							startupLong: results.startupLong,
-							startupZoom: results.startupZoom,
-							cityName: results.cityName,
-							referenceSystem: results.referenceSystem
-						})
-				})
+			.then(results => {
+				res.render("config",
+					{
+						serverUser: results.serverUser,
+						serverPassword: results.serverPassword,
+						serverHost: results.serverHost,
+						startupLat: results.startupLat,
+						startupLong: results.startupLong,
+						startupZoom: results.startupZoom,
+						cityName: results.cityName,
+						referenceSystem: results.referenceSystem
+					})
+			})
 		}
 		else {
 			res.redirect('/');
@@ -903,47 +909,44 @@ app.get('/gfi/:service/:request/:version/:feature_count/:srs/:bbox/:width/:heigt
 
 	let urlParameters = Object.entries(params).map(e => e.join('=')).join('&');
 
-	Config.findOne({
-		raw: true,
-		attributes: ['serverHost']
-	})
-		.then(results => {
-			console.log(logTime() + 'GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
-			console.log(logTime() + results.serverHost + urlParameters)
-			fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
-				.then(res => res.text())
-				.then(data => {
+	getServerHost()
+	.then(results => {
+		console.log(logTime() + 'GetFeatureInfo requisition sent, querying layers: ' + params.query_layers)
+		console.log(logTime() + results.serverHost + urlParameters)
+		fetch(results.serverHost + urlParameters, { method: 'GET', headers: headers })
+		.then(res => res.text())
+		.then(data => {
 
-					if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
+			if (req.session.user) {  // Caso o usuário esteja logado, repassa a requisição do GFI sem restrições
 
-						console.log(logTime() + 'Usuário ' + req.session.user +' logado, getFeatureInfo enviado!')
-						data = JSON.parse(data)
-						res.send(data);
+				console.log(logTime() + 'Usuário ' + req.session.user +' logado, getFeatureInfo enviado!')
+				data = JSON.parse(data)
+				res.send(data);
 
-					} else {
+			} else {
 
-						console.log(logTime() + 'Usuário requisitou getFeatureInfo sem login')
+				console.log(logTime() + 'Usuário requisitou getFeatureInfo sem login')
 
-						data = JSON.parse(data)
-						//restrição de dados		
-						restrictAttributes(data.features, 'id', 'properties')
-							.then(result => {
+				data = JSON.parse(data)
+				//restrição de dados		
+				restrictAttributes(data.features, 'id', 'properties')
+					.then(result => {
 
-								if (result[0] != undefined) {
-									data.features = result
-									res.send(data)
-								} else { // Envia um array vazio caso a resposta do GFI seja nula
-									data.features = [];
-									res.send(data)
-								}
-							})
-					}
+						if (result[0] != undefined) {
+							data.features = result
+							res.send(data)
+						} else { // Envia um array vazio caso a resposta do GFI seja nula
+							data.features = [];
+							res.send(data)
+						}
+					})
+			}
 
-				})
-				.catch(err => {
-					res.send(err);
-				});
 		})
+		.catch(err => {
+			res.send(err);
+		});
+	})
 })
 
 /* Seleção de feições */
@@ -966,109 +969,115 @@ app.get('/select/:layer/:lat/:lng/:srs', (req, res) => {
 		cql_filter: encodeURI(Object.values(filter).join(' '))
 	}
 
-	Config.findOne({
-		raw: true,
-		attributes: ['serverHost']
-	})
-		.then(results => {
+	getServerHost()
+	.then(results => {
 
-			url = results.serverHost + Object.entries(params).map(e => e.join('=')).join('&');
+		url = results.serverHost + Object.entries(params).map(e => e.join('=')).join('&');
 
-			fetch(url, { method: 'GET', headers: headers })
-				.then(res => res.text())
-				.then(data => {
-					console.log(logTime() + 'WFS requisition sent: ' + url)
+		fetch(url, { method: 'GET', headers: headers })
+		.then(res => res.text())
+		.then(data => {
+			console.log(logTime() + 'WFS requisition sent: ' + url)
 
-					if (req.session.user) {
-						res.send(data)
-					} else {
+			if (req.session.user) {
+				res.send(data)
+			} else {
 
-						data = JSON.parse(data)
-						//Restrição de atributos para usuários anônimos	
-						restrictAttributes(data.features, 'id', 'properties')
-							.then(result => {
-								if (result[0] != undefined) {
-									data.features = result
-									data = JSON.stringify(data)
-									res.send(data)
-								} else {
-									//Para resultados nulos
-									data.features = [];
-									data = JSON.stringify(data)
-									res.send(data)
-								}
-							})
+				data = JSON.parse(data)
+				//Restrição de atributos para usuários anônimos	
+				restrictAttributes(data.features, 'id', 'properties')
+					.then(result => {
+						if (result[0] != undefined) {
+							data.features = result
+							data = JSON.stringify(data)
+							res.send(data)
+						} else {
+							//Para resultados nulos
+							data.features = [];
+							data = JSON.stringify(data)
+							res.send(data)
+						}
+					})
 
-					}
-				})
-				.catch(error => res.send(error))
+			}
 		})
+		.catch(error => res.send(error))
+	})
 })
 
 /* Recolher campos pesquisáveis no banco de dados */
 app.get('/listqueryable', (req, res) => {
+	
+	listQueryable(req.session.user)
+	.then((results) => {
+		res.send(results)
+	})
+	.catch(e => res.send(e))	
+})
 
-	if (req.session.user) { // Filtra camadas publicas ou nao
-		whereClausule = { type: '2', [Op.not]: { queryFields: null } }
-	} else {
-		whereClausule = { type: '2', [Op.not]: { queryFields: null }, publicLayer: 1 }
-	}
+function listQueryable(session) {
 
-	Layers.findAll({
-		raw: true,
-		attributes: ['layerName', 'layer', 'queryFields', 'publicLayer', 'fields', 'fieldAlias', 'fieldType'],
-		where: whereClausule
-	}).then(results => {
-		//Função para adaptar retorno do banco de dados
+	return new Promise((resolve,reject) => {
 
-		for (var n = 0; n < results.length; n++) {
-			//Objeto com o retorno ordenadado por propriedade:
-			var fields = {
-				field: ((results[n].fields).split(',')),
-				queryFields: ((results[n].queryFields).split(',')),
-				fieldAlias: ((results[n].fieldAlias).split(',')),
-				fieldType: ((results[n].fieldType).split(','))
-			}
-			var properties_order = new Object()
+		if (session) { // Filtra camadas publicas ou nao
+			whereClausule = { type: '2', [Op.not]: { queryFields: null } }
+		} else {
+			whereClausule = { type: '2', [Op.not]: { queryFields: null }, publicLayer: 1 }
+		}
 
-			for (var n2 = 0; n2 < fields.field.length; n2++) {
-				//Objeto com retorno ordenado pela chave e campos pesquisáveis definidos 		
-				if (getBool(fields.queryFields[n2])) {
-					properties_order[fields.field[n2]] = {
-						'fieldAlias': fields.fieldAlias[n2],
-						'fieldType': fields.fieldType[n2]
+		Layers.findAll({
+			raw: true,
+			attributes: ['layerName', 'layer', 'queryFields', 'publicLayer', 'fields', 'fieldAlias', 'fieldType'],
+			where: whereClausule
+		})
+		.then(results => {
+			//Função para adaptar retorno do banco de dados
+	
+			for (var n = 0; n < results.length; n++) {
+				//Objeto com o retorno ordenadado por propriedade:
+				var fields = {
+					field: ((results[n].fields).split(',')),
+					queryFields: ((results[n].queryFields).split(',')),
+					fieldAlias: ((results[n].fieldAlias).split(',')),
+					fieldType: ((results[n].fieldType).split(','))
+				}
+				var properties_order = new Object()
+	
+				for (var n2 = 0; n2 < fields.field.length; n2++) {
+					//Objeto com retorno ordenado pela chave e campos pesquisáveis definidos 		
+					if (getBool(fields.queryFields[n2])) {
+						properties_order[fields.field[n2]] = {
+							'fieldAlias': fields.fieldAlias[n2],
+							'fieldType': fields.fieldType[n2]
+						}
 					}
 				}
+	
+				results[n] = {
+					'layerName': results[n].layerName,
+					'layer': results[n].layer,
+					'queryFields': properties_order
+				}
+	
+				//Remove camadas que possuam queryFields vazio 
+				if (!Object.entries(results[n].queryFields).length) {
+					results.splice(n, 1)
+					n -= 1
+				}
+
+				if (session) { //Restrição de atributos para usuário restrito
+					resolve(results)
+				} else {
+					restrictAttributes(results, 'layer', 'queryFields')
+					.then(result => {
+						resolve(result)
+					})
+				}			
 			}
-
-			results[n] = {
-				'layerName': results[n].layerName,
-				'layer': results[n].layer,
-				'queryFields': properties_order
-			}
-
-			//Remove camadas que possuam queryFields vazio 
-			if (!Object.entries(results[n].queryFields).length) {
-				results.splice(n, 1)
-				n -= 1
-			}
-
-		}
-		//Restrição de atributos para usuário restrito
-		if (req.session.user) {
-			res.send(results)
-		} else {
-
-			restrictAttributes(results, 'layer', 'queryFields')
-				.then(result => {
-					res.send(result)
-				})
-
-		}
-
-
+		})
+		.catch(e => reject(e))
 	})
-})
+}
 
 /* Restringindo atributos de uma única feição */
 
@@ -1167,57 +1176,53 @@ app.get('/wfs/:layer/:format/:property_name/:cql_filter/:srs_name?', (req, res) 
 
 	let urlWfs = Object.entries(params).map(e => e.join('=')).join('&');
 
-	Config.findOne({
-		raw: true,
-		attributes: ['serverHost']
-	})
-		.then(result => {
-			fetch(result.serverHost + encodeURI(urlWfs)
-				, { method: 'GET', headers: headers })
-				.then(res => res.text())
-				.then(response => {
-					//Verficação para Json apenas em requisições de dados para exibição
-					if (req.params.srs_name) {
-						try {
-							//Verifica se é retornada string não compatível com json
-							JSON.parse(response)
-							return response
-						} catch (e) {
-							return new Error('error')
-						}
-					} else {
-						//Retorno para formatos de download
-						return response
-					}
-				})
-				.then(data => {
-					console.log(logTime() + 'WFS requisition sent, querying layers: ' + req.params.layer)
-					console.log(logTime() + result.serverHost + encodeURI(urlWfs))
-					/* Antes de verificar se a ferramenta de download está habilitada é conferido
-					qual o tipo de requisição ( download ou dados para exibição) utilizando o srs 
-					*/
-					if (req.params.srs_name) {
-						res.send(data)
-					} else {
-						//Verficação para download desabilitados/habilitados
-						Config.findOne({
-							raw: true,
-							attributes: ['download_enabled']
-						}).then(acess => {
-							if (acess.download_enabled == 0) {
-								// Retorna um codigo de erro "Não autorizado" quando a ferramenta está desabilitada
-								res.sendStatus(401)
-							} else {
-
-								res.send(data)
-							}
-						})
-					}
-				}).catch(err => {
-					res.sendStatus(404)
-					//Envia um status de erro
-				})
+	getServerHost()
+	.then(result => {
+		fetch(result.serverHost + encodeURI(urlWfs), { method: 'GET', headers: headers })
+		.then(res => res.text())
+		.then(response => {
+			//Verficação para Json apenas em requisições de dados para exibição
+			if (req.params.srs_name) {
+				try {
+					//Verifica se é retornada string não compatível com json
+					JSON.parse(response)
+					return response
+				} catch (e) {
+					return new Error('error')
+				}
+			} else {
+				//Retorno para formatos de download
+				return response
+			}
 		})
+		.then(data => {
+			console.log(logTime() + 'WFS requisition sent, querying layers: ' + req.params.layer)
+			console.log(logTime() + result.serverHost + encodeURI(urlWfs))
+			/* Antes de verificar se a ferramenta de download está habilitada é conferido
+			qual o tipo de requisição ( download ou dados para exibição) utilizando o srs 
+			*/
+			if (req.params.srs_name) {
+				res.send(data)
+			} else {
+				//Verficação para download desabilitados/habilitados
+				Config.findOne({
+					raw: true,
+					attributes: ['download_enabled']
+				}).then(acess => {
+					if (acess.download_enabled == 0) {
+						// Retorna um codigo de erro "Não autorizado" quando a ferramenta está desabilitada
+						res.sendStatus(401)
+					} else {
+
+						res.send(data)
+					}
+				})
+			}
+		}).catch(err => {
+			res.sendStatus(404)
+			//Envia um status de erro
+		})
+	})
 })
 
 // Transforma uma string true or false em um elemento boolean
@@ -1315,36 +1320,36 @@ app.get('/propertyname/:layer', (req, res) => {
 
 /* Rota do sistema de pesquisas do geoserver-search-cache */
 app.route('/search/:keyword')
-	.get((req, res) => {
-		searcher.searchFor(req.params.keyword).then((results) => {
-			//converter string em objeto 
-			results.map(e => {
-				e.original_row = JSON.parse(e.original_row)
-				e.geometry = JSON.parse(e.geometry)
+.get((req, res) => {
+	searcher.searchFor(req.params.keyword).then((results) => {
+		//converter string em objeto 
+		results.map(e => {
+			e.original_row = JSON.parse(e.original_row)
+			e.geometry = JSON.parse(e.geometry)
+		})
+
+		//Remove propriedades restritas 
+		if (req.session.user) {
+			res.send(results)
+		} else {
+			restrictAttributes(results, 'table_name', 'original_row').then(result => {
+				var data = new Array()
+				result.map(e => {
+					//Não adiciona objetos com propriedades pesquisadas que foram excluídas anteriormente
+					if (e.original_row[e.column_name]) {
+						data.push(e)
+					}
+				})
+				res.send(data)
 			})
 
-			//Remove propriedades restritas 
-			if (req.session.user) {
-				res.send(results)
-			} else {
-				restrictAttributes(results, 'table_name', 'original_row').then(result => {
-					var data = new Array()
-					result.map(e => {
-						//Não adiciona objetos com propriedades pesquisadas que foram excluídas anteriormente
-						if (e.original_row[e.column_name]) {
-							data.push(e)
-						}
-					})
-					res.send(data)
-				})
-
-			}
 		}
-		).catch(error => res.send(error))
-	})
+	}
+	).catch(error => res.send(error))
+})
 
 app.route('/config_cache').get((req, res) => {
-	//Rederiza a página de configuração da cacahe e envia o tempo de ultima atualização realizada
+	//Rederiza a página de configuração da cache e envia o tempo de ultima atualização realizada
 	res.render('config_cache', { time: timer.log })
 })
 .post((req, res) => {
@@ -1360,7 +1365,6 @@ app.route('/config_cache').get((req, res) => {
 
 		console.log(logTime() + 'Atualização da base de pesquisa cacheada desativada.')
 
-
 	} else {
 
 		mili_seconds = parseInt(hms[0]) * 3600000 + parseInt(hms[1]) * 60000
@@ -1370,80 +1374,80 @@ app.route('/config_cache').get((req, res) => {
 		control_timer(timer)
 
 		console.log(logTime() + 'Atualização da base de pesquisa cacheada configurada para ser executada a cada ' + hms[0] + ' horas e ' + hms[1] + ' minutos.')
+		nextUpdate = new Date(Date.now() + timer.interval)
+		console.log(logTime() + 'Próxima atualização da base de dados em: ' + nextUpdate)
+	
 	}
 	res.redirect("/config")
 
 })
 
-//Função "post" da atualização
+// Rota para testes da atualização
+app.get('/updatenow',(req,res) => {
+	updateSearch()
+	.then(() => res.send('Search updated'))
+	.catch(e => res.send(e))
+})
+
+//Função POST da atualização do geoserver-search-cache
 async function updateSearch() {
 
-	t0 = new Date().getTime()
-
-	var tables = [
-		"ufv:CAD_Lote",
-		"ufv:CAD_Edificacao",
-		"ufv:CAD_Geocodificacao",
-		"ufv:CAD_Secao_Logradouro"
-	];
-
-	var columns = [
-		[
-			"inscricao_lote"
-		],
-		[
-			"inscricao"
-		],
-		[
-			"inscricao",
-			"inscricao_anterior",
-			"proprietario_",
-			"cpf"
-		],
-		[
-			"tipo",
-			"nome_logradouro",
-			"codigo",
-			"secao_e",
-			"secao_d"
-		]
-	];
-
-	var host = "https://maps.genteufv.com.br/geoserver/ufv/wms?";
-
-	var cleanCache = true || false;
-
-	var headers = { 'authorization': "Basic d2ViZ2VudGU6d2ViZ2VudGU=" };
-
-	if (cleanCache) {
-		await searcher.clearCache()
-			.then(
-				() => searcher.cacheTheseTables(tables, columns, host, headers)
-					.then((results) => {
-
-					})
-					.catch(e => console.log("Erro"))
-			)
-	}
-	else {
-		await searcher.cacheTheseTables(tables, columns, host, headers)
-			.then((results) => {
-
-			})
-			.catch(e => console.log("Erro"))
-	}
+	return new Promise((resolve,reject) => {
+		
+		var cleanCache = true || false;
+	
+		getServerHost()
+		.then(config => {
+			if (cleanCache) {
+				searcher.clearCache()
+				.then(() => getQueryableInfo())
+				.then(data => searcher.cacheTheseTables(data.tables,data.columns,config.serverHost,headers))
+				.then(() => resolve())
+				.catch(e => {
+					console.log(logTime() + "Erro durante atualização do geoserver-search-cache: " + e); 
+					reject(e)
+				})
+			}
+			else {
+				getQueryableInfo()
+				.then(data => searcher.cacheTheseTables(data.tables,data.columns,config.serverHost,headers))
+				.then(() => resolve())
+				.catch(e => {
+					console.log(logTime() + "Erro durante atualização do geoserver-search-cache: " + e); 
+					reject(e)
+				})
+			}
+		})		
+	})	
 }
 
-//Função recusiva do cronometro 
-function control_timer(timer) {
+function getQueryableInfo() {
 
+	queryable = {};
+
+	return new Promise((resolve,reject) => {
+
+		listQueryable(true)
+		.then(data => {
+
+			queryable['tables'] = data.map(e => e.layer)
+			queryable['columns'] = data.map(e => Object.keys(e.queryFields))
+
+			resolve(queryable)
+
+		})
+		.catch(e => reject(e))
+	})
+}
+
+// Cronometro de atualização da base do Geoserver
+function control_timer(timer) {
 	setTimeout(() => {
 		updateSearch()
 		if (timer.update) {
 			return control_timer(timer)
 		} else {
-			return console.log("Geoserver-search-cache update stop")
+			return console.log(logTime() + "Atualização da base de dados do geoserver-search-cache foi interrompida.")
 		}
 	}, timer.interval)
-
 }

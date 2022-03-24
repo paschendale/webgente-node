@@ -37,7 +37,7 @@ const Users = connection.define('User', {
 /* Sincroniza o modelo com a base de dados, não substituindo tabelas existentes */
 Users.sync({
     force: false,
-    alter: true
+    alter: false
 }).then(() => {
     /* Insere usuário de administração do WebGENTE caso não exista outro usuário*/
     connection.query('SELECT COUNT() AS count FROM Users') // Verifica se existem dados na base do WebGENTE
