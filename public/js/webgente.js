@@ -40,7 +40,7 @@ if (session != undefined && session != '') {
     }   
 
     $('#user-div').html('Bem vindo, <b>' + session + '</b>!').css('visibility', 'visible');
-    $('#search-fts').css('margin-top','55px')
+    
 } else {
     var loginBar = [
         login
@@ -279,37 +279,7 @@ var infoButton = L.easyButton({
         }]
     });
 
-// Adiciona botao para ativar a ferramenta de pesquisas
-var searchButton = L.easyButton({
-    states: [{
-                stateName: 'search_disabled',                
-                icon:      '<img src="/img/search_disabled.png"">',
-                title:     'Pesquise elementos das camadas pelos seus atributos',   
-                onClick: function(btn) {       
-                    searchButton.state('search_enabled');
-                    btn.state('search_enabled');  
-                    document.getElementById('search').style.visibility = "visible";
-                    $.get('/search', function( data ) {
-                        $('#search').html(data)
-                            })
-                }
-            }, {
-                stateName: 'search_enabled',   
-                icon:      '<img src="/img/search_enabled.png">',               
-                title:     'Desabilita ferramenta de pesquisa por atributo nas camadas',
-                onClick: function(btn) {
-                    searchButton.state('search_disabled');
-                    btn.state('search_disabled'); 
-                    $('#search').html(" ")
-                    closeTable()
-                    document.getElementById('search').style.visibility = "hidden";
-                     
-                }
-        }]
-    });
 
-// 
-L.DomEvent.disableScrollPropagation(L.DomUtil.get('search'));
 
 // Adiciona botão para habilitar ou desabilitar a legenda
 
@@ -522,7 +492,7 @@ function searchByCoordinates() {
 var buttonsBar = [
     selectButton,
     infoButton,
-    searchButton,
+ 
     legendButton,
     geolocationButton,
     measurementButton
@@ -572,9 +542,7 @@ $('body').on('click', function () {
     if ($("[id*='tooltip']") != undefined) $("[id*='tooltip']").tooltip('hide')
 })
 
-$('body').one('click', function () {
-    $("[name=group_search]").hide( 500 );
-})
+
 
 
 
@@ -590,9 +558,7 @@ if (select_enabled == 0) {
 if (information_enabled == 0) {
     infoButton.removeFrom(map)
 }
-if (search_enabled == 0) {
-    searchButton.removeFrom(map)
-}
+
 if (legend_enabled == 0) {
     legendButton.removeFrom(map)
     $("#webgente-legend-container").hide()
