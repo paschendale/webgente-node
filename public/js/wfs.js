@@ -34,21 +34,24 @@ function wfs_recursive(params, index){
     url = '/select/' + Object.values(params).join('/');
     $.ajax({
         url: url,
+        dataType:"json",
         success: function (data, status, xhr) {
             loadFeatureAsLayer(data)
+        },
+        error: function (xhr, status, error) {
+            console.log(error)
+        }, complete:function(){
             index-=1
             params.layers=activeLayers[index-1]
             if(index>0)
             wfs_recursive(params,index)
-        },
-        error: function (xhr, status, error) {
-            console.log(error)
+
         }
     }); 
 
 }
 function loadFeatureAsLayer (data) {
-    data = JSON.parse(data)
+    
     selectedLayers.addData(data)
     updateSelectedDownloadLink() // Atualiza o link de download após a exibição das feições selecionadas
 
