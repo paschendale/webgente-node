@@ -57,13 +57,14 @@ function getFeatureInfo(e) {
         gfiAjax = $.ajax({
             url: '/gfi/'+ Object.values(params).join('/'),
             success: function (data, status, xhr) {
+                
                 popup
                     .setLatLng(e.latlng)
                     .setContent(JSONcontentParser(data));
                 map.openPopup(popup);
             },
             error: function (xhr, status, error) {
-                console.log(error)
+               console.log(error)
             }
         });
     };    
@@ -72,8 +73,13 @@ function getFeatureInfo(e) {
 /* Formatação do conteudo JSON exibido no GetFeatureInfo para uma tabela */
 
 function JSONcontentParser (data) {
-
-    if (data.features.length == 0) { return 'No features selected or you may not have permission to see this!'}
+   
+  
+    if (data.hasOwnProperty('features')==false) {  return 'Page Not Found!' 
+}else if(data.features.length == 0){return 'No features selected or you may not have permission to see this!'}
+    
+       
+    
 
     /* Esta função recebe um JSON resultante do GetFeatureInfo e o formata para exibição em um formato adequado aos dados cadastrais */
 
