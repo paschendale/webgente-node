@@ -138,23 +138,7 @@ th {
 }
 
 /* Fim dos Elementos do GetFeatureInfo */
-.webgente-search-container{
-	visibility: hidden;
-	pointer-events: visibleFill;
-	width: auto;
-	height: auto;
-	background-color: #FFFFFF;
-	margin-top: 12px;
-	margin-left: 60px;	
-	max-height: 70vh; 
-	padding: 3%;
-	max-width: 50vh;
-	overflow-y: auto;
-	overflow-x: auto;
-	border-color: rgba(73, 73, 73, 0.377);
-	border-style: solid;
-	border-radius: 10px;
-}
+
 
 .input-group {
 	padding: 5px 5px 5px 0px;
@@ -165,26 +149,7 @@ th {
 	transition: background-color 0.5s ease;
 }
 
-@media (max-width: 768px) {
 
-	.webgente-search-container{
-		visibility: hidden;
-		pointer-events: visibleFill;
-		width: 50%;
-		height: auto;
-		background-color: #FFFFFF;
-		margin-top: 12px;
-		margin-left: 60px;	
-		max-height: 70vh; 
-		padding: 5%;
-		max-width: 50vh;
-		overflow-y: auto;
-		overflow-x: auto;
-		border-color: rgba(73, 73, 73, 0.377);
-		border-style: solid;
-		border-radius: 10px;
-	}	
-}
 
 .webgente-coordinates-container {
 	background-color: rgba(255, 255, 255, 0.5);
@@ -228,60 +193,4 @@ th {
 	}
 }
 
-.webgente-search-fts-container{
-	pointer-events: visibleFill;
-	width: auto;
-	height: auto;
-	margin-left: 60px;	
-	margin-top: 10px;
-	transition: margin 300ms;
-}
 
-.webgente-search-fts-list{
-	overflow-y: auto;
-	overflow-x: auto;
-	max-height: 70vh; 
-	max-width: 50vh;
-
-}
-
-.webgente-search-fts-result {
-	background-color: rgb(255, 255, 255);
-	border: 1px solid #343a40 !important;
-	border-radius: 0 !important;
-	
-}
-
-/* Estilo da div da tabela e barra de navegação
-dos elementos selecionados */
-.webgente-search-fts-table-div{
-	background-color: rgb(255, 255, 255);
-	pointer-events: visibleFill;
-	margin-top: 100px;
-	height: 70vh; 
-	width: 60vh;
-	min-width: 35vh;
-	
-}
-/* Controla o tamanho da div do 
-tabela de elementos selecionados */
-.webgente-search-fts-height-resize{
-	height: 50vh; 
-	overflow-y: auto;
-	margin-top: 5%;
-
-}
-/* Div da barra de navegação da tabela colapsada */
-.webgente-search-fts-table-bar-div{
-	pointer-events: visibleFill;
-	margin-left: 350px;
-	margin-bottom: 3px;
-	height: 5vh;
-	width: 30vh;
-	background-color: rgba(255, 255, 255, 0.5);
-	
-
-}
-#fts_result p{
-	cursor: text;
-}
