@@ -5,7 +5,7 @@ var map = L.map('map',{
 }).setView([initView.lat, initView.lng], initView.zoom);
 
 /* Adicionando botões de login e depois zoom */
-
+L.control.searchgente().addTo(map);
 var login = L.easyButton('fas fa-user-lock', 
     () => {
         window.location = '/login'
@@ -499,7 +499,6 @@ var buttonsBar = [
 ]
 
 L.easyBar(buttonsBar).addTo(map);
-
 /* Adicionando tooltips aos botões */
 
 $('button').tooltip({

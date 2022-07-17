@@ -1,0 +1,40 @@
+.container-search{
+    height: 30px;
+  
+}
+.control-search{
+    background:#fff;
+    box-shadow: 0 1px 5px rgb(0 0 0 / 65%);
+    border-radius: 4px;
+  
+   
+}
+
+.search-input{
+    background:#fff;
+    width: 30vw;
+    height: 30px;
+    border-radius: 4px;
+    border-color: transparent;
+    display: none;
+}
+
+.search-button{
+    background:#fff;
+    background-position: 50% 50%;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    border-color: transparent;
+	
+}
+
+.search-results{
+    background:#fff;
+    box-shadow: 0 1px 5px rgb(0 0 0 / 65%);
+    border-radius: 4px;
+    position:relative;
+    top: 5px;
+    left: 35px;
+    height: 50vh;
+}

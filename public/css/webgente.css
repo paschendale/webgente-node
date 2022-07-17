@@ -191,3 +191,9 @@ th {
 }
 
 
+.webgente-search-container{
+	margin-left: 10vh;
+	margin-top: 5px;
+	width: 30vw;
+	pointer-events: all;
+}
